@@ -1,0 +1,30 @@
+from django.shortcuts import render, redirect
+
+# Create your views here.
+from django.shortcuts import render
+from .models import SavingsPayment
+from .forms import SavingsForm, WithdrawalForm
+
+def transaction_history(request, client_id):
+    transactions = SavingsPayment.objects.filter(client_id=client_id).order_by('-created_at')
+    return render(request, 'transaction_history.html', {'transactions': transactions})
+
+def register_savings(request):
+    if request.method == 'POST':
+        form = SavingsForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = SavingsForm()
+    return render(request, 'savings_form.html', {'form': form})
+
+def record_withdrawal(request):
+    if request.method == 'POST':
+        form = WithdrawalForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = WithdrawalForm()
+    return render(request, 'withdrawal_form.html', {'form': form})

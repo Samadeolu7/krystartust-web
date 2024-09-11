@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Report - {{ group.name }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Group Report for {{ group.name }}</h1>
+
+        <!-- Group Information Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                Group Information
+            </div>
+            <div class="card-body">
+                <p><strong>Group Name:</strong> {{ group.name }}</p>
+                <p><strong>Group Description:</strong> {{ group.description }}</p>
+                <p><strong>Number of Clients:</strong> {{ clients.count }}</p>
+            </div>
+        </div>
+
+        <!-- Clients Section -->
+        <h3>Clients</h3>
+        {% if clients %}
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Client Name</th>
+                        <th>Email</th>
+                        <th>Phone Number</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in clients %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ client.name }}</td>
+                        <td>{{ client.email }}</td>
+                        <td>{{ client.phone_number }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No clients found in this group.</p>
+        {% endif %}
+
+        <!-- Loans Section -->
+        <h3>Loans</h3>
+        {% if loans %}
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Loan ID</th>
+                        <th>Client</th>
+                        <th>Amount</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for loan in loans %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ loan.id }}</td>
+                        <td>{{ loan.client.name }}</td>
+                        <td>{{ loan.amount }}</td>
+                        <td>{{ loan.start_date }}</td>
+                        <td>{{ loan.end_date }}</td>
+                        <td>{{ loan.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No loans found for this group.</p>
+        {% endif %}
+
+        <!-- Loan Payments Section -->
+        <h3>Loan Payments</h3>
+        {% if loan_payments %}
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Payment ID</th>
+                        <th>Loan ID</th>
+                        <th>Amount Paid</th>
+                        <th>Payment Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in loan_payments %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ payment.id }}</td>
+                        <td>{{ payment.loan.id }}</td>
+                        <td>{{ payment.amount }}</td>
+                        <td>{{ payment.payment_date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No loan payments found for this group.</p>
+        {% endif %}
+
+        <!-- Savings Section -->
+        <h3>Savings</h3>
+        {% if savings %}
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Savings ID</th>
+                        <th>Client</th>
+                        <th>Amount</th>
+                        <th>Start Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for saving in savings %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ saving.id }}</td>
+                        <td>{{ saving.client.name }}</td>
+                        <td>{{ saving.amount }}</td>
+                        <td>{{ saving.start_date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No savings found for this group.</p>
+        {% endif %}
+
+        <!-- Savings Payments Section -->
+        <h3>Savings Payments</h3>
+        {% if savings_payments %}
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Payment ID</th>
+                        <th>Savings ID</th>
+                        <th>Amount Paid</th>
+                        <th>Payment Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in savings_payments %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ payment.id }}</td>
+                        <td>{{ payment.savings.id }}</td>
+                        <td>{{ payment.amount }}</td>
+                        <td>{{ payment.payment_date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No savings payments found for this group.</p>
+        {% endif %}
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

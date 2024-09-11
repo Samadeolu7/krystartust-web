@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Dashboard</h1>
+        <div class="row g-4 mt-4">
+            <!-- Client Management Section -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Client Management</h5>
+                        <a href="{% url 'create_client' %}" class="btn btn-primary mb-2">Create Client</a>
+                        <a href="{% url 'list_clients' %}" class="btn btn-secondary mb-2">Clients List</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loan Management Section -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Loan Management</h5>
+                        <a href="{% url 'loan_registration' %}" class="btn btn-primary mb-2">Register Loan</a>
+                        <a href="{% url 'loan_payment' %}" class="btn btn-secondary mb-2">Record Payment</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Reports</h5>
+                        <a href="{% url 'loan_defaulters_report' %}" class="btn btn-primary mb-2">Loan Defaulters Report</a>
+                        <a href="{% url 'daily_transactions_report' %}" class="btn btn-secondary mb-2">Daily Transactions Report</a>
+                        <a href="{% url 'all_groups_report' %}" class="btn btn-secondary mb-2">Group Report</a>
+                        <a href="{% url 'all_clients_report' %}" class="btn btn-secondary mb-2">Individual Report</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Savings Management Section -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Savings Management</h5>
+                        <a href="{% url 'savings_registration' %}" class="btn btn-primary mb-2">Register Savings</a>
+                        <a href="{% url 'savings_withdrawal' %}" class="btn btn-secondary mb-2">Record Withdrawal</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
