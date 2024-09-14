@@ -1,8 +1,6 @@
 from django.db import models
-
 from django.contrib.auth.models import User
 
-# Create your models here.
 class Income(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -38,45 +36,41 @@ class IncomePayment(models.Model):
     class Meta:
         ordering = ['-created_at']
 
-class RegistrationFee(models.Model):
+class SingletonModel(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super(SingletonModel, self).save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+class RegistrationFee(SingletonModel):
     def __str__(self):
         return f'Registration Fee - {self.amount}'
-    
 
-class IDFee(models.Model):
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-
+class IDFee(SingletonModel):
     def __str__(self):
         return f'ID Fee - {self.amount}'
-    
 
-
-class LoanRegistrationFee(models.Model):
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-
+class LoanRegistrationFee(SingletonModel):
     def __str__(self):
         return f'Loan Registration Fee - {self.amount}'
-    
 
-class RiskPremium(models.Model):
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-
+class RiskPremium(SingletonModel):
     def __str__(self):
         return f'Risk Premium - {self.amount}%'
-    
-class UnionContribution(models.Model):
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
 
+class UnionContribution(SingletonModel):
     def __str__(self):
         return f'Union Contribution - {self.amount}'
-    
 
-class LoanServiceFee(models.Model):
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-
+class LoanServiceFee(SingletonModel):
     def __str__(self):
         return f'Loan Service Fee - {self.amount}%'
-    
-

@@ -1,8 +1,8 @@
 from .models import IncomePayment, Income
 from bank.models import BankPayment, Bank
-# from main.models import Year
+from main.models import Year
 
-# YEAR = Year.objects.order_by('-id').first().year
+YEAR = Year.current_year()
 
 def get_loan_interest_income():
     return Income.objects.get_or_create(name='Loan Interest', description='Loan Interest Income', year=YEAR)[0]

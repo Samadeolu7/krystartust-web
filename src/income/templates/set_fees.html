@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Fees</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Set Fees</h1>
+        <div class="row g-4 mt-4">
+            <!-- Registration Fee Section -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Registration Fee</h5>
+                        <a href="{% url 'registration_fee' %}" class="btn btn-primary mb-2">Set Registration Fee</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ID Fee Section -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">ID Fee</h5>
+                        <a href="{% url 'id_fee' %}" class="btn btn-primary mb-2">Set ID Fee</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loan Registration Fee Section -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Loan Registration Fee</h5>
+                        <a href="{% url 'loan_registration_fee' %}" class="btn btn-primary mb-2">Set Loan Registration Fee</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Premium Section -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Risk Premium</h5>
+                        <a href="{% url 'risk_premium' %}" class="btn btn-primary mb-2">Set Risk Premium</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Union Contribution Section -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Union Contribution</h5>
+                        <a href="{% url 'union_contribution' %}" class="btn btn-primary mb-2">Set Union Contribution</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loan Service Fee Section -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Loan Service Fee</h5>
+                        <a href="{% url 'loan_service_fee' %}" class="btn btn-primary mb-2">Set Loan Service Fee</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -3,9 +3,10 @@ from django.contrib import messages
 
 from client.models import Client
 from savings.models import Savings, SavingsPayment
+from bank.models import BankPayment
 from main.models import ClientGroup as Group
 from .models import Loan, LoanPayment, LoanRepaymentSchedule
-from .forms import LoanForm, LoanRegistrationForm, LoanPaymentForm
+from .forms import LoanRegistrationForm, LoanPaymentForm
 
 from datetime import timedelta
 
@@ -62,6 +63,7 @@ def loan_registration(request):
             # Save the loan form data to create a new Loan instance
             loan = form.save(commit=False)
             loan.save()  # Save the loan instance first to access it for schedule creation
+
             
             # Get the loan details
             loan_type = loan.loan_type
@@ -70,6 +72,7 @@ def loan_registration(request):
             amount = loan.amount
             interest = loan.interest
             risk_premium = loan.risk_premium
+            bank = form.cleaned_data.get('bank')
             
             # Calculate the total amount due per schedule
             amount_due = amount + (amount * interest) + risk_premium
@@ -89,6 +92,16 @@ def loan_registration(request):
                     due_date=due_date,
                     amount_due=amount_due
                 )
+            # subtract loan amount from bank balance
+            
+            bank_payment = BankPayment.objects.create(
+                bank=bank,
+                description=f'Loan disbursement to {loan.client.name}',
+                amount=-amount,
+                payment_date=start_date,
+                created_by=request.user
+            )
+            bank_payment.save()
             
             messages.success(request, "Loan registered successfully and repayment schedule created.")
             return redirect('success_page')  # Replace with your actual success page URL name

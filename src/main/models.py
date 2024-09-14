@@ -17,3 +17,11 @@ class Year(models.Model):
 
     def __str__(self):
         return str(self.year)
+    
+    @classmethod
+    def current_year(cls):
+        last_year_instance = cls.objects.order_by('-year').first()
+        if last_year_instance:
+            return last_year_instance.year
+        else:
+            return 2024
