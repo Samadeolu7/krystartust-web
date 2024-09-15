@@ -6,4 +6,5 @@ urlpatterns = [
     path('', dashboard, name='dashboard'),
     path('detail/<int:pk>/', group_detail, name='group_detail'),
     path('create_group/', group_create, name='group_create'),
+    path('view_groups/', group_view, name='group_view'),
 ]

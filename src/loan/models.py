@@ -1,16 +1,18 @@
 from django.db import models
-
-# from user.models import User
 from client.models import Client
-
-from datetime import timedelta, date
+from datetime import date
 
 # Create your models here.
 class Loan(models.Model):
-    LOAN_TYPE = ('Daily', 'Daily'), ('Weekly', 'Weekly'), ('Monthly', 'Monthly')
+    LOAN_TYPE = (
+        ('Daily', 'Daily'),
+        ('Weekly', 'Weekly'),
+        ('Monthly', 'Monthly')
+    )
 
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    amount = models.IntegerField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     interest = models.FloatField()
     loan_type = models.CharField(max_length=100, choices=LOAN_TYPE)
     duration = models.IntegerField()
@@ -30,16 +32,15 @@ class Loan(models.Model):
         return False
     
     def __str__(self) -> str:
-        return self.client.name + ' - ' + str(self.amount)
+        return self.client.name + ' - ' + str(self.balance)
 
 
 class LoanPayment(models.Model):
-
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     loan = models.ForeignKey(Loan, on_delete=models.CASCADE)
     emi = models.FloatField()
     amount = models.FloatField()
-    balance = models.FloatField()
+    balance = models.DecimalField(max_digits=10, decimal_places=2)
     payment_schedule = models.ForeignKey('LoanRepaymentSchedule', on_delete=models.CASCADE)
     payment_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -51,12 +52,15 @@ class LoanPayment(models.Model):
             last_payment = LoanPayment.objects.filter(client=self.client).order_by('-created_at').first()
             if last_payment:
                 self.balance = last_payment.balance - self.amount
+                # update loan balance
+                self.loan.balance = self.balance
             else:
                 self.balance = self.amount
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return self.client.name + ' - ' + str(self.amount) + ' - ' + str(self.balance)
+
 
 class LoanRepaymentSchedule(models.Model):
     loan = models.ForeignKey(Loan, on_delete=models.CASCADE)

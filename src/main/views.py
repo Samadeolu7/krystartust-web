@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 from loan.models import Loan, LoanPayment
 from savings.models import Savings, SavingsPayment
@@ -21,6 +21,7 @@ def group_create(request):
         form = GroupForm(request.POST)
         if form.is_valid():
             form.save()
+            return redirect('group_view')
     else:
         form = GroupForm()
     

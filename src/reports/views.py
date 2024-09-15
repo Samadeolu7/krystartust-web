@@ -1,6 +1,8 @@
 from django.shortcuts import render
 
 from client.models import Client
+from expenses.models import Expense
+from income.models import Income
 from loan.models import Loan, LoanPayment, LoanRepaymentSchedule
 from savings.models import Savings, SavingsPayment
 from main.models import ClientGroup as Group
@@ -104,3 +106,22 @@ def daily_transactions_report(request):
     else:
         return render(request, 'daily_collection_form.html')
     return render(request, 'daily_transactions_report.html', context)
+
+# create P&L report
+def profit_and_loss_report(request):
+    
+    incomes = Income.objects.all()
+    expenses = Expense.objects.all()
+    # create different buckets based on expense_type
+    expense_buckets = {}
+    for expense in expenses:
+        if expense.expense_type.name not in expense_buckets:
+            expense_buckets[expense.expense_type.name] = []
+        expense_buckets[expense.expense_type.name].append(expense)
+    context = {
+        'incomes': incomes,
+        'expenses': expenses,
+        'expense_buckets': expense_buckets,
+    }
+    return render(request, 'profit_loss.html', context)
+
