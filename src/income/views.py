@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 from .forms import RegistrationFeeForm, IDFeeForm, LoanRegistrationFeeForm, RiskPremiumForm, UnionContributionForm, LoanServiceFeeForm
 
@@ -12,64 +12,70 @@ def registration_fee(request):
         form = RegistrationFeeForm(request.POST)
         if form.is_valid():
             form.save()
-            return render(request, 'fees.html', {'form': form})
+            return redirect('dashboard')
         
     else:
         form = RegistrationFeeForm()
-        return render(request, 'fees.html', {'form': form})
+        title = 'Registration Fee'
+        return render(request, 'fees.html', {'form': form,'title': title})
 
 def id_fee(request):
     if request.method == 'POST':
         form = IDFeeForm(request.POST)
         if form.is_valid():
             form.save()
-            return render(request, 'fees.html', {'form': form})
+            return redirect('dashboard')
         
     else:
         form = IDFeeForm()
-        return render(request, 'fees.html', {'form': form})
+        title = 'ID Fee'
+        return render(request, 'fees.html', {'form': form,'title': title})
 
 def loan_registration_fee(request):
     if request.method == 'POST':
         form = LoanRegistrationFeeForm(request.POST)
         if form.is_valid():
             form.save()
-            return render(request, 'fees.html', {'form': form})
+            return redirect('dashboard')
         
     else:
         form = LoanRegistrationFeeForm()
-        return render(request, 'fees.html', {'form': form})
+        title = 'Loan Registration Fee'
+        return render(request, 'fees.html', {'form': form,'title': title})
 
 def risk_premium(request):
     if request.method == 'POST':
         form = RiskPremiumForm(request.POST)
         if form.is_valid():
             form.save()
-            return render(request, 'fees.html', {'form': form})
+            return redirect('dashboard')
         
     else:
         form = RiskPremiumForm()
-        return render(request, 'fees.html', {'form': form})
+        title = 'Risk Premium'
+        return render(request, 'fees.html', {'form': form,'title': title})
 
 def union_contribution(request):
     if request.method == 'POST':
         form = UnionContributionForm(request.POST)
         if form.is_valid():
             form.save()
-            return render(request, 'fees.html', {'form': form})
+            return redirect('dashboard')
         
     else:
         form = UnionContributionForm()
-        return render(request, 'fees.html', {'form': form})
+        title = 'Union Contribution'
+        return render(request, 'fees.html', {'form': form,'title': title})
 
 def loan_service_fee(request):
     if request.method == 'POST':
         form = LoanServiceFeeForm(request.POST)
         if form.is_valid():
             form.save()
-            return render(request, 'fees.html', {'form': form})
+            return redirect('dashboard')
         
     else:
         form = LoanServiceFeeForm()
-        return render(request, 'fees.html', {'form': form})
+        title = 'Loan Service Fee'
+        return render(request, 'fees.html', {'form': form,'title': title})
 

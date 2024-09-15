@@ -1,5 +1,11 @@
-from .models import SavingsPayment, Savings
+from .models import SavingsPayment, CompulsorySavings, Savings
+
 from django import forms
+
+class CompulsorySavingsForm(forms.ModelForm):
+    class Meta:
+        model = CompulsorySavings
+        fields = ['amount']
 
 class SavingsForm(forms.ModelForm):
     class Meta:

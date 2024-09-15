@@ -2,6 +2,7 @@ from django.db import models
 
 from client.models import Client
 from django.contrib.auth.models import User
+from income.models import SingletonModel
 
 # Create your models here.
 
@@ -44,8 +45,6 @@ class SavingsPayment(models.Model):
         return f"{self.client} - {self.get_transaction_type_display()} - {self.amount}"
     
 
-class CompulsorySavings(models.Model):
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-
+class CompulsorySavings(SingletonModel):
     def __str__(self):
         return f'Compulsory Savings - {self.amount}'

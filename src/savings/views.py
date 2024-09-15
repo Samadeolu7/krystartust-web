@@ -3,7 +3,21 @@ from django.shortcuts import render, redirect
 # Create your views here.
 from django.shortcuts import render
 from .models import SavingsPayment
-from .forms import SavingsForm, WithdrawalForm
+from .forms import SavingsForm, WithdrawalForm, CompulsorySavingsForm
+
+
+
+def compulsory_savings(request):
+    if request.method == 'POST':
+        form = CompulsorySavingsForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+        
+    else:
+        form = CompulsorySavingsForm()
+        title = 'Compulsory Savings'
+        return render(request, 'fees.html', {'form': form,'title': title})
 
 def transaction_history(request, client_id):
     transactions = SavingsPayment.objects.filter(client_id=client_id).order_by('-created_at')
