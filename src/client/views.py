@@ -4,7 +4,7 @@ from client.models import Client
 from loan.models import Loan, LoanPayment
 from savings.models import Savings, SavingsPayment
 from savings.utils import register_savings
-from income.utils import create_income_payment, get_registration_fee_income
+from income.utils import create_income_payment, get_id_fee_income, get_registration_fee_income
 
 from .forms import ClientForm
 
@@ -17,10 +17,13 @@ def create_client(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Client created successfully.')
-            register_savings(client=form.instance, amount=form.cleaned_data.compulsory_savings, bank=form.cleaned_data.bank)
+            register_savings(client=form.instance, amount=form.cleaned_data["compulsory_savings"], bank=form.cleaned_data['bank'], created_by=request.user)
             income = get_registration_fee_income()
-            create_income_payment(bank=form.cleaned_data.bank, income=income, description='Registration Fee', amount=form.cleaned_data.registration_fee, created_by=request.user, payment_date=form.instance.created_at)
-
+            id_fee = get_id_fee_income()
+            create_income_payment(bank=form.cleaned_data['bank'], income=income, description='Registration Fee', amount=form.cleaned_data['registration_fee'], created_by=request.user, payment_date=form.instance.created_at)
+            create_income_payment(bank=form.cleaned_data['bank'], income=id_fee, description='ID Fee', amount=form.cleaned_data['id_fee'], created_by=request.user, payment_date=form.instance.created_at)
+            
+            
             return redirect('client_list')  # Redirect to a client list or relevant page
         else:
             messages.error(request, 'Please correct the errors below.')

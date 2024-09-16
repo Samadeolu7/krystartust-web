@@ -2,15 +2,20 @@ from django.db import models
 
 from django.contrib.auth.models import User
 
+from main.models import Year
+
+
+
 # Create your models here.
 class Bank(models.Model):
     #cash in hand will be a bank
+    YEAR = Year.current_year()
     name = models.CharField(max_length=100)
     description = models.TextField()
-    balance = models.DecimalField(max_digits=10, decimal_places=2)
-    balance_bf = models.DecimalField(max_digits=10, decimal_places=2)
+    balance = models.DecimalField(max_digits=10, decimal_places=2,default=0)
+    balance_bf = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    year = models.IntegerField()
+    year = models.IntegerField(default=YEAR)
 
     def __str__(self):
         return f'{self.name} - {self.balance}'

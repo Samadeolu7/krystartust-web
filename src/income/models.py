@@ -4,13 +4,13 @@ from django.contrib.auth.models import User
 class Income(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
-    balance = models.DecimalField(max_digits=10, decimal_places=2)
-    balance_bf = models.DecimalField(max_digits=10, decimal_places=2)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    balance_bf = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     year = models.IntegerField()
 
     def __str__(self):
-        return f'{self.client_id} - {self.amount}'
+        return f'{self.name} - {self.description}'
     
     class Meta:
         ordering = ['-created_at']
@@ -25,7 +25,7 @@ class IncomePayment(models.Model):
     payment_date = models.DateField()
 
     def __str__(self):
-        return f'{self.client_id} - {self.amount}'
+        return f'{self.income.name} - {self.amount}'
     
     def save(self, *args, **kwargs):
         self.income_balance = self.income.balance + self.amount

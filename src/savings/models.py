@@ -22,15 +22,15 @@ class SavingsPayment(models.Model):
         (SAVINGS, 'Savings'),
         (WITHDRAWAL, 'Withdrawal'),
     ]
-
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    savings = models.ForeignKey(Savings, on_delete=models.CASCADE)
+    savings = models.ForeignKey(Savings, on_delete=models.SET_NULL, null=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(default=f'Savings for {savings}')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_date = models.DateField()
     transaction_type = models.CharField(max_length=1, choices=TRANSACTION_TYPE_CHOICES, default=SAVINGS)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     def save(self, *args, **kwargs):
         if not self.pk:  # If the record is being created
