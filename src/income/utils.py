@@ -16,10 +16,18 @@ def get_id_fee_income():
     YEAR = Year.current_year()
     return Income.objects.get_or_create(name='ID Fee', description='ID Fee Income', year=YEAR)[0]
 
-def create_income_payment(bank,income, description, amount, created_by, payment_date):
-    income_payment = IncomePayment.objects.create(income=income, description=description, amount=amount, created_by=created_by, payment_date=payment_date)
+def get_risk_premium_income():
+    YEAR = Year.current_year()
+    return Income.objects.get_or_create(name='Risk Premium', description='Risk Premium Income', year=YEAR)[0]
+
+def get_union_contribution_income():
+    YEAR = Year.current_year()
+    return Income.objects.get_or_create(name='Union Contribution', description='Union Contribution Income', year=YEAR)[0]
+
+def create_income_payment(bank,income, description, amount , payment_date):
+    income_payment = IncomePayment.objects.create(income=income, description=description, amount=amount, payment_date=payment_date)
     income_payment.save()
-    bank_payment = BankPayment.objects.create(bank=bank, description=description, amount=amount, created_by=created_by, payment_date=payment_date)
+    bank_payment = BankPayment.objects.create(bank=bank, description=description, amount=amount, payment_date=payment_date)
     bank_payment.save()
     return income_payment
     

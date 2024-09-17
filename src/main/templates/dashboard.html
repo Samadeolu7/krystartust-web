@@ -11,6 +11,12 @@
     <div class="container mt-5">
         <h1 class="text-center">Dashboard</h1>
         <div class="row g-4 mt-4">
+
+            <form method="post" action="{% url 'update_app' %}">
+                {% csrf_token %}
+                <button type="submit">Update App</button>
+              </form>
+              
             <!-- Client Management Section -->
             <div class="col-md-3">
                 <div class="card">

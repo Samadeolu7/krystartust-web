@@ -8,6 +8,16 @@ from .forms import GroupForm
 from client.models import Client
 # Create your views here.
 
+from django.http import HttpResponse
+from subprocess import Popen
+
+def update_app(request):
+    # Run the Docker commands to update the app
+    Popen(["docker-compose", "down"])
+    Popen(["git", "pull", "origin", "main"])
+    Popen(["docker-compose", "up", "--build", "-d"])
+    return HttpResponse("App is updating. Please wait...")
+
 def dashboard(request):
     """View to render the main dashboard."""
     return render(request, 'dashboard.html')

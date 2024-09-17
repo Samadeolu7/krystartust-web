@@ -38,7 +38,6 @@ class Loan(models.Model):
 class LoanPayment(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     loan = models.ForeignKey(Loan, on_delete=models.CASCADE)
-    emi = models.FloatField()
     amount = models.FloatField()
     balance = models.DecimalField(max_digits=10, decimal_places=2)
     payment_schedule = models.ForeignKey('LoanRepaymentSchedule', on_delete=models.CASCADE)
@@ -54,6 +53,7 @@ class LoanPayment(models.Model):
                 self.balance = last_payment.balance - self.amount
                 # update loan balance
                 self.loan.balance = self.balance
+                self.loan.save()
             else:
                 self.balance = self.amount
         super().save(*args, **kwargs)

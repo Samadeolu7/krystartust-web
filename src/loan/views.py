@@ -1,12 +1,18 @@
+from decimal import Decimal
 from django.shortcuts import redirect, render
 from django.contrib import messages
 
 from client.models import Client
+from income.models import IncomePayment
 from savings.models import Savings, SavingsPayment
 from bank.models import BankPayment
 from main.models import ClientGroup as Group
 from .models import Loan, LoanPayment, LoanRepaymentSchedule
 from .forms import LoanRegistrationForm, LoanPaymentForm
+
+from bank.utils import create_bank_payment
+
+from income.utils import get_loan_interest_income, get_risk_premium_income, get_union_contribution_income
 
 from datetime import timedelta
 
@@ -37,7 +43,7 @@ def loan_payment(request):
             # Update the loan balance
             loan = Loan.objects.filter(client_id=client_id).first()
             if loan:
-                loan.balance -= loan_payment.amount
+                loan.balance -= Decimal(loan_payment.amount)
                 loan.save()
             else:
                 messages.error(request, "Loan not found for the client.")
@@ -45,6 +51,11 @@ def loan_payment(request):
             
             # Save the payment after modifying the balance and schedule
             loan_payment.save()
+
+            # Update the bank balance
+            bank = form.cleaned_data.get('bank')
+            create_bank_payment(bank, loan_payment.amount, f'Loan payment from {loan.client.name}', loan_payment.payment_date)
+            
 
             messages.success(request, "Loan payment processed successfully.")
             return redirect('success_page')  # Replace with your success page URL name
@@ -62,54 +73,85 @@ def loan_registration(request):
         if form.is_valid():
             # Save the loan form data to create a new Loan instance
             loan = form.save(commit=False)
-            loan.save()  # Save the loan instance first to access it for schedule creation
+            loan.balance = loan.amount * (Decimal(1) + (Decimal(loan.interest)/Decimal(100)))
+            loan.end_date = loan.start_date + timedelta(days=loan.duration) + timedelta(weeks=1)  # Extend end date by 1 week
+            loan.emi = loan.balance / loan.duration
+            loan.status = 'Active'
+            loan.save()
 
-            
             # Get the loan details
             loan_type = loan.loan_type
             duration = loan.duration
             start_date = loan.start_date
             amount = loan.amount
-            interest = loan.interest
-            risk_premium = loan.risk_premium
             bank = form.cleaned_data.get('bank')
-            
+
             # Calculate the total amount due per schedule
-            amount_due = amount + (amount * interest) + risk_premium
-            
+
             # Determine the increment based on loan type
             time_increment = {
                 'Daily': timedelta(days=1),
                 'Weekly': timedelta(weeks=1),
                 # Add more loan types as needed
             }.get(loan_type, timedelta(weeks=1))  # Default to weekly if the loan type is not specifically listed
-            
+
             # Create repayment schedule based on the loan type and duration
+            amount_due = loan.balance / duration
             for i in range(duration):
-                due_date = start_date + (i * time_increment)
+                due_date = start_date + timedelta(weeks=1) + (i * time_increment)  # Start 1 week after the start date
+
                 LoanRepaymentSchedule.objects.create(
                     loan=loan,
                     due_date=due_date,
-                    amount_due=amount_due
+                    amount_due=amount_due,
                 )
-            # subtract loan amount from bank balance
-            
+
+            # Subtract loan amount from bank balance
             bank_payment = BankPayment.objects.create(
                 bank=bank,
                 description=f'Loan disbursement to {loan.client.name}',
                 amount=-amount,
                 payment_date=start_date,
-                created_by=request.user
             )
             bank_payment.save()
-            
+
+            interest_amount = Decimal(loan.interest) * Decimal(amount) / Decimal(100)
+            interest_income = get_loan_interest_income()
+            income_payment = IncomePayment.objects.create(
+                income=interest_income,
+                description=f'Interest income from {loan.client.name}',
+                amount=interest_amount,
+                payment_date=start_date,
+            )
+            income_payment.save()
+
+            risk_premium_income = get_risk_premium_income()
+            risk_premimum_amount = Decimal(loan.risk_premium) * Decimal(amount) / Decimal(100)
+            risk_premium_payment = IncomePayment.objects.create(
+                income=risk_premium_income,
+                description=f'Risk premium from {loan.client.name}',
+                amount=risk_premimum_amount,
+                payment_date=start_date,
+            )
+            risk_premium_payment.save()
+
+            union_contribution_income = get_union_contribution_income()
+            union_contribution_amount = Decimal(form.cleaned_data.get('union_contribution'))
+            union_contribution_payment = IncomePayment.objects.create(
+                income=union_contribution_income,
+                description=f'Union contribution from {loan.client.name}',
+                amount=union_contribution_amount,
+                payment_date=start_date,
+            )
+            union_contribution_payment.save()
+
             messages.success(request, "Loan registered successfully and repayment schedule created.")
             return redirect('success_page')  # Replace with your actual success page URL name
         else:
             messages.error(request, "There was an error with the form. Please correct it below.")
     else:
         form = LoanRegistrationForm()
-    
+
     return render(request, 'loan_register.html', {'form': form})
 
 def loan_detail(request, loan_id):

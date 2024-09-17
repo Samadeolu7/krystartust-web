@@ -17,7 +17,9 @@
                     <th>Name</th>
                     <th>Email</th>
                     <th>Phone</th>
-                    <th>Actions</th>
+                    <th>Group</th>
+                    <th>Savings</th>
+                    <th>Loan</th>
                 </tr>
             </thead>
             <tbody>
@@ -28,8 +30,12 @@
                     <td>{{ client.email }}</td>
                     <td>{{ client.phone_number }}</td>
                     <td>{{ client.group }}</td>
-                        <a href="{% url 'edit_client' client.id %}" class="btn btn-warning btn-sm">Edit</a>
+                    <td><a href="{% url 'transaction_history' client.id %}">
+                        {{ client.savings.balance }}</a>
                     </td>
+                    <td><a href="{% url 'loan_transaction_history' client.id %}">
+                    {{ client.loans.balance }}
+                    </a></td>
                 </tr>
                 {% empty %}
                 <tr>

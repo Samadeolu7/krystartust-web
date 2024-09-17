@@ -17,11 +17,11 @@ def create_client(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Client created successfully.')
-            register_savings(client=form.instance, amount=form.cleaned_data["compulsory_savings"], bank=form.cleaned_data['bank'], created_by=request.user)
+            register_savings(client=form.instance, amount=form.cleaned_data["compulsory_savings"], bank=form.cleaned_data['bank'] )
             income = get_registration_fee_income()
             id_fee = get_id_fee_income()
-            create_income_payment(bank=form.cleaned_data['bank'], income=income, description='Registration Fee', amount=form.cleaned_data['registration_fee'], created_by=request.user, payment_date=form.instance.created_at)
-            create_income_payment(bank=form.cleaned_data['bank'], income=id_fee, description='ID Fee', amount=form.cleaned_data['id_fee'], created_by=request.user, payment_date=form.instance.created_at)
+            create_income_payment(bank=form.cleaned_data['bank'], income=income, description='Registration Fee', amount=form.cleaned_data['registration_fee'], payment_date=form.instance.created_at)
+            create_income_payment(bank=form.cleaned_data['bank'], income=id_fee, description='ID Fee', amount=form.cleaned_data['id_fee'], payment_date=form.instance.created_at)
             
             
             return redirect('client_list')  # Redirect to a client list or relevant page
@@ -51,6 +51,10 @@ def edit_client(request, client_id):
 def list_clients(request):
     """View to list all clients."""
     clients = Client.objects.all()
+    for client in clients:
+        client.savings = Savings.objects.filter(client=client).first()
+        client.loans = Loan.objects.filter(client=client).first()
+
     return render(request, 'client_list.html', {'clients': clients})
 
 
