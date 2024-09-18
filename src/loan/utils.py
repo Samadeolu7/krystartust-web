@@ -1,4 +1,4 @@
-from .models import Loan, LoanPayment
+from .models import Loan, LoanPayment, LoanRepaymentSchedule
 from income.utils import create_income_payment, get_loan_interest_income
 from income.models import Income
 
@@ -9,7 +9,10 @@ def register_loan(client, amount, interest, loan_type, duration, risk_premium, s
     interest = create_income_payment(client.bank, income, f'intrest on {loan.client.name} loan', loan.interest, start_date)
     
 
-def create_loan_payment(client, loan, emi, amount, payment_schedule, payment_date):
-    loan_payment = LoanPayment.objects.create(client=client, loan=loan, emi=emi, amount=amount, payment_schedule=payment_schedule, payment_date=payment_date)
+def create_loan_payment(client, loan,amount,date):
+    loan_payment_schedule = LoanRepaymentSchedule.objects.filter(loan=loan,is_paid=False).first()
+    loan_payment = LoanPayment.objects.create(client=client, loan=loan, amount=amount, payment_date=date, payment_schedule=loan_payment_schedule)
     loan_payment.save()
-    return loan_payment
+    loan_payment_schedule.is_paid = True
+    loan_payment_schedule.payment_date = date
+    loan_payment_schedule.save()

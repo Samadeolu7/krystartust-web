@@ -4,11 +4,12 @@ from django.contrib import messages
 
 from client.models import Client
 from income.models import IncomePayment
+from loan.excel_utils import loan_from_excel
 from savings.models import Savings, SavingsPayment
 from bank.models import BankPayment
 from main.models import ClientGroup as Group
 from .models import Loan, LoanPayment, LoanRepaymentSchedule
-from .forms import LoanRegistrationForm, LoanPaymentForm
+from .forms import LoanRegistrationForm, LoanPaymentForm, LoanExcelForm
 
 from bank.utils import create_bank_payment
 
@@ -197,3 +198,13 @@ def group_report(request, pk):
     }
 
     return render(request, 'group_report.html', context)
+
+def loan_upload(request):
+    if request.method == 'POST':
+        form = LoanExcelForm(request.POST, request.FILES)
+        if form.is_valid():
+            loan_from_excel(request.FILES['excel_file'])
+            return redirect('dashboard')
+    else:
+        form = LoanExcelForm()
+    return render(request, 'upload_loan.html', {'form': form})

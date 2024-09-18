@@ -7,6 +7,11 @@ class CompulsorySavingsForm(forms.ModelForm):
         model = CompulsorySavings
         fields = ['amount']
 
+class SavingsExcelForm(forms.Form):
+    excel_file = forms.FileField(
+        label='Excel File'
+    )
+
 class SavingsForm(forms.ModelForm):
     class Meta:
         model = SavingsPayment

@@ -3,7 +3,8 @@ from django.shortcuts import render, redirect
 # Create your views here.
 from django.shortcuts import render
 from .models import SavingsPayment
-from .forms import SavingsForm, WithdrawalForm, CompulsorySavingsForm
+from .forms import SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm
+from .excel_utils import savings_from_excel
 
 
 
@@ -42,3 +43,13 @@ def record_withdrawal(request):
     else:
         form = WithdrawalForm()
     return render(request, 'withdrawal_form.html', {'form': form})
+
+def upload_savings(request):
+    if request.method == 'POST':
+        form = SavingsExcelForm(request.POST, request.FILES)
+        if form.is_valid():
+            savings_from_excel(request.FILES['excel_file'])
+            return redirect('dashboard')
+    else:
+        form = SavingsExcelForm()
+    return render(request, 'upload_savings.html', {'form': form})

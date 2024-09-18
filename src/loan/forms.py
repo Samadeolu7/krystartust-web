@@ -87,3 +87,9 @@ class LoanRegistrationForm(forms.ModelForm):
         self.fields['risk_premium'].widget.attrs['readonly'] = True
         self.fields['union_contribution'].widget.attrs['readonly'] = True
         self.fields['interest'].widget.attrs['readonly'] = True
+
+
+class LoanExcelForm(forms.Form):
+    excel_file = forms.FileField(
+        label='Excel File'
+    )

@@ -26,5 +26,6 @@ urlpatterns = [
     path('savings/', include('savings.urls')),
     path('income/', include('income.urls')),
     # path('expense/', include('expense.urls')),
-    path('bank/', include('bank.urls')),
+    path('asset/', include('asset.urls')),
+    # path('liability/', include('liability.urls')),
 ]
