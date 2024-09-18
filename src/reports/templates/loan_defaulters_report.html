@@ -30,7 +30,7 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ loan.id }}</td>
-                        <td>{{ loan.amount }}</td>
+                        <td>{{ loan.balance }}</td>
                         <td>{{ loan.start_date }}</td>
                         <td>{{ loan.end_date }}</td>
                         <td>{{ loan.status }}</td>
@@ -60,7 +60,7 @@
                         <td>{{ forloop.counter }}</td>
                         <td>{{ client.name }}</td>
                         <td>{{ client.email }}</td>
-                        <td>{{ client.phone_number }}</td>
+                        <td>{{ client.phone }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

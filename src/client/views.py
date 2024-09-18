@@ -1,12 +1,15 @@
+import os
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from client.excel_utils import create_clients_from_excel
 from client.models import Client
 from loan.models import Loan, LoanPayment
 from savings.models import Savings, SavingsPayment
 from savings.utils import register_savings
 from income.utils import create_income_payment, get_id_fee_income, get_registration_fee_income
 
-from .forms import ClientForm
+from .forms import ClientExcelForm, ClientForm
 
 # Create your views here.
 
@@ -24,7 +27,7 @@ def create_client(request):
             create_income_payment(bank=form.cleaned_data['bank'], income=id_fee, description='ID Fee', amount=form.cleaned_data['id_fee'], payment_date=form.instance.created_at)
             
             
-            return redirect('client_list')  # Redirect to a client list or relevant page
+            return redirect('list_clients')  # Redirect to a client list or relevant page
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -73,3 +76,29 @@ def individual_report(request, pk):
     }
 
     return render(request, 'individual_report.html', context)
+
+
+def create_client_excel(request):
+    """View to create clients from an excel file."""
+    if request.method == 'POST':
+        form = ClientExcelForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = request.FILES['file']
+            report_path = create_clients_from_excel(file)
+
+            # Create a CSV response
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename="{os.path.basename(report_path)}"'
+
+            with open(report_path, 'r') as report_file:
+                response.write(report_file.read())
+
+            messages.success(request, 'Clients created successfully. Check the report for more details.')
+            return response
+        else:
+            messages.error(request, 'Please correct the errors below.')
+
+    else:
+        form = ClientExcelForm()
+    
+    return render(request, 'client_excel_form.html', {'form': form})

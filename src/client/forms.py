@@ -33,3 +33,10 @@ class ClientForm(forms.ModelForm):
         self.fields['compulsory_savings'].widget.attrs['readonly'] = True
         self.fields['registration_fee'].widget.attrs['readonly'] = True
         self.fields['id_fee'].widget.attrs['readonly'] = True
+
+
+class ClientExcelForm(forms.Form):
+    excel_file = forms.FileField(
+        label='Excel File'
+    )
+    

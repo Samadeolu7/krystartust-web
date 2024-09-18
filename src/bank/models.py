@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from main.models import Year
 
 class Bank(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     description = models.TextField()
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     balance_bf = models.DecimalField(max_digits=10, decimal_places=2, default=0)

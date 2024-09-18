@@ -11,7 +11,7 @@ class ExpenseType(models.Model):
 
 class Expense(models.Model):
 
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
     balance_bf = models.DecimalField(max_digits=10, decimal_places=2)
     expense_type = models.ForeignKey(ExpenseType, on_delete=models.CASCADE, related_name='expenses')

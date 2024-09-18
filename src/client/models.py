@@ -5,7 +5,7 @@ from django.apps import apps
 # Create your models here.
 
 class Client(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     email = models.EmailField(null=True, blank=True)
     phone = models.CharField(max_length=15)
     address = models.TextField(null=True, blank=True)

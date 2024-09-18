@@ -14,7 +14,7 @@ from bank.utils import create_bank_payment
 
 from income.utils import get_loan_interest_income, get_risk_premium_income, get_union_contribution_income
 
-from datetime import timedelta
+from datetime import date, timedelta
 
 # Create your views here.
 
@@ -167,13 +167,15 @@ def loan_defaulters_report(request):
     defaulters = [loan for loan in loans if loan.is_defaulted()]
     clients = Client.objects.filter(loan__in=defaulters)
     schedule = LoanRepaymentSchedule.objects.filter(loan__in=defaulters)
+    #filter fo those schedules that have the due date less than today and is_paid is False
+    filtered_schedule = [schedule for schedule in schedule if schedule.due_date < date.today() and not schedule.is_paid]
     loan_payments = LoanPayment.objects.filter(loan__in=defaulters)
     
     context = {
         'defaulters': defaulters,
         'clients': clients,
         'loan_payments': loan_payments,
-        'schedule': schedule,
+        'schedule': filtered_schedule,
     }
 
     return render(request, 'loan_defaulters_report.html', context)
