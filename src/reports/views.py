@@ -1,8 +1,10 @@
+import calendar
+from datetime import datetime
 from django.shortcuts import render
 
 from client.models import Client
-from expenses.models import Expense
-from income.models import Income
+from expenses.models import Expense, ExpensePayment
+from income.models import Income, IncomePayment
 from loan.models import Loan, LoanPayment, LoanRepaymentSchedule
 from savings.models import Savings, SavingsPayment
 from main.models import ClientGroup as Group
@@ -107,21 +109,75 @@ def daily_transactions_report(request):
         return render(request, 'daily_collection_form.html')
     return render(request, 'daily_transactions_report.html', context)
 
-# create P&L report
+
 def profit_and_loss_report(request):
-    
-    incomes = Income.objects.all()
-    expenses = Expense.objects.all()
-    # create different buckets based on expense_type
-    expense_buckets = {}
+    # Get the current year
+    current_year = datetime.now().year
+
+    # Initialize dictionaries to hold monthly data
+    monthly_incomes = {month: {} for month in range(1, 13)}
+    monthly_expenses = {month: [] for month in range(1, 13)}
+    expense_buckets = {month: {} for month in range(1, 13)}
+    monthly_income_totals = {month: 0 for month in range(1, 13)}
+    monthly_expense_totals = {month: 0 for month in range(1, 13)}
+
+    # Initialize yearly totals
+    yearly_income_total = 0
+    yearly_expense_total = 0
+
+    # Initialize dictionaries to hold yearly totals by type
+    yearly_income_by_type = {}
+    yearly_expense_by_type = {}
+
+    # Get all incomes and expenses for the current year
+    incomes = IncomePayment.objects.filter(created_at__year=current_year)
+    expenses = ExpensePayment.objects.filter(created_at__year=current_year)
+
+    # Organize incomes by month and income type, and calculate totals
+    for income in incomes:
+        month = income.payment_date.month
+        income_type_name = income.income.name
+        if income_type_name not in monthly_incomes[month]:
+            monthly_incomes[month][income_type_name] = {'total': 0, 'details': []}
+        monthly_incomes[month][income_type_name]['details'].append(income)
+        monthly_incomes[month][income_type_name]['total'] += income.amount
+        monthly_income_totals[month] += income.amount
+        yearly_income_total += income.amount
+
+        # Calculate yearly totals by income type
+        if income_type_name not in yearly_income_by_type:
+            yearly_income_by_type[income_type_name] = 0
+        yearly_income_by_type[income_type_name] += income.amount
+
+    # Organize expenses by month and calculate totals
     for expense in expenses:
-        if expense.expense_type.name not in expense_buckets:
-            expense_buckets[expense.expense_type.name] = []
-        expense_buckets[expense.expense_type.name].append(expense)
+        month = expense.payment_date.month
+        monthly_expenses[month].append(expense)
+        monthly_expense_totals[month] += expense.amount
+        expense_type_name = expense.expense_type.name
+        if expense_type_name not in expense_buckets[month]:
+            expense_buckets[month][expense_type_name] = []
+        expense_buckets[month][expense_type_name].append(expense)
+        yearly_expense_total += expense.amount
+
+        # Calculate yearly totals by expense type
+        if expense_type_name not in yearly_expense_by_type:
+            yearly_expense_by_type[expense_type_name] = 0
+        yearly_expense_by_type[expense_type_name] += expense.amount
+
+    # Create a list of tuples (month_number, month_name)
+    months = [(month, calendar.month_name[month]) for month in range(1, 13)]
+    
     context = {
-        'incomes': incomes,
-        'expenses': expenses,
+        'monthly_incomes': monthly_incomes,
+        'monthly_expenses': monthly_expenses,
         'expense_buckets': expense_buckets,
+        'monthly_income_totals': monthly_income_totals,
+        'monthly_expense_totals': monthly_expense_totals,
+        'yearly_income_total': yearly_income_total,
+        'yearly_expense_total': yearly_expense_total,
+        'yearly_income_by_type': yearly_income_by_type,
+        'yearly_expense_by_type': yearly_expense_by_type,
+        'months': months,  # List of tuples (month_number, month_name)
     }
     return render(request, 'profit_loss.html', context)
-

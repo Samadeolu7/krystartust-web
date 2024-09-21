@@ -1,3 +1,4 @@
+from datetime import datetime
 import pandas as pd
 import csv
 import logging
@@ -6,6 +7,7 @@ from main.models import ClientGroup as Group
 from income.utils import create_id_fee_income_payment, create_registration_fee_income_payment
 from savings.utils import create_compulsory_savings
 from django.db import transaction
+from loan.excel_utils import parse_date
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -33,13 +35,20 @@ def create_clients_from_excel(file_path):
                     raise ValueError(f"Duplicate name found: {row['Name']}")
                 unique_names.add(row['Name'])
 
+                date = row['Date']
+                if isinstance(date, str):
+                    date = parse_date(date)
+                elif not isinstance(date, datetime):
+                    raise ValueError(f"Unsupported date format for '{date}'")
+
+
                 client = Client(
                     name=row['Name'],
                     email=row['Email'],
                     phone=row['Phone'],
                     address=row['Address'],
                     group=group,
-                    created_at=row['Date']
+                    created_at=date
                 )
                 clients_to_create.append(client)
                 report_rows.append([client.name, "success", "Client created successfully"])
@@ -56,8 +65,8 @@ def create_clients_from_excel(file_path):
             for client in clients_to_create:
                 try:
                     create_compulsory_savings(client)
-                    create_registration_fee_income_payment(client.created_at)
-                    create_id_fee_income_payment(client.created_at)
+                    create_registration_fee_income_payment(date)
+                    create_id_fee_income_payment(date)
                 except Exception as e:
                     logging.error(f"Error in post-creation operations for client {client.name}: {e}")
                     report_rows.append([client.name, "partial success", f"Post-creation error: {e}"])

@@ -48,10 +48,12 @@
                 <div class="card">
                     <div class="card-body text-center">
                         <h5 class="card-title">Reports</h5>
-                        <a href="{% url 'loan_defaulters_report' %}" class="btn btn-primary mb-2">Loan Defaulters Report</a>
-                        <a href="{% url 'daily_transactions_report' %}" class="btn btn-secondary mb-2">Daily Transactions Report</a>
+                        <a href="{% url 'loan_defaulters_report' %}" class="btn btn-primary mb-2">Defaulters Report</a>
+                        <a href="{% url 'daily_transactions_report' %}" class="btn btn-secondary mb-2">Daily Transactions</a>
                         <a href="{% url 'all_groups_report' %}" class="btn btn-secondary mb-2">Group Report</a>
                         <a href="{% url 'all_clients_report' %}" class="btn btn-secondary mb-2">Individual Report</a>
+                        <a href="{% url 'profit_and_loss_report' %}" class="btn btn-secondary mb-2">P&L Report</a>
+                        
                     </div>
                 </div>
             </div>

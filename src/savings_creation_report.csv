@@ -1,29 +1,29 @@
 Client Name,Status,Message
-Demilade Bukky Anuoluwapo,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Nurat Ajose,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Demilade Bukky Anuoluwapo,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Nurat Ajose,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Rebecca Temitope Adepoju,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Esther Ola Bashiru,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Kikelomo Adewale,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Damilola Olarewaju,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Kafayat Titilayo Akeem,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Oluwatosin ipinmidun Abosede,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Esther Ibanga Queen,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Islamiyat Alabi Amoke,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Rihanat Abdulrahman,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Joy Amhanyunose Ivbade,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Blessing Imade Orobosa,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Rebecca Temitope Adepoju,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Esther Ola Bashiru,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Afusat Titilayo Adepoju,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Kikelomo Adewale,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Damilola Olarewaju,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Kafayat Titilayo Akeem,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Oluwatosin ipinmidun Abosede,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Esther Ibanga Queen,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Islamiyat Alabi Amoke,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Rihanat Abdulrahman,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Joy Amhanyunose Ivbade,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Blessing Imade Orobosa,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
-Abigeal Akinrinsade Olujoke,failed,create_bank_payment() missing 1 required positional argument: 'payment_date'
+Demilade Bukky Anuoluwapo,success,Savings payment created successfully
+Nurat Ajose,success,Savings payment created successfully
+Demilade Bukky Anuoluwapo,success,Savings payment created successfully
+Nurat Ajose,success,Savings payment created successfully
+Rebecca Temitope Adepoju,success,Savings payment created successfully
+Esther Ola Bashiru,success,Savings payment created successfully
+Kikelomo Adewale,success,Savings payment created successfully
+Damilola Olarewaju,success,Savings payment created successfully
+Kafayat Titilayo Akeem,success,Savings payment created successfully
+Oluwatosin ipinmidun Abosede,success,Savings payment created successfully
+Esther Ibanga Queen,success,Savings payment created successfully
+Islamiyat Alabi Amoke,success,Savings payment created successfully
+Rihanat Abdulrahman,success,Savings payment created successfully
+Joy Amhanyunose Ivbade,success,Savings payment created successfully
+Blessing Imade Orobosa,success,Savings payment created successfully
+Rebecca Temitope Adepoju,success,Savings payment created successfully
+Esther Ola Bashiru,success,Savings payment created successfully
+Afusat Titilayo Adepoju,success,Savings payment created successfully
+Kikelomo Adewale,success,Savings payment created successfully
+Damilola Olarewaju,success,Savings payment created successfully
+Kafayat Titilayo Akeem,success,Savings payment created successfully
+Oluwatosin ipinmidun Abosede,success,Savings payment created successfully
+Esther Ibanga Queen,success,Savings payment created successfully
+Islamiyat Alabi Amoke,success,Savings payment created successfully
+Rihanat Abdulrahman,success,Savings payment created successfully
+Joy Amhanyunose Ivbade,success,Savings payment created successfully
+Blessing Imade Orobosa,success,Savings payment created successfully
+Abigeal Akinrinsade Olujoke,success,Savings payment created successfully

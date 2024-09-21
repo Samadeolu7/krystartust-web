@@ -122,4 +122,7 @@ def loan_from_excel(file_path):
     for index, row in df.iterrows():
         client_name = row['Name']
         amount = row['Amount']
-        create_loan_payment(client_name, amount)
+        date = row['Date']
+        client = Client.objects.get(name=client_name)
+        loan = Loan.objects.get(client=client.name)
+        create_loan_payment(client, loan, amount, date)

@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
 # Create your views here.
@@ -48,8 +49,16 @@ def upload_savings(request):
     if request.method == 'POST':
         form = SavingsExcelForm(request.POST, request.FILES)
         if form.is_valid():
-            savings_from_excel(request.FILES['excel_file'])
-            return redirect('dashboard')
+            report_path = savings_from_excel(request.FILES['excel_file'])
+
+            # Read the report file content
+            with open(report_path, 'r') as report_file:
+                report_content = report_file.read()
+
+            # Create a downloadable response
+            response = HttpResponse(report_content, content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename="savings_report.csv"'
+            return response
     else:
         form = SavingsExcelForm()
     return render(request, 'upload_savings.html', {'form': form})

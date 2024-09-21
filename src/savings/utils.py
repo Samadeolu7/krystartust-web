@@ -32,7 +32,8 @@ def create_savings_payment(client, amount, payment_date):
             amount=amount,
             payment_date=payment_date
         )
-        create_bank_payment(amount, payment_date, f'Savings for {client.name}')
+        bank = get_cash_in_hand()
+        create_bank_payment(bank,f'Savings for {client.name}',amount, payment_date )
         return savings_payment
     except Exception as e:
         logging.error(f"Error creating savings payment for client {client.name}: {e}")
