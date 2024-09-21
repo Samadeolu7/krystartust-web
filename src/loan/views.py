@@ -169,7 +169,7 @@ def loan_registration(request):
             union_contribution_payment.save()
 
             messages.success(request, "Loan registered successfully and repayment schedule created.")
-            return redirect('success_page')  # Replace with your actual success page URL name
+            return redirect('dashboard')
         else:
             messages.error(request, "There was an error with the form. Please correct it below.")
     else:
