@@ -1,9 +1,9 @@
-# Use official Python runtime as a parent image
+# Use the official Python image as the base
 FROM python:3.11-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Prevent Python from writing .pyc files and buffer stdout/stderr
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -11,8 +11,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Create a directory for the app user
-RUN mkdir /app
+# Set work directory
 WORKDIR /app
 
 # Install Python dependencies
@@ -20,15 +19,18 @@ COPY requirements.txt /app/
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Copy the project files
+# Copy project
 COPY . /app/
 
-
-# Expose port 8000 for the app
+# Expose port 8000
 EXPOSE 8000
 
-# Define the default command to run the app
-CMD ["python manage.py migrate && python manage.py collectstatic --noinput && gunicorn phoenix.wsgi:application --bind 0.0.0.0:8000"]
+# Add entrypoint script
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
+# Set the entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]
 
-
+# Define default command (handled in entrypoint.sh)
+# CMD ["gunicorn", "phoenix.wsgi:application", "--bind", "0.0.0.0:8000"]
