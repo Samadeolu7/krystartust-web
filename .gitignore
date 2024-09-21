@@ -2,4 +2,4 @@
 
 my_env
 *.pyc
-.pem
+ca.pem
