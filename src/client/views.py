@@ -83,7 +83,7 @@ def create_client_excel(request):
     if request.method == 'POST':
         form = ClientExcelForm(request.POST, request.FILES)
         if form.is_valid():
-            file = request.FILES['file']
+            file = request.FILES['excel_file']
             report_path = create_clients_from_excel(file)
 
             # Create a CSV response

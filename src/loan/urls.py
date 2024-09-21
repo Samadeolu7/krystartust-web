@@ -1,4 +1,4 @@
-from .views import  group_report, transaction_history, loan_payment, loan_registration, loan_detail, loan_schedule, loan_defaulters_report, loan_from_excel
+from .views import  group_report, loan_upload_view, transaction_history, loan_payment, loan_registration, loan_detail, loan_schedule, loan_defaulters_report, loan_upload
 
 from django.urls import path
 
@@ -10,5 +10,7 @@ urlpatterns = [
     path('schedule/<int:loan_id>/', loan_schedule, name='loan_schedule'),
     path('loan-defaulters-report/', loan_defaulters_report, name='loan_defaulters_report'),
     path('group-report/<int:pk>/', group_report, name='group_report'),
-    path('upload/', loan_from_excel, name='loan_upload'),
+    path('upload/', loan_upload, name='loan_upload'),
+    path('upload-loans/', loan_upload_view, name='loan_upload_bulk'),
+    
 ]

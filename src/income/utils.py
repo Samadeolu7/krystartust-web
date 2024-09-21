@@ -2,7 +2,7 @@ from .models import IncomePayment, Income, IDFee, RegistrationFee, RiskPremium, 
 from bank.models import BankPayment, Bank
 from main.models import Year
 
-from bank.utils import get_cash_in_hand
+from bank.utils import get_cash_in_hand, get_union_pulse
 
 
 
@@ -45,16 +45,20 @@ def create_registration_fee_income_payment( payment_date):
     bank = get_cash_in_hand()
     return create_income_payment(bank=bank, income=income, description='Registration Fee', amount=amount, payment_date=payment_date)
 
-def create_risk_premium_income_payment( payment_date):
+def create_loan_interest_income_payment( amount, payment_date):
+    income = get_loan_interest_income()
+    bank = get_cash_in_hand()
+    return create_income_payment(bank=bank, income=income, description='Loan Interest', amount=amount, payment_date=payment_date)
+
+def create_risk_premium_income_payment( amount,payment_date):
     income = get_risk_premium_income()
-    amount = RiskPremium.objects.all().first().amount
     bank = get_cash_in_hand()
     return create_income_payment(bank=bank, income=income, description='Risk Premium', amount=amount, payment_date=payment_date)
 
 def create_union_contribution_income_payment( payment_date):
     income = get_union_contribution_income()
     amount = UnionContribution.objects.all().first().amount
-    bank = get_cash_in_hand()
+    bank = get_union_pulse()
     return create_income_payment(bank=bank, income=income, description='Union Contribution', amount=amount, payment_date=payment_date)
     
 

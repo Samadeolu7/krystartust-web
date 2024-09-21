@@ -1,9 +1,14 @@
 import pandas as pd
 import csv
+import logging
 from client.models import Client
 from main.models import ClientGroup as Group
 from income.utils import create_id_fee_income_payment, create_registration_fee_income_payment
 from savings.utils import create_compulsory_savings
+from django.db import transaction
+
+# Configure logging
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def read_excel(file_path):
     """Read an excel file and return a DataFrame."""
@@ -13,15 +18,22 @@ def create_clients_from_excel(file_path):
     """Create clients from an excel file."""
     df = read_excel(file_path)
     report_path = 'client_creation_report.csv'
+    clients_to_create = []
+    report_rows = []
+    unique_names = set()  # Set to track unique names
 
-    with open(report_path, 'w', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(['Client Name', 'Status', 'Message'])  # Header row
-
+    with transaction.atomic():
         for index, row in df.iterrows():
-            group = Group.objects.get(name=row['Group'])
+            group, created = Group.objects.get_or_create(name=row['Group'])
+            if created:
+                group.description = "Description for the new group"  # Add your description here
+                group.save()
             try:
-                client = Client.objects.create(
+                if row['Name'] in unique_names:
+                    raise ValueError(f"Duplicate name found: {row['Name']}")
+                unique_names.add(row['Name'])
+
+                client = Client(
                     name=row['Name'],
                     email=row['Email'],
                     phone=row['Phone'],
@@ -29,14 +41,36 @@ def create_clients_from_excel(file_path):
                     group=group,
                     created_at=row['Date']
                 )
-                client.save()
-                create_compulsory_savings(client)
-                create_registration_fee_income_payment(client.created_at)
-                create_id_fee_income_payment(client.created_at)
-                writer.writerow([client.name, "success", "Client created successfully"])
+                clients_to_create.append(client)
+                report_rows.append([client.name, "success", "Client created successfully"])
             except Exception as e:
-                writer.writerow([row['Name'], "failed", str(e)])
+                logging.error(f"Error creating client for row {index}: {e}")
+                report_rows.append([row['Name'], "failed", str(e)])
                 continue
+
+        try:
+            # Bulk create clients
+            Client.objects.bulk_create(clients_to_create)
+
+            # Perform post-creation operations
+            for client in clients_to_create:
+                try:
+                    create_compulsory_savings(client)
+                    create_registration_fee_income_payment(client.created_at)
+                    create_id_fee_income_payment(client.created_at)
+                except Exception as e:
+                    logging.error(f"Error in post-creation operations for client {client.name}: {e}")
+                    report_rows.append([client.name, "partial success", f"Post-creation error: {e}"])
+        except Exception as e:
+            logging.error(f"Error in bulk creation of clients: {e}")
+            for client in clients_to_create:
+                report_rows.append([client.name, "failed", f"Bulk creation error: {e}"])
+
+    # Write the report
+    with open(report_path, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['Client Name', 'Status', 'Message'])  # Header row
+        writer.writerows(report_rows)
 
     # Return the CSV file path
     return report_path

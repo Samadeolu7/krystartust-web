@@ -1,5 +1,4 @@
 from .views import transaction_history, register_savings, record_withdrawal, compulsory_savings, upload_savings
-
 from django.urls import path
 
 urlpatterns = [

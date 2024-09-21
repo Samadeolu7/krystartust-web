@@ -1,15 +1,16 @@
 from decimal import Decimal
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.contrib import messages
 
 from client.models import Client
 from income.models import IncomePayment
-from loan.excel_utils import loan_from_excel
+from loan.excel_utils import bulk_create_loans_from_excel, loan_from_excel
 from savings.models import Savings, SavingsPayment
 from bank.models import BankPayment
 from main.models import ClientGroup as Group
 from .models import Loan, LoanPayment, LoanRepaymentSchedule
-from .forms import LoanRegistrationForm, LoanPaymentForm, LoanExcelForm
+from .forms import LoanRegistrationForm, LoanPaymentForm, LoanExcelForm, LoanUploadForm
 
 from bank.utils import create_bank_payment
 
@@ -67,6 +68,27 @@ def loan_payment(request):
     
     return render(request, 'loan_payment_form.html', {'form': form})
 
+def loan_upload_view(request):
+    if request.method == 'POST':
+        form = LoanUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = form.cleaned_data['file']
+            report_path = bulk_create_loans_from_excel(file)
+
+            # Read the report file content
+            with open(report_path, 'r') as report_file:
+                report_content = report_file.read()
+
+            # Create a downloadable response
+            response = HttpResponse(report_content, content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename="loan_creation_report.csv"'
+            return response
+        else:
+            messages.error(request, "There was an error with the form. Please correct it below.")
+    else:
+        form = LoanUploadForm()
+
+    return render(request, 'upload_loan.html', {'form': form})
 
 def loan_registration(request):
     if request.method == 'POST':

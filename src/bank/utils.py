@@ -8,3 +8,11 @@ def create_bank_payment(bank, description, amount, payment_date):
 def get_cash_in_hand():
     bank = Bank.objects.get(name='Cash in Hand')
     return bank
+
+def get_bank_account():
+    bank = Bank.objects.get_or_create(name='MoniePoint')[0]
+    return bank
+
+def get_union_pulse():
+    bank = Bank.objects.get_or_create(name='Union Pulse')[0]
+    return bank

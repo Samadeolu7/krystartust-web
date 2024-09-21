@@ -1,5 +1,6 @@
+import logging
 from bank.models import BankPayment
-from bank.utils import get_cash_in_hand
+from bank.utils import get_cash_in_hand, create_bank_payment
 from .models import Savings, SavingsPayment, CompulsorySavings
 
 def register_savings(client, amount):
@@ -15,11 +16,24 @@ def register_savings(client, amount):
 def create_compulsory_savings(client):
     compulsory_savings = CompulsorySavings.objects.all().first()
     if compulsory_savings:
-        register_savings(client=client, amount=compulsory_savings.amount, bank=get_cash_in_hand())
+        register_savings(client=client, amount=compulsory_savings.amount)
     return compulsory_savings
+
 
 def create_savings_payment(client, amount, payment_date):
     savings = Savings.objects.filter(client=client).first()
-    savings_payment = SavingsPayment.objects.create(client=client, savings=savings, amount=amount, payment_date=payment_date)
-    savings_payment.save()
-    return savings_payment
+    if not savings:
+        raise ValueError(f"No savings account found for client {client.name}")
+
+    try:
+        savings_payment = SavingsPayment.objects.create(
+            client=client,
+            savings=savings,
+            amount=amount,
+            payment_date=payment_date
+        )
+        create_bank_payment(amount, payment_date, f'Savings for {client.name}')
+        return savings_payment
+    except Exception as e:
+        logging.error(f"Error creating savings payment for client {client.name}: {e}")
+        raise

@@ -93,3 +93,6 @@ class LoanExcelForm(forms.Form):
     excel_file = forms.FileField(
         label='Excel File'
     )
+
+class LoanUploadForm(forms.Form):
+    file = forms.FileField(label='Select an Excel file')
