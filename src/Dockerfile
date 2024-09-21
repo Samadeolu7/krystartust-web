@@ -23,13 +23,11 @@ RUN pip install -r requirements.txt
 # Copy the project files
 COPY . /app/
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
 
 # Expose port 8000 for the app
 EXPOSE 8000
 
 # Define the default command to run the app
-CMD ["gunicorn", "python manage.py migrate && phoenix.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "python manage.py migrate && python manage.py collectstatic --noinput && phoenix.wsgi:application", "--bind", "0.0.0.0:8000"]
 
 
