@@ -1,24 +1,35 @@
-# Use an official Python runtime as a base image
-FROM python:3.10-slim
+# Use official Python runtime as a parent image
+FROM python:3.11-slim
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-# Set the working directory in the container
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a directory for the app user
+RUN mkdir /app
 WORKDIR /app
 
-# Copy requirements.txt to the container
+# Install Python dependencies
 COPY requirements.txt /app/
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
-# Install any necessary dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the entire project into the container
+# Copy the project files
 COPY . /app/
 
-# Expose the port that Django will run on
+# Collect static files
+RUN python manage.py collectstatic --noinput
+
+# Expose port 8000 for the app
 EXPOSE 8000
 
-# Run migrations, collect static files, and start the Django development server
-CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"]
+# Define the default command to run the app
+CMD ["gunicorn", "python manage.py migrate && phoenix.wsgi:application", "--bind", "0.0.0.0:8000"]
+
+
