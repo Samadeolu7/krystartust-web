@@ -17,15 +17,15 @@ logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %
 def read_excel(file_path):
     return pd.read_excel(file_path)
 
-def parse_date(date_str):
-    # Try different date formats
-    for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y', '%d-%m-%Y', '%d-%m-%y'):
-        try:
-            return datetime.strptime(date_str, fmt)
-        except ValueError:
-            continue
-    raise ValueError(f"Date format for '{date_str}' is not supported")
+from dateutil.parser import parse
 
+def parse_date(date_str, dayfirst=False, yearfirst=False):
+    try:
+        return parse(date_str, dayfirst=dayfirst, yearfirst=yearfirst)
+    except ValueError:
+        raise ValueError(f"Date format for '{date_str}' is not supported")
+
+    
 def bulk_create_loans_from_excel(file_path):
     df = read_excel(file_path)
     report_rows = []
