@@ -2,118 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trial Balance Report</title>
-    <style>
-        /* Container styling */
-        .container {
-            width: 90%;
-            margin: 50px auto;
-            font-family: Arial, sans-serif;
-        }
-
-        /* Table styling */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Table header */
-        thead {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        thead th {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 2px solid #ddd;
-        }
-
-        /* Table body */
-        tbody tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        tbody td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        /* Table footer */
-        tfoot {
-            background-color: #f1f1f1;
-            font-weight: bold;
-        }
-
-        tfoot td {
-            padding: 12px;
-        }
-
-        /* Highlight total rows */
-        .total-row {
-            background-color: #e8f5e9;
-        }
-
-        /* Responsive design */
-        @media (max-width: 768px) {
-            table, thead, tbody, th, td, tr {
-                display: block;
-            }
-
-            thead tr {
-                position: absolute;
-                top: -9999px;
-                left: -9999px;
-            }
-
-            tr {
-                margin-bottom: 15px;
-            }
-
-            td {
-                border: none;
-                position: relative;
-                padding-left: 50%;
-            }
-
-            td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 10px;
-                font-weight: bold;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Trial Balance Report - {{ current_year }}</h1>
-        <table>
-            <thead>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Trial Balance Report - {{ current_year }}</h1>
+        <table class="table table-bordered">
+            <thead class="table-dark">
                 <tr>
                     <th>Account Type</th>
                     <th>Account Name</th>
-                    <th>Credit</th>
                     <th>Debit</th>
+                    <th>Credit</th>
+
                 </tr>
             </thead>
             <tbody>
                 <!-- Savings -->
-                <tr class="total-row">
+                <tr class="table-success">
                     <td>Savings</td>
                     <td>Total Savings</td>
-                    <td>${{ total_savings }}</td>
                     <td></td>
+                    <td>${{ total_savings }}</td>
                 </tr>
 
                 <!-- Loans -->
-                <tr class="total-row">
+                <tr class="table-success">
                     <td>Loans</td>
                     <td>Total Loans</td>
-                    <td></td>
                     <td>${{ total_loans }}</td>
+                    <td></td>
                 </tr>
 
                 <!-- Banks -->
@@ -131,27 +52,32 @@
                 <tr>
                     <td>Incomes</td>
                     <td>{{ income.name }}</td>
-                    <td>${{ income.balance }}</td>
                     <td></td>
+                    <td>${{ income.balance }}</td>
+
                 </tr>
                 {% endfor %}
 
                 <!-- Expenses -->
-                <tr class="total-row">
+                <tr class="table-success">
                     <td>Expenses</td>
                     <td>Total Expenses</td>
                     <td>${{ total_expenses }}</td>
+                    <td></td>
                 </tr>
             </tbody>
-            <tfoot>
+            <tfoot class="table-dark">
                 <tr>
                     <td>Total</td>
                     <td></td>
-                    <td>${{ total_credit }}</td>
                     <td>${{ total_debit }}</td>
+                    <td>${{ total_credit }}</td>
+
                 </tr>
             </tfoot>
         </table>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

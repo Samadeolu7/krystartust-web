@@ -26,4 +26,9 @@ def bank_list(request):
 
 def bank_detail(request, pk):
     bank = Bank.objects.get(pk=pk)
-    return render(request, 'bank_detail.html', {'bank': bank})
+    bank_payment = bank.bankpayment_set.all()
+    context = {
+        'bank': bank,
+        'bank_payment': bank_payment
+    }
+    return render(request, 'bank_detail.html', context)

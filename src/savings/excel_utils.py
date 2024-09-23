@@ -17,26 +17,21 @@ def read_excel(file_path):
 
 def savings_from_excel(file_path):
     df = read_excel(file_path)
-    df['Date'] = pd.to_datetime(df['Date'], dayfirst=True)  # Ensure day-first format
     report_rows = []
 
     with transaction.atomic():
         for index, row in df.iterrows():
             client_name = row['Name']
             amount = row['Amount']
-            date = row['Date']
+            date_str = str(row['Date'])
+            date = pd.to_datetime(date_str, dayfirst=True, errors='coerce')
             client = Client.objects.filter(name=client_name).first()
             if client:
                 try:
                     # Ensure date is a datetime object
-                    if isinstance(date, str):
-                        date = parse_date(date)
-                    elif not isinstance(date, datetime):
-                        raise ValueError(f"Unsupported date format for '{date}'")
-
-                    # Make the datetime object timezone-aware
-                    date = timezone.make_aware(date, timezone.get_current_timezone())
-
+                    if pd.isnull(date):
+                        raise ValueError(f"Unsupported date format for '{row['Date']}'")
+                    
                     create_savings_payment(client, amount, date)
                     report_rows.append([client_name, "success", "Savings payment created successfully"])
                 except Exception as e:

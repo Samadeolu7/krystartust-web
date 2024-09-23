@@ -1,3 +1,4 @@
+from bank.utils import create_bank_payment, get_cash_in_hand
 from .models import Loan, LoanPayment, LoanRepaymentSchedule
 from income.utils import create_income_payment, get_loan_interest_income
 from income.models import Income
@@ -16,3 +17,6 @@ def create_loan_payment(client, loan,amount,date):
     loan_payment_schedule.is_paid = True
     loan_payment_schedule.payment_date = date
     loan_payment_schedule.save()
+    bank = get_cash_in_hand()
+    bank_payment = create_bank_payment(bank, f'Loan payment from {client.name}', amount, date)
+    

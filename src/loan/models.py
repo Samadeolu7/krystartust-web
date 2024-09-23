@@ -44,14 +44,14 @@ class LoanPayment(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            last_payment = LoanPayment.objects.filter(client=self.client).order_by('-created_at').first()
-            if last_payment:
-                self.balance = last_payment.balance - self.amount
+            balance = self.loan.balance
+            if balance :
+                self.balance = balance - self.amount
                 # update loan balance
                 self.loan.balance = self.balance
                 self.loan.save()
             else:
-                self.balance = self.amount
+                self.balance = -self.amount
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:

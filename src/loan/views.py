@@ -232,12 +232,17 @@ def group_report(request, pk):
 
     return render(request, 'group_report.html', context)
 
+
 def loan_upload(request):
     if request.method == 'POST':
         form = LoanExcelForm(request.POST, request.FILES)
         if form.is_valid():
-            loan_from_excel(request.FILES['excel_file'])
-            return redirect('dashboard')
+            report_content = loan_from_excel(request.FILES['excel_file'])
+            
+            # Create the HttpResponse object with the appropriate CSV header.
+            response = HttpResponse(report_content, content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="loan_payment_report.csv"'
+            return response
     else:
         form = LoanExcelForm()
     return render(request, 'upload_loan.html', {'form': form})

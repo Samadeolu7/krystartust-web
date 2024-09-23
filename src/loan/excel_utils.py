@@ -38,13 +38,12 @@ def bulk_create_loans_from_excel(file_path):
                 amount = Decimal(row['Amount'])
                 interest = LoanServiceFee.load().amount
                 duration = 23
-                start_date = row['Date']
+                date_str = str(row['Date'])
+                start_date = pd.to_datetime(date_str, dayfirst=False, errors='coerce')
                 
                 # Ensure start_date is a datetime object
-                if isinstance(start_date, str):
-                    start_date = parse_date(start_date)
-                elif not isinstance(start_date, datetime):
-                    raise ValueError(f"Unsupported date format for '{start_date}'")
+                if pd.isnull(start_date):
+                    raise ValueError(f"Unsupported date format for '{row['Date']}'")
 
                 # Make the datetime object timezone-aware
                 start_date = timezone.make_aware(start_date, timezone.get_current_timezone())
@@ -120,23 +119,41 @@ def bulk_create_loans_from_excel(file_path):
 
     # Return the CSV file path
     return report_path
+import csv
+from io import StringIO
 
-def loan_from_excel(file_path):
-    df = read_excel(file_path)
+def loan_from_excel(file):
+    df = read_excel(file)
+    report_rows = []
+
     for index, row in df.iterrows():
-        client_name = row['Name']
-        amount = row['Amount']
-        date = parse_date(row['Date'])
-        
-        # Ensure date is a datetime object
-        if isinstance(date, str):
-            date = parse_date(date)
-        elif not isinstance(date, datetime):
-            raise ValueError(f"Unsupported date format for '{date}'")
+        try:
+            client_name = row['Name']
+            amount = row['Amount']
+            date_str = str(row['Date'])
+            date = pd.to_datetime(date_str, dayfirst=True, errors='coerce')
+            
+            # Ensure date is a datetime object
+            if pd.isnull(date):
+                raise ValueError(f"Unsupported date format for '{row['Date']}'")
 
-        # Make the datetime object timezone-aware
-        date = timezone.make_aware(date, timezone.get_current_timezone())
+            # Make the datetime object timezone-aware
+            date = timezone.make_aware(date, timezone.get_current_timezone())
 
-        client = Client.objects.get(name=client_name)
-        loan = Loan.objects.get(client=client.name)
-        create_loan_payment(client, loan, amount, date)
+            client = Client.objects.get(name=client_name)
+            loan = Loan.objects.get(client=client)
+            create_loan_payment(client, loan, amount, date)
+
+            report_rows.append([client_name, "success", "Loan payment created successfully"])
+        except Exception as e:
+            logging.error(f"Error processing row {index} for client {client_name}: {e}")
+            report_rows.append([client_name, "failed", str(e)])
+
+    # Create the CSV content
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Client Name', 'Status', 'Message'])  # Header row
+    writer.writerows(report_rows)
+
+    # Return the CSV content
+    return output.getvalue()
