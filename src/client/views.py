@@ -52,10 +52,14 @@ def edit_client(request, client_id):
     return render(request, 'client_form.html', {'form': form})
 
 def list_clients(request):
-    """View to list all clients."""
-    clients = Client.objects.all()
+    """View to list all clients, with optimized query for related data."""
+    
+    # Use select_related to fetch the 'group' (ForeignKey) in the same query
+    # Use prefetch_related to optimize fetching of 'savings' and 'loan' (reverse FK)
+    clients = Client.objects.select_related('group').prefetch_related('savings_set', 'loan_set')
 
     return render(request, 'client_list.html', {'clients': clients})
+
 
 
 

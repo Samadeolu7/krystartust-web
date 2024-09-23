@@ -110,69 +110,77 @@ def daily_transactions_report(request):
         return render(request, 'daily_collection_form.html')
     return render(request, 'daily_transactions_report.html', context)
 
+from django.db.models import Sum
+from datetime import datetime
+import calendar
 
 def profit_and_loss_report(request):
     # Get the current year
     current_year = datetime.now().year
 
-    # Initialize dictionaries to hold monthly data
+    # Get monthly totals for incomes and expenses using annotations
+    incomes_by_month = IncomePayment.objects.filter(created_at__year=current_year).values(
+        'payment_date__month', 'income__name'
+    ).annotate(monthly_total=Sum('amount'))
+
+    expenses_by_month = ExpensePayment.objects.filter(created_at__year=current_year).values(
+        'payment_date__month', 'expense__name'
+    ).annotate(monthly_total=Sum('amount'))
+
+    # Initialize dictionaries for storing the data
     monthly_incomes = {month: {} for month in range(1, 13)}
-    monthly_expenses = {month: [] for month in range(1, 13)}
-    expense_buckets = {month: {} for month in range(1, 13)}
+    monthly_expenses = {month: {} for month in range(1, 13)}
     monthly_income_totals = {month: 0 for month in range(1, 13)}
     monthly_expense_totals = {month: 0 for month in range(1, 13)}
 
-    # Initialize yearly totals
-    yearly_income_total = 0
-    yearly_expense_total = 0
-
-    # Initialize dictionaries to hold yearly totals by type
     yearly_income_by_type = {}
     yearly_expense_by_type = {}
 
-    # Get all incomes and expenses for the current year
-    incomes = IncomePayment.objects.filter(created_at__year=current_year)
-    expenses = ExpensePayment.objects.filter(created_at__year=current_year)
+    yearly_income_total = 0
+    yearly_expense_total = 0
 
-    # Organize incomes by month and income type, and calculate totals
-    for income in incomes:
-        month = income.payment_date.month
-        income_type_name = income.income.name
-        if income_type_name not in monthly_incomes[month]:
-            monthly_incomes[month][income_type_name] = {'total': 0, 'details': []}
-        monthly_incomes[month][income_type_name]['details'].append(income)
-        monthly_incomes[month][income_type_name]['total'] += income.amount
-        monthly_income_totals[month] += income.amount
-        yearly_income_total += income.amount
+    # Process the incomes and calculate totals by month and type
+    for income in incomes_by_month:
+        month = income['payment_date__month']
+        income_type = income['income__name']
+        total = income['monthly_total']
 
-        # Calculate yearly totals by income type
-        if income_type_name not in yearly_income_by_type:
-            yearly_income_by_type[income_type_name] = 0
-        yearly_income_by_type[income_type_name] += income.amount
+        if income_type not in monthly_incomes[month]:
+            monthly_incomes[month][income_type] = {'total': 0}
 
-    # Organize expenses by month and calculate totals
-    for expense in expenses:
-        month = expense.payment_date.month
-        monthly_expenses[month].append(expense)
-        monthly_expense_totals[month] += expense.amount
-        expense_type_name = expense.expense_type.name
-        if expense_type_name not in expense_buckets[month]:
-            expense_buckets[month][expense_type_name] = []
-        expense_buckets[month][expense_type_name].append(expense)
-        yearly_expense_total += expense.amount
+        monthly_incomes[month][income_type]['total'] += total
+        monthly_income_totals[month] += total
+        yearly_income_total += total
 
-        # Calculate yearly totals by expense type
-        if expense_type_name not in yearly_expense_by_type:
-            yearly_expense_by_type[expense_type_name] = 0
-        yearly_expense_by_type[expense_type_name] += expense.amount
+        # Yearly total by income type
+        if income_type not in yearly_income_by_type:
+            yearly_income_by_type[income_type] = 0
+        yearly_income_by_type[income_type] += total
+
+    # Process the expenses and calculate totals by month and type
+    for expense in expenses_by_month:
+        month = expense['payment_date__month']
+        expense_type = expense['expense_type__name']
+        total = expense['monthly_total']
+
+        if expense_type not in monthly_expenses[month]:
+            monthly_expenses[month][expense_type] = {'total': 0}
+
+        monthly_expenses[month][expense_type]['total'] += total
+        monthly_expense_totals[month] += total
+        yearly_expense_total += total
+
+        # Yearly total by expense type
+        if expense_type not in yearly_expense_by_type:
+            yearly_expense_by_type[expense_type] = 0
+        yearly_expense_by_type[expense_type] += total
 
     # Create a list of tuples (month_number, month_name)
     months = [(month, calendar.month_name[month]) for month in range(1, 13)]
-    
+
     context = {
         'monthly_incomes': monthly_incomes,
         'monthly_expenses': monthly_expenses,
-        'expense_buckets': expense_buckets,
         'monthly_income_totals': monthly_income_totals,
         'monthly_expense_totals': monthly_expense_totals,
         'yearly_income_total': yearly_income_total,
@@ -181,6 +189,7 @@ def profit_and_loss_report(request):
         'yearly_expense_by_type': yearly_expense_by_type,
         'months': months,  # List of tuples (month_number, month_name)
     }
+
     return render(request, 'profit_loss.html', context)
 
 def trial_balance_report(request):
