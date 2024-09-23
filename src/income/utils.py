@@ -47,8 +47,9 @@ def create_registration_fee_income_payment( payment_date):
 
 def create_loan_interest_income_payment( amount, payment_date):
     income = get_loan_interest_income()
-    bank = get_cash_in_hand()
-    return create_income_payment(bank=bank, income=income, description='Loan Interest', amount=amount, payment_date=payment_date)
+    income_payment = IncomePayment.objects.create(income=income, description='Loan Interest', amount=amount, payment_date=payment_date)
+    income_payment.save()
+    return income_payment
 
 def create_risk_premium_income_payment( amount,payment_date):
     income = get_risk_premium_income()

@@ -4,6 +4,7 @@ import logging
 from decimal import Decimal
 from datetime import datetime, timedelta
 from django.db import transaction
+from django.utils import timezone  # Import timezone module
 from bank.utils import create_bank_payment, get_bank_account
 from client.models import Client
 from income.utils import create_loan_interest_income_payment, create_risk_premium_income_payment, create_union_contribution_income_payment
@@ -19,13 +20,12 @@ def read_excel(file_path):
 
 from dateutil.parser import parse
 
-def parse_date(date_str, dayfirst=False, yearfirst=False):
+def parse_date(date_str, dayfirst=True, yearfirst=False):
     try:
         return parse(date_str, dayfirst=dayfirst, yearfirst=yearfirst)
     except ValueError:
         raise ValueError(f"Date format for '{date_str}' is not supported")
 
-    
 def bulk_create_loans_from_excel(file_path):
     df = read_excel(file_path)
     report_rows = []
@@ -45,6 +45,9 @@ def bulk_create_loans_from_excel(file_path):
                     start_date = parse_date(start_date)
                 elif not isinstance(start_date, datetime):
                     raise ValueError(f"Unsupported date format for '{start_date}'")
+
+                # Make the datetime object timezone-aware
+                start_date = timezone.make_aware(start_date, timezone.get_current_timezone())
 
                 loan_type = 'Weekly'
                 risk_premium = RiskPremium.load().amount
@@ -117,12 +120,23 @@ def bulk_create_loans_from_excel(file_path):
 
     # Return the CSV file path
     return report_path
+
 def loan_from_excel(file_path):
     df = read_excel(file_path)
     for index, row in df.iterrows():
         client_name = row['Name']
         amount = row['Amount']
-        date = row['Date']
+        date = parse_date(row['Date'])
+        
+        # Ensure date is a datetime object
+        if isinstance(date, str):
+            date = parse_date(date)
+        elif not isinstance(date, datetime):
+            raise ValueError(f"Unsupported date format for '{date}'")
+
+        # Make the datetime object timezone-aware
+        date = timezone.make_aware(date, timezone.get_current_timezone())
+
         client = Client.objects.get(name=client_name)
         loan = Loan.objects.get(client=client.name)
         create_loan_payment(client, loan, amount, date)

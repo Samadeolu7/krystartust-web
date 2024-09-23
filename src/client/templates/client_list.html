@@ -34,7 +34,7 @@
                         {{ client.savings.balance }}</a>
                     </td>
                     <td><a href="{% url 'loan_transaction_history' client.id %}">
-                    {{ client.loans.balance }}
+                    {{ client.loan.balance }}
                     </a></td>
                 </tr>
                 {% empty %}

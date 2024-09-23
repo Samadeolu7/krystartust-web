@@ -10,8 +10,16 @@ class Client(models.Model):
     phone = models.CharField(max_length=15)
     address = models.TextField(null=True, blank=True)
     group = models.ForeignKey('main.ClientGroup', on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
+    
+    @property
+    def savings(self):
+        return self.savings_set.first()
+
+    @property
+    def loan(self):
+        return self.loan_set.first()

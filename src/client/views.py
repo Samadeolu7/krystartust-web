@@ -54,11 +54,9 @@ def edit_client(request, client_id):
 def list_clients(request):
     """View to list all clients."""
     clients = Client.objects.all()
-    for client in clients:
-        client.savings = Savings.objects.filter(client=client).first()
-        client.loans = Loan.objects.filter(client=client).first()
 
     return render(request, 'client_list.html', {'clients': clients})
+
 
 
 def individual_report(request, pk):

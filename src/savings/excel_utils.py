@@ -1,19 +1,23 @@
 import csv
+from datetime import datetime
 import pandas as pd
 import logging
 from django.db import transaction
+from django.utils import timezone  # Import timezone module
 from client.models import Client
 from .models import SavingsPayment
 from .utils import create_savings_payment
+from loan.excel_utils import parse_date
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def read_excel(file_path):
-    return pd.read_excel(file_path)
+    return pd.read_excel(file_path)  # Ensure day-first format
 
 def savings_from_excel(file_path):
     df = read_excel(file_path)
+    df['Date'] = pd.to_datetime(df['Date'], dayfirst=True)  # Ensure day-first format
     report_rows = []
 
     with transaction.atomic():
@@ -24,6 +28,15 @@ def savings_from_excel(file_path):
             client = Client.objects.filter(name=client_name).first()
             if client:
                 try:
+                    # Ensure date is a datetime object
+                    if isinstance(date, str):
+                        date = parse_date(date)
+                    elif not isinstance(date, datetime):
+                        raise ValueError(f"Unsupported date format for '{date}'")
+
+                    # Make the datetime object timezone-aware
+                    date = timezone.make_aware(date, timezone.get_current_timezone())
+
                     create_savings_payment(client, amount, date)
                     report_rows.append([client_name, "success", "Savings payment created successfully"])
                 except Exception as e:

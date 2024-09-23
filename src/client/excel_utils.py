@@ -7,6 +7,7 @@ from main.models import ClientGroup as Group
 from income.utils import create_id_fee_income_payment, create_registration_fee_income_payment
 from savings.utils import create_compulsory_savings
 from django.db import transaction
+from django.utils import timezone  # Import timezone module
 from loan.excel_utils import parse_date
 
 # Configure logging
@@ -35,12 +36,17 @@ def create_clients_from_excel(file_path):
                     raise ValueError(f"Duplicate name found: {row['Name']}")
                 unique_names.add(row['Name'])
 
+                # Extract and parse the date
                 date = row['Date']
-                if isinstance(date, str):
+                if isinstance(date, pd.Timestamp):
+                    date = date.to_pydatetime()
+                elif isinstance(date, str):
                     date = parse_date(date)
-                elif not isinstance(date, datetime):
+                else:
                     raise ValueError(f"Unsupported date format for '{date}'")
 
+                # Make the datetime object timezone-aware
+                date = timezone.make_aware(date, timezone.get_current_timezone())
 
                 client = Client(
                     name=row['Name'],
@@ -65,8 +71,8 @@ def create_clients_from_excel(file_path):
             for client in clients_to_create:
                 try:
                     create_compulsory_savings(client)
-                    create_registration_fee_income_payment(date)
-                    create_id_fee_income_payment(date)
+                    create_registration_fee_income_payment(client.created_at)
+                    create_id_fee_income_payment(client.created_at)
                 except Exception as e:
                     logging.error(f"Error in post-creation operations for client {client.name}: {e}")
                     report_rows.append([client.name, "partial success", f"Post-creation error: {e}"])

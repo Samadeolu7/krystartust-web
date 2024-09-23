@@ -2,6 +2,7 @@ import calendar
 from datetime import datetime
 from django.shortcuts import render
 
+from bank.models import Bank
 from client.models import Client
 from expenses.models import Expense, ExpensePayment
 from income.models import Income, IncomePayment
@@ -181,3 +182,52 @@ def profit_and_loss_report(request):
         'months': months,  # List of tuples (month_number, month_name)
     }
     return render(request, 'profit_loss.html', context)
+
+def trial_balance_report(request):
+    # Get the current year
+    current_year = datetime.now().year
+
+    # Initialize dictionaries to hold totals by account type
+    incomes = Income.objects.all()
+    expenses = Expense.objects.all()
+    savings = Savings.objects.all()
+    loans = Loan.objects.all()
+    banks = Bank.objects.all()
+
+    total_savings = 0
+    total_loans = 0
+    total_incomes = 0
+    total_expenses = 0
+    total_banks = 0
+
+    for saving in savings:
+        total_savings += saving.balance
+
+    for loan in loans:
+        total_loans += loan.balance
+
+    for income in incomes:
+        total_incomes += income.balance
+
+    for expense in expenses:
+        total_expenses += expense.balance
+
+    for bank in banks:
+        total_banks += bank.balance
+
+    total_credit = total_incomes + total_savings 
+    total_debit = total_expenses + total_loans + total_banks
+
+    context = {
+        'total_savings': total_savings,
+        'total_loans': total_loans,
+        'total_incomes': total_incomes,
+        'total_expenses': total_expenses,
+        'total_banks': total_banks,
+        'total_credit': total_credit,
+        'total_debit': total_debit,
+        'banks': banks,
+        'incomes': incomes,
+
+    }
+    return render(request, 'trial_balance.html', context)

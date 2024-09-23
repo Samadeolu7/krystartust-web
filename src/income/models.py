@@ -28,10 +28,11 @@ class IncomePayment(models.Model):
         return f'{self.income.name} - {self.amount}'
     
     def save(self, *args, **kwargs):
-        self.income_balance = self.income.balance + self.amount
-        self.income.balance = self.income_balance
-        self.income.save()
-        super(IncomePayment, self).save(*args, **kwargs)
+        if not self.pk:
+            self.income_balance = self.income.balance + self.amount
+            self.income.balance = self.income_balance
+            self.income.save()
+            super(IncomePayment, self).save(*args, **kwargs)
     
     class Meta:
         ordering = ['-created_at']

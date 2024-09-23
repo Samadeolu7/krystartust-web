@@ -12,10 +12,10 @@ class SavingsExcelForm(forms.Form):
         label='Excel File'
     )
 
-class SavingsForm(forms.ModelForm):
-    class Meta:
-        model = SavingsPayment
-        fields = ['client', 'amount']
+# class SavingsForm(forms.ModelForm):
+#     class Meta:
+#         model = SavingsPayment
+#         fields = ['client', 'amount']
 
 class WithdrawalForm(forms.ModelForm):
     class Meta:
@@ -39,7 +39,10 @@ class WithdrawalForm(forms.ModelForm):
 class SavingsForm(forms.ModelForm):
     class Meta:
         model = SavingsPayment
-        fields = ['client', 'savings', 'balance', 'amount', 'payment_date']
+        fields = ['savings', 'amount', 'payment_date']
+        widgets = {
+            'payment_date': forms.DateInput(attrs={'type': 'date'}),
+        }
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
@@ -47,6 +50,7 @@ class SavingsForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super(SavingsForm, self).save(commit=False)
+        instance.client = instance.savings.client
         if self.user:
             #instance.created_by = self.user
             instance.balance = instance.savings.balance + instance.amount

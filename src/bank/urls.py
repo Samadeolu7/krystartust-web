@@ -7,4 +7,5 @@ urlpatterns = [
     path('create-payment/', create_bank_payment, name='create_bank_payment'),
     path('list/', bank_list, name='bank_list'),
     path('detail/<int:pk>/', bank_detail, name='bank_detail'),
+    path('update/<int:pk>/', create_bank, name='update_bank'),
 ]
