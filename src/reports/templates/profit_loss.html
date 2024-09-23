@@ -2,215 +2,89 @@
 <html lang="en">
 <head>
     {% load custom_filters %}
-
+    
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profit and Loss Report</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-    <style>
-        /* Flex container for months */
-        .months-container {
-            display: flex;
-            overflow-x: auto;
-            padding-bottom: 20px;
-        }
-
-        /* Individual month section */
-        .month-section {
-            flex: 0 0 300px; /* Fixed width for each month */
-            margin-right: 20px;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 15px;
-            background-color: #f8f9fa;
-        }
-
-        /* Ensure tables are responsive within each month */
-        .month-section table {
-            width: 100%;
-            font-size: 0.9rem;
-        }
-
-        /* Optional: Hide scrollbar for Webkit browsers */
-        .months-container::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .months-container::-webkit-scrollbar-thumb {
-            background-color: #ced4da;
-            border-radius: 4px;
-        }
-
-        /* Optional: Sticky header for each month */
-        .month-header {
-            position: sticky;
-            top: 0;
-            background-color: #f8f9fa;
-            padding-bottom: 10px;
-        }
-    </style>
 </head>
 <body>
     <div class="container mt-5">
         <h1 class="text-center mb-4">Profit and Loss Report</h1>
 
-        <div class="months-container">
-            {% for month_number, month_name in months %}
-            <div class="month-section">
-                <div class="month-header">
-                    <h2>Month: {{ month_name }}</h2>
-                </div>
-
-                <!-- Incomes Section -->
-                <div class="mb-3">
-                    <h4>Incomes</h4>
-                    {% with monthly_incomes|get_item:month_number as incomes %}
-                    {% if incomes %}
-                    <table class="table table-striped table-sm">
-                        <thead>
-                            <tr>
-                                <th>Income Type</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for income_type, data in incomes.items %}
-                            <tr>
-                                <td>{{ income_type }}</td>
-                                <td>{{ data.total }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    <p><strong>Total Income: {{ monthly_income_totals|get_item:month_number|default_if_none:0 }}</strong></p>
-                    {% else %}
-                    <p>No incomes for this month.</p>
-                    {% endif %}
-                    {% endwith %}
-                </div>
-
-                <!-- Expenses Section -->
-                <div class="mb-3">
-                    <h4>Expenses</h4>
-                    {% with monthly_expenses|get_item:month_number as expenses %}
-                    {% if expenses %}
-                    <table class="table table-striped table-sm">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Amount</th>
-                                <th>Expense Type</th>
-                                <th>Created At</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for expense in expenses %}
-                            <tr>
-                                <td>{{ expense.name }}</td>
-                                <td>{{ expense.description }}</td>
-                                <td>{{ expense.amount }}</td>
-                                <td>{{ expense.expense_type.name }}</td>
-                                <td>{{ expense.created_at|date:"Y-m-d" }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    <p><strong>Total Expenses: {{ monthly_expense_totals|get_item:month_number|default_if_none:0 }}</strong></p>
-                    {% else %}
-                    <p>No expenses for this month.</p>
-                    {% endif %}
-                    {% endwith %}
-                </div>
-
-                <!-- Expense Buckets Section -->
-                <div class="mb-3">
-                    <h4>Expense Buckets</h4>
-                    {% with expense_buckets|get_item:month_number as buckets %}
-                    {% if buckets %}
-                        {% for expense_type, expenses in buckets.items %}
-                        <div class="mb-2">
-                            <h5>{{ expense_type }}</h5>
-                            <table class="table table-striped table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Description</th>
-                                        <th>Amount</th>
-                                        <th>Created At</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for expense in expenses %}
-                                    <tr>
-                                        <td>{{ expense.name }}</td>
-                                        <td>{{ expense.description }}</td>
-                                        <td>{{ expense.amount }}</td>
-                                        <td>{{ expense.created_at|date:"Y-m-d" }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <p>No expense buckets for this month.</p>
-                    {% endif %}
-                    {% endwith %}
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-
-        <!-- Yearly Totals Section -->
-        <div class="mt-5">
-            <h3>Yearly Totals</h3>
-            <div class="card">
-                <div class="card-body">
-                    <h4>Incomes</h4>
-                    <table class="table table-striped table-sm">
-                        <thead>
-                            <tr>
-                                <th>Income Type</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for income_type, total in yearly_income_by_type.items %}
-                            <tr>
-                                <td>{{ income_type }}</td>
-                                <td>{{ total }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    <p><strong>Total Income for the Year: {{ yearly_income_total }}</strong></p>
-                </div>
-            </div>
-            <div class="card mt-3">
-                <div class="card-body">
-                    <h4>Expenses</h4>
-                    <table class="table table-striped table-sm">
-                        <thead>
-                            <tr>
-                                <th>Expense Type</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for expense_type, total in yearly_expense_by_type.items %}
-                            <tr>
-                                <td>{{ expense_type }}</td>
-                                <td>{{ total }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    <p><strong>Total Expenses for the Year: {{ yearly_expense_total }}</strong></p>
-                </div>
-            </div>
-        </div>
+        <!-- Profit and Loss Table -->
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Type</th>
+                    {% for month_number, month_name in months %}
+                    <th>{{ month_name }}</th>
+                    {% endfor %}
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Income Rows -->
+                {% for income_type in yearly_income_by_type.keys %}
+                <tr class="table-success">
+                    <td>{{ income_type }}</td>
+                    {% for month_number, _ in months %}
+                    <td>
+                        {# Access the total income for this type and month #}
+                        {% with monthly_incomes|get_item:month_number as income_dict %}
+                            {{ income_dict|get_item:income_type|get_item:"total"|default:"0"|naira }}
+                        {% endwith %}
+                    </td>
+                    {% endfor %}
+                    <td>{{ yearly_income_by_type|get_item:income_type|default:"0"|naira }}</td>
+                </tr>
+                {% endfor %}
+            
+                <!-- Total Income Row -->
+                <tr class="table-success">
+                    <td><strong>Total Income</strong></td>
+                    {% for month_number, _ in months %}
+                    <td>{{ monthly_income_totals|get_item:month_number|default:"0"|naira }}</td>
+                    {% endfor %}
+                    <td><strong>{{ yearly_income_total|naira }}</strong></td>
+                </tr>
+            
+                <!-- Expense Rows -->
+                {% for expense_type in yearly_expense_by_type.keys %}
+                <tr class="table-danger">
+                    <td>{{ expense_type }}</td>
+                    {% for month_number, _ in months %}
+                    <td>
+                        {# Access the total expense for this type and month #}
+                        {% with monthly_expenses|get_item:month_number as expense_dict %}
+                            {{ expense_dict|get_item:expense_type|get_item:"total"|default:"0"|naira }}
+                        {% endwith %}
+                    </td>
+                    {% endfor %}
+                    <td>{{ yearly_expense_by_type|get_item:expense_type|default:"0"|naira }}</td>
+                </tr>
+                {% endfor %}
+            
+                <!-- Total Expense Row -->
+                <tr class="table-danger">
+                    <td><strong>Total Expenses</strong></td>
+                    {% for month_number, _ in months %}
+                    <td>{{ monthly_expense_totals|get_item:month_number|default:"0"|naira }}</td>
+                    {% endfor %}
+                    <td><strong>{{ yearly_expense_total|naira }}</strong></td>
+                </tr>
+            
+                <!-- Net Profit/Loss Row -->
+                <tr class="table-warning">
+                    <td><strong>Net Profit/Loss</strong></td>
+                    {% for month_number, _ in months %}
+                    <td>{{ monthly_profit|get_item:month_number|naira }}</td>
+                    {% endfor %}
+                    <td><strong>{{ yearly_income_total|floatformat:2|add:"-"|add:yearly_expense_total|floatformat:2|naira }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>

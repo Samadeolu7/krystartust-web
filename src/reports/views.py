@@ -95,20 +95,14 @@ def daily_transactions_report(request):
         schedule = LoanRepaymentSchedule.objects.filter(due_date=date)
         loan_payments = LoanPayment.objects.filter(payment_date=date)
         savings_payments = SavingsPayment.objects.filter(payment_date=date)
-        loans = Loan.objects.filter(loan_payment__in=loan_payments)
-        savings = Savings.objects.filter(savings_payment__in=savings_payments)
-        clients = Client.objects.filter(loan__in=loans, savings__in=savings)
         context = {
             'Schedule': schedule,
             'loan_payments': loan_payments,
             'savings_payments': savings_payments,
-            'loans': loans,
-            'savings': savings,
-            'clients': clients,
         }
     else:
         return render(request, 'daily_collection_form.html')
-    return render(request, 'daily_transactions_report.html', context)
+    return render(request, 'daily_collection_report.html', context)
 
 from django.db.models import Sum
 from datetime import datetime
@@ -188,6 +182,10 @@ def profit_and_loss_report(request):
         'yearly_income_by_type': yearly_income_by_type,
         'yearly_expense_by_type': yearly_expense_by_type,
         'months': months,  # List of tuples (month_number, month_name)
+        'monthly_profit': {
+            month: (monthly_income_totals.get(month, 0) - monthly_expense_totals.get(month, 0))
+            for month in range(1, 13)
+        }
     }
 
     return render(request, 'profit_loss.html', context)
