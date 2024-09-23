@@ -1,4 +1,5 @@
 # client/models.py
+from functools import cached_property
 from django.db import models
 from django.apps import apps
 
@@ -16,10 +17,10 @@ class Client(models.Model):
     def __str__(self):
         return self.name
     
-    @property
+    @cached_property
     def savings(self):
         return self.savings_set.first()
 
-    @property
+    @cached_property
     def loan(self):
         return self.loan_set.first()

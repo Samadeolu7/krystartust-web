@@ -8,7 +8,7 @@ from loan.models import Loan, LoanPayment
 from savings.models import Savings, SavingsPayment
 from savings.utils import register_savings
 from income.utils import create_income_payment, get_id_fee_income, get_registration_fee_income
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import ClientExcelForm, ClientForm
 
 # Create your views here.
@@ -51,16 +51,33 @@ def edit_client(request, client_id):
     
     return render(request, 'client_form.html', {'form': form})
 
+
 def list_clients(request):
-    """View to list all clients, with optimized query for related data."""
+    """View to list paginated and optimized clients."""
     
-    # Use select_related to fetch the 'group' (ForeignKey) in the same query
-    # Use prefetch_related to optimize fetching of 'savings' and 'loan' (reverse FK)
-    clients = Client.objects.select_related('group').prefetch_related('savings_set', 'loan_set')
+    # Number of clients per page
+    clients_per_page = 20  # You can adjust this number as needed
 
-    return render(request, 'client_list.html', {'clients': clients})
+    # Use select_related to fetch 'group' and prefetch_related for 'savings_set' and 'loan_set'
+    clients_queryset = Client.objects.select_related('group').prefetch_related('savings_set', 'loan_set').order_by('id')
 
+    # Initialize Paginator
+    paginator = Paginator(clients_queryset, clients_per_page)
+    page = request.GET.get('page')
 
+    try:
+        clients = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver the first page.
+        clients = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range, deliver the last page of results.
+        clients = paginator.page(paginator.num_pages)
+
+    context = {
+        'clients': clients,  # This is now a Page object
+    }
+    return render(request, 'client_list.html', context)
 
 
 def individual_report(request, pk):

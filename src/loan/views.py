@@ -185,23 +185,34 @@ def loan_schedule(request, loan_id):
     schedules = LoanRepaymentSchedule.objects.filter(loan_id=loan_id).order_by('due_date')
     return render(request, 'loan_schedule.html', {'schedules': schedules})
 
+
 def loan_defaulters_report(request):
-    loans = Loan.objects.filter(status='Active')
-    defaulters = [loan for loan in loans if loan.is_defaulted()]
-    clients = Client.objects.filter(loan__in=defaulters)
-    schedule = LoanRepaymentSchedule.objects.filter(loan__in=defaulters)
-    #filter fo those schedules that have the due date less than today and is_paid is False
-    filtered_schedule = [schedule for schedule in schedule if schedule.due_date < date.today() and not schedule.is_paid]
-    loan_payments = LoanPayment.objects.filter(loan__in=defaulters)
-    
+    today = date.today()
+
+    # Fetch the necessary fields from the loan repayment schedule to avoid unnecessary data loading
+    overdue_schedules = LoanRepaymentSchedule.objects.filter(
+        due_date__lt=today,
+        is_paid=False
+    ).select_related('loan').only(
+        'loan__id', 'loan__client__name', 'loan__client__phone', 'loan__amount', 'loan__balance', 
+        'loan__start_date', 'loan__end_date', 'loan__status', 'due_date', 'amount_due', 'is_paid'
+    )
+
+    # Fetch the defaulters, filtering only by IDs and loading required fields
+    defaulters = Loan.objects.filter(
+        id__in=overdue_schedules.values('loan_id'),
+        status='Active'
+    ).only(
+        'id', 'client__name', 'client__phone', 'amount', 'balance', 'start_date', 'end_date', 'status'
+    ).distinct()
+
     context = {
         'defaulters': defaulters,
-        'clients': clients,
-        'loan_payments': loan_payments,
-        'schedule': filtered_schedule,
+        'schedule': overdue_schedules,
     }
 
     return render(request, 'loan_defaulters_report.html', context)
+
 
 def group_report(request, pk):
     group = Group.objects.get(pk=pk)

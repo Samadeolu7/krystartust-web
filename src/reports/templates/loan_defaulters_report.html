@@ -29,7 +29,9 @@
                     {% for loan in defaulters %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ loan.id }}</td>
+                        <td>{{ loan.client.name }}</td>
+                        <td>{{ loan.client.phone }}</td>
+                        <td>{{ loan.amount }}</td>
                         <td>{{ loan.balance }}</td>
                         <td>{{ loan.start_date }}</td>
                         <td>{{ loan.end_date }}</td>
@@ -40,62 +42,6 @@
             </table>
         {% else %}
             <p>No defaulters found.</p>
-        {% endif %}
-
-        <!-- Clients Section -->
-        <h3>Clients</h3>
-        {% if clients %}
-            <table class="table table-bordered">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Client Name</th>
-                        <th>Email</th>
-                        <th>Phone Number</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for client in clients %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ client.name }}</td>
-                        <td>{{ client.email }}</td>
-                        <td>{{ client.phone }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No clients found for the defaulters.</p>
-        {% endif %}
-
-        <!-- Loan Payments Section -->
-        <h3>Loan Payments</h3>
-        {% if loan_payments %}
-            <table class="table table-bordered">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Payment ID</th>
-                        <th>Loan ID</th>
-                        <th>Amount Paid</th>
-                        <th>Payment Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for payment in loan_payments %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ payment.id }}</td>
-                        <td>{{ payment.loan.id }}</td>
-                        <td>{{ payment.amount }}</td>
-                        <td>{{ payment.payment_date }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No loan payments found for the defaulters.</p>
         {% endif %}
 
         <!-- Repayment Schedule Section -->

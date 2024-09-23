@@ -193,8 +193,6 @@ def profit_and_loss_report(request):
     return render(request, 'profit_loss.html', context)
 
 def trial_balance_report(request):
-    # Get the current year
-    current_year = datetime.now().year
 
     # Initialize dictionaries to hold totals by account type
     incomes = Income.objects.all()
