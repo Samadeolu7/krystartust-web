@@ -14,13 +14,14 @@
         <!-- Client Information Section -->
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
-                Client Information
+                Client Information  <a href="{% url 'edit_client' client.id %}" class="btn btn-light btn-sm float-end">Edit</a>
             </div>
             <div class="card-body">
                 <p><strong>Name:</strong> {{ client.name }}</p>
                 <p><strong>Email:</strong> {{ client.email }}</p>
                 <p><strong>Phone Number:</strong> {{ client.phone_number }}</p>
                 <p><strong>Address:</strong> {{ client.address }}</p>
+                <p><strong>Group:</strong> {{ client.group }}</p>
             </div>
         </div>
 

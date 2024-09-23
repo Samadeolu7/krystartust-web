@@ -43,7 +43,7 @@ def edit_client(request, client_id):
         if form.is_valid():
             form.save()
             messages.success(request, 'Client updated successfully.')
-            return redirect('client_list')  # Redirect to a client list or relevant page
+            return redirect('individual_report', pk=client.id)
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
