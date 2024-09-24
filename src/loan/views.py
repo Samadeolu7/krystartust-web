@@ -11,6 +11,7 @@ from bank.models import BankPayment
 from main.models import ClientGroup as Group
 from .models import Loan, LoanPayment, LoanRepaymentSchedule
 from .forms import LoanRegistrationForm, LoanPaymentForm, LoanExcelForm, LoanUploadForm
+from django.contrib.auth.decorators import login_required
 
 from bank.utils import create_bank_payment
 
@@ -20,11 +21,13 @@ from datetime import date, timedelta
 
 # Create your views here.
 
+@login_required
 def transaction_history(request, client_id):
     transactions = Loan.objects.filter(client_id=client_id).order_by('-created_at')
     return render(request, 'transaction_history.html', {'transactions': transactions})
 
 
+@login_required
 def loan_payment(request):
     if request.method == 'POST':
         form = LoanPaymentForm(request.POST)
@@ -68,6 +71,7 @@ def loan_payment(request):
     
     return render(request, 'loan_payment_form.html', {'form': form})
 
+@login_required
 def loan_upload_view(request):
     if request.method == 'POST':
         form = LoanUploadForm(request.POST, request.FILES)
@@ -90,6 +94,7 @@ def loan_upload_view(request):
 
     return render(request, 'upload_loan.html', {'form': form})
 
+@login_required
 def loan_registration(request):
     if request.method == 'POST':
         form = LoanRegistrationForm(request.POST)
@@ -177,15 +182,18 @@ def loan_registration(request):
 
     return render(request, 'loan_register.html', {'form': form})
 
+@login_required
 def loan_detail(request, loan_id):
     loan = Loan.objects.filter(id=loan_id).first()
     return render(request, 'loan_detail.html', {'loan': loan})
 
+@login_required
 def loan_schedule(request, loan_id):
     schedules = LoanRepaymentSchedule.objects.filter(loan_id=loan_id).order_by('due_date')
     return render(request, 'loan_schedule.html', {'schedules': schedules})
 
 
+@login_required
 def loan_defaulters_report(request):
     today = date.today()
 
@@ -214,6 +222,7 @@ def loan_defaulters_report(request):
     return render(request, 'loan_defaulters_report.html', context)
 
 
+@login_required
 def group_report(request, pk):
     group = Group.objects.get(pk=pk)
     clients = Client.objects.filter(group=group)
@@ -233,6 +242,7 @@ def group_report(request, pk):
     return render(request, 'group_report.html', context)
 
 
+@login_required
 def loan_upload(request):
     if request.method == 'POST':
         form = LoanExcelForm(request.POST, request.FILES)

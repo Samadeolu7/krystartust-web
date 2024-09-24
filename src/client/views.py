@@ -10,9 +10,10 @@ from savings.utils import register_savings
 from income.utils import create_income_payment, get_id_fee_income, get_registration_fee_income
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import ClientExcelForm, ClientForm
-
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
+@login_required
 def create_client(request):
     """View to handle creating a new client."""
     if request.method == 'POST':
@@ -35,6 +36,7 @@ def create_client(request):
     
     return render(request, 'client_form.html', {'form': form})
 
+@login_required
 def edit_client(request, client_id):
     """View to handle editing an existing client."""
     client = get_object_or_404(Client, id=client_id)
@@ -52,6 +54,7 @@ def edit_client(request, client_id):
     return render(request, 'client_form.html', {'form': form})
 
 
+@login_required
 def list_clients(request):
     """View to list paginated and optimized clients."""
     
@@ -80,6 +83,7 @@ def list_clients(request):
     return render(request, 'client_list.html', context)
 
 
+@login_required
 def individual_report(request, pk):
     client = Client.objects.get(pk=pk)
     loans = Loan.objects.filter(client=client)
@@ -97,6 +101,7 @@ def individual_report(request, pk):
     return render(request, 'individual_report.html', context)
 
 
+@login_required
 def create_client_excel(request):
     """View to create clients from an excel file."""
     if request.method == 'POST':

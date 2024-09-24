@@ -32,7 +32,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'krystartust-web.onrender.com','krystartust.ng']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'krystartust-web.onrender.com','krystartrust.ng']
 
 
 # Application definition
@@ -135,6 +135,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# settings.py
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'  # Redirect to dashboard after login
+LOGOUT_REDIRECT_URL = 'login'     # Redirect to login after logout
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

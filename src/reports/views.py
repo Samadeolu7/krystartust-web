@@ -9,9 +9,10 @@ from income.models import Income, IncomePayment
 from loan.models import Loan, LoanPayment, LoanRepaymentSchedule
 from savings.models import Savings, SavingsPayment
 from main.models import ClientGroup as Group
-
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
+@login_required
 def all_clients_report(request):
     clients = Client.objects.all()
     loans = Loan.objects.filter(client__in=clients)
@@ -28,6 +29,7 @@ def all_clients_report(request):
 
     return render(request, 'all_clients_report.html', context)
 
+@login_required
 def all_groups_report(request):
     groups = Group.objects.all()
     clients = Client.objects.filter(group__in=groups)
@@ -46,6 +48,7 @@ def all_groups_report(request):
 
     return render(request, 'all_groups_report.html', context)
 
+@login_required
 def all_loans_report(request):
     loans = Loan.objects.all()
     clients = Client.objects.filter(loan__in=loans)
@@ -58,6 +61,7 @@ def all_loans_report(request):
 
     return render(request, 'all_loans_report.html', context)
 
+@login_required
 def all_savings_report(request):
     savings = Savings.objects.all()
     clients = Client.objects.filter(savings__in=savings)
@@ -70,6 +74,7 @@ def all_savings_report(request):
 
     return render(request, 'all_savings_report.html', context)
 
+@login_required
 def all_transactions_report(request):
     loan_payments = LoanPayment.objects.all()
     savings_payments = SavingsPayment.objects.all()
@@ -86,9 +91,11 @@ def all_transactions_report(request):
     
     return render(request, 'all_transactions_report.html', context)
 
+@login_required
 def daily_collection_form(request):
     return render(request, 'daily_collection_form.html')
 
+@login_required
 def daily_transactions_report(request):
     if request.method == 'POST':
         date = request.POST.get('date')
@@ -108,6 +115,7 @@ from django.db.models import Sum
 from datetime import datetime
 import calendar
 
+@login_required
 def profit_and_loss_report(request):
     # Get the current year
     current_year = datetime.now().year
@@ -190,6 +198,7 @@ def profit_and_loss_report(request):
 
     return render(request, 'profit_loss.html', context)
 
+@login_required
 def trial_balance_report(request):
 
     # Initialize dictionaries to hold totals by account type

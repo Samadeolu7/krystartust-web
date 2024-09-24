@@ -6,9 +6,11 @@ from django.shortcuts import render
 from .models import SavingsPayment
 from .forms import SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm
 from .excel_utils import savings_from_excel
+from django.contrib.auth.decorators import login_required
 
 
 
+@login_required
 def compulsory_savings(request):
     if request.method == 'POST':
         form = CompulsorySavingsForm(request.POST)
@@ -21,10 +23,12 @@ def compulsory_savings(request):
         title = 'Compulsory Savings'
         return render(request, 'fees.html', {'form': form,'title': title})
 
+@login_required
 def transaction_history(request, client_id):
     transactions = SavingsPayment.objects.filter(client_id=client_id).order_by('-created_at')
     return render(request, 'transaction_history.html', {'transactions': transactions})
 
+@login_required
 def register_savings(request):
     if request.method == 'POST':
         form = SavingsForm(request.POST)
@@ -35,6 +39,7 @@ def register_savings(request):
         form = SavingsForm()
     return render(request, 'savings_form.html', {'form': form})
 
+@login_required
 def record_withdrawal(request):
     if request.method == 'POST':
         form = WithdrawalForm(request.POST)
@@ -45,6 +50,7 @@ def record_withdrawal(request):
         form = WithdrawalForm()
     return render(request, 'withdrawal_form.html', {'form': form})
 
+@login_required
 def upload_savings(request):
     if request.method == 'POST':
         form = SavingsExcelForm(request.POST, request.FILES)

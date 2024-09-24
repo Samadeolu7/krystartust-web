@@ -9,8 +9,10 @@ from client.models import Client
 # Create your views here.
 
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 from subprocess import Popen
 
+@login_required
 def update_app(request):
     # Run the Docker commands to update the app
     Popen(["docker-compose", "down"])
@@ -18,14 +20,17 @@ def update_app(request):
     Popen(["docker-compose", "up", "--build", "-d"])
     return HttpResponse("App is updating. Please wait...")
 
+@login_required
 def dashboard(request):
     """View to render the main dashboard."""
     return render(request, 'dashboard.html')
 
+@login_required
 def group_detail(request, pk):
     group = Client.objects.get(group=pk)
     return render(request, 'group_detail.html', {'group': group})
 
+@login_required
 def group_create(request):
     if request.method == 'POST':
         form = GroupForm(request.POST)
@@ -37,10 +42,12 @@ def group_create(request):
     
     return render(request, 'group_form.html', {'form': form})
 
+@login_required
 def group_view(request):
     groups = Group.objects.all()
     return render(request, 'group_view.html', {'groups': groups})
 
+@login_required
 def group_edit(request, pk):
     group = Group.objects.get(pk=pk)
     if request.method == 'POST':
@@ -52,6 +59,7 @@ def group_edit(request, pk):
     
     return render(request, 'group_form.html', {'form': form})
 
+@login_required
 def group_report(request, pk):
     group = Group.objects.get(pk=pk)
     clients = Client.objects.filter(group=group)
