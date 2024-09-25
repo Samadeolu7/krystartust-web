@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load custom_filters %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Savings Detail</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Savings Detail</h1>
+
+        <!-- Savings Information Table -->
+        <h3>Savings Information</h3>
+        <table class="table table-bordered">
+            <tr>
+                <th>Client Name</th>
+                <td>{{ savings.client.name }}</td>
+            </tr>
+            <tr>
+                <th>Balance</th>
+                <td>{{ savings.balance|naira }}</td>
+            </tr>
+            <tr>
+                <th>Created At</th>
+                <td>{{ savings.created_at }}</td>
+            </tr>
+            <tr>
+                <th>Updated At</th>
+                <td>{{ savings.updated_at }}</td>
+            </tr>
+        </table>
+
+        <!-- Savings Payments Table -->
+        <h3>Savings Payments</h3>
+        {% if savings_payments %}
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Amount</th>
+                        <th>Balance</th>
+                        <th>Payment Date</th>
+                        <th>Transaction Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in savings_payments %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ payment.amount|naira }}</td>
+                        <td>{{ payment.balance|naira }}</td>
+                        <td>{{ payment.payment_date }}</td>
+                        <td>{{ payment.get_transaction_type_display }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No savings payments found for this client.</p>
+        {% endif %}
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

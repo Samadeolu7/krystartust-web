@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 
 # Create your views here.
 from django.shortcuts import render
-from .models import SavingsPayment
+from .models import Savings, SavingsPayment
 from .forms import SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm
 from .excel_utils import savings_from_excel
 from django.contrib.auth.decorators import login_required
@@ -24,9 +24,14 @@ def compulsory_savings(request):
         return render(request, 'fees.html', {'form': form,'title': title})
 
 @login_required
-def transaction_history(request, client_id):
-    transactions = SavingsPayment.objects.filter(client_id=client_id).order_by('-created_at')
-    return render(request, 'transaction_history.html', {'transactions': transactions})
+def savings_detail(request, client_id):
+    savings = Savings.objects.get(client_id=client_id)
+    savings_payments = SavingsPayment.objects.filter(client_id=client_id)
+    context = {
+        'savings': savings,
+        'savings_payments': savings_payments
+    }
+    return render(request, 'savings_detail.html', context)
 
 @login_required
 def register_savings(request):

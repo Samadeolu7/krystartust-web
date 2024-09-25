@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load custom_filters %}
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -32,7 +33,7 @@
                         <td>{{ item.loan.id }}</td>
                         <td>{{ item.loan.client.name }}</td>
                         <td>{{ item.due_date }}</td>
-                        <td>{{ item.amount_due }}</td>
+                        <td>{{ item.amount_due|naira }}</td>
                         <td>{{ item.is_paid }}</td>
                     </tr>
                     {% endfor %}
@@ -62,7 +63,7 @@
                         <td>{{ forloop.counter }}</td>
                         <td>{{ payment.loan.id }}</td>
                         <td>{{ payment.loan.client.name }}</td>
-                        <td>{{ payment.amount }}</td>
+                        <td>{{ payment.amount|naira }}</td>
                         <td>{{ payment.payment_date }}</td>
                         <td>{{ payment.payment_schedule.due_date }}</td>
                     </tr>
@@ -92,7 +93,7 @@
                         <td>{{ forloop.counter }}</td>
                         <td>{{ payment.savings.id }}</td>
                         <td>{{ payment.savings.client.name }}</td>
-                        <td>{{ payment.amount }}</td>
+                        <td>{{ payment.amount|naira }}</td>
                         <td>{{ payment.payment_date }}</td>
                     </tr>
                     {% endfor %}

@@ -14,20 +14,20 @@ import os
 from pathlib import Path
 import environ
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env(
     DEBUG=(bool, False)
 )
 
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+# environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = 'django-insecure-sla6%i+-5&kkj'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -93,28 +93,28 @@ WSGI_APPLICATION = 'phoenix.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DB_NAME'),
-        'USER': env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': env('DB_HOST'),
-        'PORT': env('DB_PORT', default='5432'),
-        'OPTIONS': {
-            'sslmode': env('DB_SSLMODE', default='require'),
-            'sslrootcert': env('DB_SSLROOTCERT', default=''),
-        },
-    }
-}
-
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': env('DB_NAME'),
+#         'USER': env('DB_USER'),
+#         'PASSWORD': env('DB_PASSWORD'),
+#         'HOST': env('DB_HOST'),
+#         'PORT': env('DB_PORT', default='5432'),
+#         'OPTIONS': {
+#             'sslmode': env('DB_SSLMODE', default='require'),
+#             'sslrootcert': env('DB_SSLROOTCERT', default=''),
+#         },
 #     }
 # }
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 
 # Password validation

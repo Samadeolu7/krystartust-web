@@ -183,9 +183,16 @@ def loan_registration(request):
     return render(request, 'loan_register.html', {'form': form})
 
 @login_required
-def loan_detail(request, loan_id):
-    loan = Loan.objects.filter(id=loan_id).first()
-    return render(request, 'loan_detail.html', {'loan': loan})
+def loan_detail(request, client_id):
+    loan = Loan.objects.filter(client=client_id).first()
+    loan_payments_schedule = LoanRepaymentSchedule.objects.filter(loan_id=loan.id)
+    loan_interest_amount = Decimal(loan.interest) * Decimal(loan.amount) / Decimal(100)
+    context = {
+        'loan': loan,
+        'loan_payments_schedule': loan_payments_schedule,
+        'loan_interest_amount': loan_interest_amount,
+    }
+    return render(request, 'loan_detail.html', context)
 
 @login_required
 def loan_schedule(request, loan_id):
