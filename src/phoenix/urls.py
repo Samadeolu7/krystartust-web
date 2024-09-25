@@ -29,7 +29,7 @@ urlpatterns = [
     path('main', include('main.urls')),
     path('savings/', include('savings.urls')),
     path('income/', include('income.urls')),
-    # path('expense/', include('expense.urls')),
+    path('expense/', include('expenses.urls')),
     path('asset/', include('asset.urls')),
     # path('liability/', include('liability.urls')),
 ]

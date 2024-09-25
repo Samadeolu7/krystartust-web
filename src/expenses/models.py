@@ -1,5 +1,7 @@
 from django.db import models
 
+from main.models import Year
+
 # Create your models here.
 
 class ExpenseType(models.Model):
@@ -12,33 +14,38 @@ class ExpenseType(models.Model):
 class Expense(models.Model):
 
     name = models.CharField(max_length=100, unique=True)
-    balance = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(null=True, blank=True)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     balance_bf = models.DecimalField(max_digits=10, decimal_places=2)
     expense_type = models.ForeignKey(ExpenseType, on_delete=models.CASCADE, related_name='expenses')
-    duration = models.IntegerField()
-    start_date = models.DateField()
-    end_date = models.DateField()
-    status = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    year = models.IntegerField()
+
+    def save(self, *args, **kwargs):
+        if not self.year:
+            self.year = Year.current_year() or 0
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return self.name + ' - ' + str(self.amount) + ' - ' + self.expense_type
+        return self.name + ' - ' + str(self.balance) + ' - ' + self.expense_type.name
     
 
 class ExpensePayment(models.Model):
     
         expense = models.ForeignKey(Expense, on_delete=models.CASCADE)
-        amount = models.FloatField()
+        amount = models.DecimalField(max_digits=10, decimal_places=2)
+        balance = models.DecimalField(max_digits=10, decimal_places=2)
         payment_date = models.DateField()
         created_at = models.DateTimeField(auto_now_add=True)
         updated_at = models.DateTimeField(auto_now=True)
         # create_by = models.ForeignKey(User, on_delete=models.CASCADE)
     
         def save(self, *args, **kwargs):
-            super().save(*args, **kwargs)
-            self.expense.balance = self.expense.balance - self.amount
-            self.expense.save()
-
+            if not self.pk:
+                self.balance = self.expense.balance
+                self.expense.balance += self.amount
+                self.expense.save()
+            super(ExpensePayment, self).save(*args, **kwargs)
+            
         def __str__(self) -> str:
             return self.expense.name + ' - ' + str(self.amount) + ' - ' + str(self.expense.balance)

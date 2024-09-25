@@ -30,6 +30,19 @@
                 </div>
             </div>
 
+            <!-- Savings Management Section -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Savings Management</h5>
+                        <a href="{% url 'savings_registration' %}" class="btn btn-primary mb-2">Register Savings</a>
+                        <a href="{% url 'savings_upload' %}" class="btn btn-secondary mb-2">Upload Savings</a>
+                        <a href="{% url 'savings_withdrawal' %}" class="btn btn-secondary mb-2">Record Withdrawal</a>
+
+                    </div>
+                </div>
+            </div>
+
             <!-- Loan Management Section -->
             <div class="col-md-3">
                 <div class="card">
@@ -39,31 +52,6 @@
                         <a href="{% url 'loan_payment' %}" class="btn btn-secondary mb-2">Record Payment</a>
                         <a href="{% url 'loan_upload' %}" class="btn btn-secondary mb-2">Upload Loan</a>
                         <a href="{% url 'loan_upload_bulk' %}" class="btn btn-secondary mb-2">Upload Loan Bulk</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Reports Section -->
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Reports</h5>
-                        <a href="{% url 'loan_defaulters_report' %}" class="btn btn-primary mb-2">Defaulters Report</a>
-                        <a href="{% url 'daily_transactions_report' %}" class="btn btn-secondary mb-2">Daily Transactions</a>
-                        <a href="{% url 'all_groups_report' %}" class="btn btn-secondary mb-2">Group Report</a>
-                        <a href="{% url 'profit_and_loss_report' %}" class="btn btn-secondary mb-2">P&L Report</a>
-                        <a href="{% url 'trial_balance' %}" class="btn btn-secondary mb-2">Trial Balance</a>
-                        
-                    </div>
-                </div>
-            </div>
-
-            <!-- Income Section -->
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Income</h5>
-                        <a href="{% url 'set_fees' %}" class="btn btn-primary mb-2">Set Fees</a>
                     </div>
                 </div>
             </div>
@@ -81,18 +69,46 @@
                 </div>
             </div>
 
-            <!-- Savings Management Section -->
-            <div class="col-md-3">
+             <!-- Income Section -->
+             <div class="col-md-3">
                 <div class="card">
                     <div class="card-body text-center">
-                        <h5 class="card-title">Savings Management</h5>
-                        <a href="{% url 'savings_registration' %}" class="btn btn-primary mb-2">Register Savings</a>
-                        <a href="{% url 'savings_upload' %}" class="btn btn-secondary mb-2">Upload Savings</a>
-                        <a href="{% url 'savings_withdrawal' %}" class="btn btn-secondary mb-2">Record Withdrawal</a>
-
+                        <h5 class="card-title">Income</h5>
+                        <a href="{% url 'set_fees' %}" class="btn btn-primary mb-2">Set Fees</a>
                     </div>
                 </div>
             </div>
+
+            <!-- Expenses Section -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Expenses</h5>
+                        <a href="{% url 'create_expense' %}" class="btn btn-primary mb-2">Create Expense</a>
+                        <a href="{% url 'create_expense_type' %}" class="btn btn-secondary mb-2">Create Expense Category</a>
+                        <a href="{% url 'expense_list' %}" class="btn btn-secondary mb-2">Expense List</a>
+                        <a href="{% url 'expense_payment' %}" class="btn btn-secondary mb-2">Record Expense</a>
+                        
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Reports Section -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Reports</h5>
+                        <a href="{% url 'loan_defaulters_report' %}" class="btn btn-primary mb-2">Defaulters Report</a>
+                        <a href="{% url 'daily_transactions_report' %}" class="btn btn-secondary mb-2">Daily Transactions</a>
+                        <a href="{% url 'all_groups_report' %}" class="btn btn-secondary mb-2">Group Report</a>
+                        <a href="{% url 'profit_and_loss_report' %}" class="btn btn-secondary mb-2">P&L Report</a>
+                        <a href="{% url 'trial_balance' %}" class="btn btn-secondary mb-2">Trial Balance</a>
+                        
+                    </div>
+                </div>
+            </div>
+                
         </div>
     </div>
 
