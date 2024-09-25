@@ -23,7 +23,11 @@ def dict_item(dictionary, key):
 import locale
 
 # Set locale to use comma as thousand separator
-locale.setlocale(locale.LC_ALL, '')
+try:
+    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+except locale.Error:
+    # Fallback if the specified locale is not available
+    locale.setlocale(locale.LC_ALL, '')
 
 @register.filter
 def naira(value):

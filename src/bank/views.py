@@ -1,6 +1,7 @@
-from django.shortcuts import render
-from .forms import BankForm, BankPaymentForm
-from .models import Bank
+from datetime import datetime, timezone
+from django.shortcuts import redirect, render
+from .forms import BankForm, BankPaymentForm, CashTransferForm
+from .models import Bank, BankPayment
 from django.contrib.auth.decorators import login_required
 # Create your views here.
 
@@ -36,3 +37,41 @@ def bank_detail(request, pk):
         'bank_payment': bank_payment
     }
     return render(request, 'bank_detail.html', context)
+
+# views.py
+
+
+def cash_transfer(request):
+    if request.method == 'POST':
+        form = CashTransferForm(request.POST)
+        if form.is_valid():
+            source_bank = form.cleaned_data['source_bank']
+            destination_bank = form.cleaned_data['destination_bank']
+            amount = form.cleaned_data['amount']
+            description = form.cleaned_data['description']
+
+            # Create BankPayment for source bank (debit)
+            
+            BankPayment.objects.create(
+                bank=source_bank,
+                description=f"Transfer to {destination_bank.name}: {description}",
+                amount=-amount,
+                bank_balance=source_bank.balance - amount,
+                payment_date=form.cleaned_data['payment_date']
+            )
+
+            # Create BankPayment for destination bank (credit)
+            BankPayment.objects.create(
+                bank=destination_bank,
+                description=f"Transfer from {source_bank.name}: {description}",
+                amount=amount,
+                bank_balance=destination_bank.balance + amount,
+                payment_date=form.cleaned_data['payment_date']
+            )
+
+            return redirect('dashboard')
+    else:
+        form = CashTransferForm()
+        form.fields['payment_date'].initial = datetime.now().date()
+
+    return render(request, 'cash_transfer.html', {'form': form})

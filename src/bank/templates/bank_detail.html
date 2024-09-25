@@ -31,20 +31,26 @@
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
-                            <th>Payment ID</th>
-                            <th>Amount</th>
                             <th>Date</th>
                             <th>Description</th>
+                            <th>Amount</th>
+                            <th>Balance</th>
+                            
                         </tr>
                     </thead>
                     <tbody>
+                        <td> 0 </td>
+                        <td> - </td>
+                        <td> Current Balance </td>
+                        <td> - </td>
+                        <td> {{ bank.balance }} </td>
                         {% for payment in bank_payment %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
-                            <td>{{ payment.id }}</td>
-                            <td>{{ payment.amount }}</td>
                             <td>{{ payment.payment_date }}</td>
                             <td>{{ payment.description }}</td>
+                            <td>{{ payment.amount }}</td>
+                            <td>{{ payment.bank_balance }}</td>                
                         </tr>
                         {% endfor %}
                     </tbody>
