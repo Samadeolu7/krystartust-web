@@ -7,6 +7,7 @@ from django.shortcuts import redirect, render
 from .forms import LiabilityForm, LiabilityPaymentForm
 from .models import Liability, LiabilityPayment
 from django.contrib.auth.decorators import login_required
+from bank.utils import create_bank_payment, get_bank_account
 # Create your views here.
 
 @login_required
@@ -25,6 +26,9 @@ def liability_payment(request):
         form = LiabilityPaymentForm(request.POST)
         if form.is_valid():
             form.save()
+            bank = get_bank_account()
+            amount = form.cleaned_data['amount'] * -1
+            create_bank_payment(bank,f'liability payment for {form.cleaned_data["liability"]}', amount, form.cleaned_data['payment_date'])
     return render(request, 'create_liability_payment.html', {'form': form})
 
 @login_required
@@ -35,7 +39,7 @@ def liability_list(request):
 @login_required
 def liability_detail(request, pk):
     liability = Liability.objects.get(pk=pk)
-    liability_payment = liability.liability_payments.all()
+    liability_payment = LiabilityPayment.objects.filter(liability=liability).all()
     context = {
         'liability': liability,
         'liability_payment': liability_payment

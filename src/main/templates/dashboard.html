@@ -87,12 +87,24 @@
                         <a href="{% url 'create_expense' %}" class="btn btn-primary mb-2">Create Expense</a>
                         <a href="{% url 'create_expense_type' %}" class="btn btn-secondary mb-2">Create Expense Category</a>
                         <a href="{% url 'expense_list' %}" class="btn btn-secondary mb-2">Expense List</a>
-                        <a href="{% url 'expense_payment' %}" class="btn btn-secondary mb-2">Record Expense</a>
+                        <a href="{% url 'expense_payment' %}" class="btn btn-secondary mb-2">Record Expense Payments</a>
                         
                     </div>
                 </div>
             </div>
 
+            <!-- Liability Section -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Liabilities</h5>
+                        <a href="{% url 'create_liability' %}" class="btn btn-primary mb-2">Create Liability</a>
+                        <a href="{% url 'liability_list' %}" class="btn btn-secondary mb-2">Liability List</a>
+                        <a href="{% url 'liability_payment' %}" class="btn btn-secondary mb-2">Record Liability Payments</a>
+                        
+                    </div>
+                </div>
+            </div>
 
             <!-- Reports Section -->
             <div class="col-md-3">

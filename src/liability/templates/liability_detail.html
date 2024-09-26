@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liability Detail</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Liability Detail</h1>
+        <div class="card">
+            <div class="card-header">
+                <h2>{{ liability.name }}</h2>
+            </div>
+            <div class="card-body">
+                <p><strong>Name:</strong> {{ liability.name }}</p>
+                <p><strong>Liability Type:</strong> {{ liability.get_liability_type_display }}</p>
+                <p><strong>Description:</strong> {{ liability.description }}</p>
+                <p><strong>Balance:</strong> {{ liability.balance }}</p>
+                <p><strong>Balance BF:</strong> {{ liability.balance_bf }}</p>
+                <p><strong>Year:</strong> {{ liability.year }}</p>
+                <p><strong>Created At:</strong> {{ liability.created_at }}</p>
+            </div>
+        </div>
+
+        <!-- liability Payments Section -->
+        <div class="mt-5">
+            <h3>Liability Payments</h3>
+            {% if liability_payment %}
+                <table class="table table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Balance</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <td> 0 </td>
+                        <td> - </td>
+                        <td> Current Balance </td>
+                        <td> - </td>
+                        <td> {{ liability.balance }} </td>
+                        {% for payment in liability_payment %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ payment.payment_date }}</td>
+                            <td>{{ payment.description }}</td>
+                            <td>{{ payment.amount }}</td>
+                            <td>{{ payment.liability_balance }}</td>                
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No payments found for this liability.</p>
+            {% endif %}
+        </div>
+
+        <div class="mt-4">
+            <a href="{% url 'liability_list' %}" class="btn btn-primary">Back to liability List</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
