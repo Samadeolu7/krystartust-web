@@ -1,6 +1,8 @@
 from django.urls import reverse
 from django.db import models
 
+from main.models import Year
+
 # Create your models here.
 
 class Liability(models.Model):
@@ -10,11 +12,17 @@ class Liability(models.Model):
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    year = models.IntegerField(default=2024)
     def __str__(self):
         return self.name- self.amount
 
     def get_absolute_url(self):
         return reverse('liability:liability_detail', kwargs={'pk': self.pk})
+    
+    def save(self, *args, **kwargs):
+        if not self.year:
+            self.year = Year.current_year() or 0
+        super().save(*args, **kwargs)
     
 
 class LiabilityPayment(models.Model):
