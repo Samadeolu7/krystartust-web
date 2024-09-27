@@ -11,6 +11,8 @@ from loan.models import Loan, LoanPayment, LoanRepaymentSchedule
 from savings.models import Savings, SavingsPayment
 from main.models import ClientGroup as Group
 from django.contrib.auth.decorators import login_required
+
+from django.db.models import Sum
 # Create your views here.
 
 @login_required
@@ -112,9 +114,6 @@ def daily_transactions_report(request):
         return render(request, 'daily_collection_form.html')
     return render(request, 'daily_collection_report.html', context)
 
-from django.db.models import Sum
-from datetime import datetime
-import calendar
 
 @login_required
 def profit_and_loss_report(request):
@@ -127,7 +126,7 @@ def profit_and_loss_report(request):
     ).annotate(monthly_total=Sum('amount'))
 
     expenses_by_month = ExpensePayment.objects.filter(created_at__year=current_year).values(
-        'payment_date__month', 'expense__name'
+        'payment_date__month', 'expense__expense_type__name'
     ).annotate(monthly_total=Sum('amount'))
 
     # Initialize dictionaries for storing the data
@@ -163,7 +162,7 @@ def profit_and_loss_report(request):
     # Process the expenses and calculate totals by month and type
     for expense in expenses_by_month:
         month = expense['payment_date__month']
-        expense_type = expense['expense_type__name']
+        expense_type = expense['expense__expense_type__name']
         total = expense['monthly_total']
 
         if expense_type not in monthly_expenses[month]:
@@ -198,7 +197,6 @@ def profit_and_loss_report(request):
     }
 
     return render(request, 'profit_loss.html', context)
-
 
 @login_required
 def trial_balance_report(request):

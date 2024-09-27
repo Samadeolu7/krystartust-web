@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load custom_filters %}
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,14 +27,14 @@
                     <td>Savings</td>
                     <td>Total Savings</td>
                     <td></td>
-                    <td>${{ total_savings }}</td>
+                    <td>{{ total_savings |naira }}</td>
                 </tr>
 
                 <!-- Loans -->
                 <tr class="table-success">
                     <td>Loans</td>
                     <td>Total Loans</td>
-                    <td>${{ total_loans }}</td>
+                    <td>{{ total_loans |naira }}</td>
                     <td></td>
                 </tr>
 
@@ -42,7 +43,7 @@
                 <tr>
                     <td>Banks</td>
                     <td>{{ bank.name }}</td>
-                    <td>${{ bank.balance }}</td>
+                    <td>{{ bank.balance |naira }}</td>
                     <td></td>
                 </tr>
                 {% endfor %}
@@ -53,7 +54,7 @@
                     <td>Incomes</td>
                     <td>{{ income.name }}</td>
                     <td></td>
-                    <td>${{ income.balance }}</td>
+                    <td>{{ income.balance |naira }}</td>
 
                 </tr>
                 {% endfor %}
@@ -63,7 +64,7 @@
                 <tr>
                     <td>Expenses</td>
                     <td>{{ expense.name }}</td>
-                    <td>${{ expense.balance }}</td>
+                    <td>{{ expense.balance |naira }}</td>
                     <td></td>
                 </tr>
                 {% endfor %}
@@ -73,7 +74,7 @@
                 <tr>
                     <td>Liabilities</td>
                     <td>{{ liability.name }}</td>
-                    <td>${{ liability.balance }}</td>
+                    <td>{{ liability.balance |naira }} </td>
                     <td></td>
             </tbody>
             {% endfor %}
@@ -81,8 +82,8 @@
                 <tr>
                     <td>Total</td>
                     <td></td>
-                    <td>${{ total_debit }}</td>
-                    <td>${{ total_credit }}</td>
+                    <td>{{ total_debit |naira }}</td>
+                    <td>{{ total_credit |naira }}</td>
 
                 </tr>
             </tfoot>

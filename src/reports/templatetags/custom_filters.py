@@ -20,14 +20,8 @@ def dict_item(dictionary, key):
         return dictionary.get(key)
     return None
 
-import locale
+from django import template
 
-# Set locale to use comma as thousand separator
-try:
-    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-except locale.Error:
-    # Fallback if the specified locale is not available
-    locale.setlocale(locale.LC_ALL, '')
 
 @register.filter
 def naira(value):
@@ -37,8 +31,9 @@ def naira(value):
     """
     # Ensure value is a number
     try:
+        value = float(value)
         # Format the value with commas and 2 decimal places
-        value = locale.format_string("%.2f", float(value), grouping=True)
-        return f"₦{value}"
+        formatted_value = f"{value:,.2f}"
+        return f"₦{formatted_value}"
     except (ValueError, TypeError):
         return value
