@@ -15,9 +15,13 @@ class Income(models.Model):
     class Meta:
         ordering = ['-created_at']
 
+    def record_payment(self, amount,description, payment_date):
+        payment = IncomePayment(income=self, amount=amount,description=description, payment_date=payment_date)
+        payment.save()
+
 class IncomePayment(models.Model):
     income = models.ForeignKey(Income, on_delete=models.CASCADE)
-    description = models.TextField()
+    description = models.TextField(null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     income_balance = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -19,7 +19,10 @@ class Bank(models.Model):
 
     def __str__(self):
         return f'{self.name} - {self.balance}'
-
+    
+    def record_payment(self, amount, description,payment_date):
+        payment = BankPayment(bank=self, amount=amount,description=description, payment_date=payment_date)
+        payment.save()
     class Meta:
         ordering = ['-created_at']
 

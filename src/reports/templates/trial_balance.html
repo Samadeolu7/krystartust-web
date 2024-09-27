@@ -59,13 +59,24 @@
                 {% endfor %}
 
                 <!-- Expenses -->
-                <tr class="table-success">
+                {% for expense in expenses %}
+                <tr>
                     <td>Expenses</td>
-                    <td>Total Expenses</td>
-                    <td>${{ total_expenses }}</td>
+                    <td>{{ expense.name }}</td>
+                    <td>${{ expense.balance }}</td>
                     <td></td>
                 </tr>
+                {% endfor %}
+
+                <!-- Liability-->
+                {% for liability in liabilities %}
+                <tr>
+                    <td>Liabilities</td>
+                    <td>{{ liability.name }}</td>
+                    <td>${{ liability.balance }}</td>
+                    <td></td>
             </tbody>
+            {% endfor %}
             <tfoot class="table-dark">
                 <tr>
                     <td>Total</td>

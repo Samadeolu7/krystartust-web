@@ -1,13 +1,19 @@
 from django.shortcuts import redirect, render
 
+from bank.models import Bank
+from expenses.models import Expense
+from income.models import Income
+from liability.models import Liability
 from loan.models import Loan, LoanPayment
 from savings.models import Savings, SavingsPayment
 
 from .models import ClientGroup as Group
-from .forms import GroupForm
+from .forms import GroupForm, JVForm
 from client.models import Client
 # Create your views here.
 
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from subprocess import Popen
@@ -77,3 +83,53 @@ def group_report(request, pk):
     }
 
     return render(request, 'group_report.html', context)
+
+# views.py
+
+
+def get_accounts(request):
+    type_value = request.GET.get('type')
+    if type_value == 'Income':
+        accounts = Income.objects.all()
+    elif type_value == 'Expense':
+        accounts = Expense.objects.all()
+    elif type_value == 'Liability':
+        accounts = Liability.objects.all()
+    elif type_value == 'Bank':
+        accounts = Bank.objects.all()
+    else:
+        accounts = []
+
+    html = render_to_string('account_options.html', {'accounts': accounts})
+    return JsonResponse(html, safe=False)
+
+def journal_entry(request):
+    if request.method == 'POST':
+        form = JVForm(request.POST)
+        if form.is_valid():
+            credit_account = form.cleaned_data['jv_credit_account']
+            debit_account = form.cleaned_data['jv_debit_account']
+            amount = form.cleaned_data['amount']
+            payment_date = form.cleaned_data['payment_date']
+            description = form.cleaned_data['description']
+            credit_account_type = form.cleaned_data['jv_credit']
+            debit_account_type = form.cleaned_data['jv_debit']
+            if credit_account == debit_account:
+                return redirect('journal_entry')
+            if credit_account_type == 'Income':
+                credit_account.record_payment(-amount,description,payment_date)
+                debit_account.record_payment(-amount,description,payment_date)
+                return redirect('dashboard')
+
+            if debit_account_type == 'Income':
+                
+                credit_account.record_payment(amount,description,payment_date)
+                debit_account.record_payment(amount,description,payment_date)
+                return redirect('dashboard')
+            credit_account.record_payment(-amount,description,payment_date)
+            debit_account.record_payment(amount,description,payment_date)
+
+            return redirect('dashboard')    
+    
+    form = JVForm()
+    return render(request, 'journal_entry.html', {'form': form})

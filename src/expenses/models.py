@@ -29,11 +29,17 @@ class Expense(models.Model):
     def __str__(self) -> str:
         return self.name + ' - ' + str(self.balance) + ' - ' + self.expense_type.name
     
+    def record_payment(self, amount,description, payment_date):
+        payment = ExpensePayment(expense=self, amount=amount,description=description, payment_date=payment_date)
+        payment.save()
+
+    
 
 class ExpensePayment(models.Model):
     
         expense = models.ForeignKey(Expense, on_delete=models.CASCADE)
         amount = models.DecimalField(max_digits=10, decimal_places=2)
+        description = models.TextField(null=True)
         balance = models.DecimalField(max_digits=10, decimal_places=2)
         payment_date = models.DateField()
         created_at = models.DateTimeField(auto_now_add=True)

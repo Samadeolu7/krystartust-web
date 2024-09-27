@@ -6,6 +6,7 @@ from bank.models import Bank
 from client.models import Client
 from expenses.models import Expense, ExpensePayment
 from income.models import Income, IncomePayment
+from liability.models import Liability
 from loan.models import Loan, LoanPayment, LoanRepaymentSchedule
 from savings.models import Savings, SavingsPayment
 from main.models import ClientGroup as Group
@@ -198,39 +199,26 @@ def profit_and_loss_report(request):
 
     return render(request, 'profit_loss.html', context)
 
+
 @login_required
 def trial_balance_report(request):
-
-    # Initialize dictionaries to hold totals by account type
+    # Fetch all objects
     incomes = Income.objects.all()
     expenses = Expense.objects.all()
-    savings = Savings.objects.all()
-    loans = Loan.objects.all()
     banks = Bank.objects.all()
+    liability = Liability.objects.all()
 
-    total_savings = 0
-    total_loans = 0
-    total_incomes = 0
-    total_expenses = 0
-    total_banks = 0
+    # Aggregate sums in a single query for each model
+    total_incomes = Income.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_expenses = Expense.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_savings = Savings.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_loans = Loan.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_banks = Bank.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_liability = Liability.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
 
-    for saving in savings:
-        total_savings += saving.balance
-
-    for loan in loans:
-        total_loans += loan.balance
-
-    for income in incomes:
-        total_incomes += income.balance
-
-    for expense in expenses:
-        total_expenses += expense.balance
-
-    for bank in banks:
-        total_banks += bank.balance
-
-    total_credit = total_incomes + total_savings 
-    total_debit = total_expenses + total_loans + total_banks
+    # Calculate total credit and debit
+    total_credit = total_incomes + total_savings
+    total_debit = total_expenses + total_loans + total_banks + total_liability
 
     context = {
         'total_savings': total_savings,
@@ -238,10 +226,12 @@ def trial_balance_report(request):
         'total_incomes': total_incomes,
         'total_expenses': total_expenses,
         'total_banks': total_banks,
+        'total_liability': total_liability,
         'total_credit': total_credit,
         'total_debit': total_debit,
         'banks': banks,
         'incomes': incomes,
-
+        'expenses': expenses,
+        'liabilities': liability,
     }
     return render(request, 'trial_balance.html', context)

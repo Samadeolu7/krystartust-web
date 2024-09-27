@@ -14,7 +14,7 @@ class Liability(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     year = models.IntegerField(default=2024)
     def __str__(self):
-        return self.name- self.amount
+        return f'{self.name} - {self.balance}'
 
     def get_absolute_url(self):
         return reverse('liability:liability_detail', kwargs={'pk': self.pk})
@@ -23,11 +23,16 @@ class Liability(models.Model):
         if not self.year:
             self.year = Year.current_year() or 0
         super().save(*args, **kwargs)
+
+    def record_payment(self, amount,description, payment_date):
+        payment = LiabilityPayment(liability=self, amount=amount,description=description, payment_date=payment_date)
+        payment.save()
     
 
 class LiabilityPayment(models.Model):
     liability = models.ForeignKey(Liability, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(null =True)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
     payment_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -38,8 +43,10 @@ class LiabilityPayment(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.liability.balance -= self.amount
+            self.balance = self.liability.balance
+            self.liability.balance += self.amount
             self.liability.save()
+
         super(LiabilityPayment, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
