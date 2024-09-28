@@ -132,8 +132,9 @@ def journal_entry(request):
                 credit_account.record_payment(amount,description,payment_date)
                 debit_account.record_payment(amount,description,payment_date)
                 return redirect('dashboard')
-            credit_account.record_payment(-amount,description,payment_date)
-            debit_account.record_payment(amount,description,payment_date)
+            else:
+                credit_account.record_payment(-amount,description,payment_date)
+                debit_account.record_payment(amount,description,payment_date)
 
             return redirect('dashboard')    
     
