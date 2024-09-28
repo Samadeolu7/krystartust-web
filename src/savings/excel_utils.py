@@ -5,7 +5,7 @@ import logging
 from django.db import transaction
 from django.utils import timezone  # Import timezone module
 from client.models import Client
-from .models import SavingsPayment
+from .models import SavingsPayment, Savings
 from .utils import create_savings_payment
 from loan.excel_utils import parse_date
 

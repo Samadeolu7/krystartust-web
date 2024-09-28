@@ -1,5 +1,6 @@
 import calendar
 from datetime import datetime
+from django.http import HttpResponse
 from django.shortcuts import render
 
 from bank.models import Bank
@@ -8,6 +9,7 @@ from expenses.models import Expense, ExpensePayment
 from income.models import Income, IncomePayment
 from liability.models import Liability
 from loan.models import Loan, LoanPayment, LoanRepaymentSchedule
+from reports.excel_utils import client_list_to_excel
 from savings.models import Savings, SavingsPayment
 from main.models import ClientGroup as Group
 from django.contrib.auth.decorators import login_required
@@ -233,3 +235,12 @@ def trial_balance_report(request):
         'liabilities': liability,
     }
     return render(request, 'trial_balance.html', context)
+
+
+@login_required
+def client_list_excel(request):
+    merged_df = client_list_to_excel()
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=client_list.xlsx'
+    merged_df.to_excel(response, index=False)
+    return response

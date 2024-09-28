@@ -13,36 +13,6 @@
         
         <!-- Defaulters Section -->
         <h3>Defaulters</h3>
-        {% if defaulters %}
-            <table class="table table-bordered">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Loan ID</th>
-                        <th>Amount</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for loan in defaulters %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ loan.client.name }}</td>
-                        <td>{{ loan.client.phone }}</td>
-                        <td>{{ loan.amount }}</td>
-                        <td>{{ loan.balance }}</td>
-                        <td>{{ loan.start_date }}</td>
-                        <td>{{ loan.end_date }}</td>
-                        <td>{{ loan.status }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No defaulters found.</p>
-        {% endif %}
 
         <!-- Repayment Schedule Section -->
         <h3>Repayment Schedule</h3>
@@ -51,8 +21,8 @@
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>
-                        <th>Schedule ID</th>
-                        <th>Loan ID</th>
+                        <th>Name</th>
+                        <th>Phone</th>
                         <th>Due Date</th>
                         <th>Amount Due</th>
                         <th>Payment Status</th>
@@ -62,8 +32,8 @@
                     {% for item in schedule %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ item.id }}</td>
-                        <td>{{ item.loan.id }}</td>
+                        <td>{{ item.loan.client.name }}</td>
+                        <td>{{ item.loan.client.phone }}</td>
                         <td>{{ item.due_date }}</td>
                         <td>{{ item.amount_due }}</td>
                         <td>{{ item.is_paid }}</td>
@@ -72,7 +42,7 @@
                 </tbody>
             </table>
         {% else %}
-            <p>No repayment schedules found for the defaulters.</p>
+            <p>No defaulters found.</p>
         {% endif %}
     </div>
 
