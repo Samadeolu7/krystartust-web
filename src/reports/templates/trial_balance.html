@@ -25,7 +25,7 @@
                 <!-- Savings -->
                 <tr class="table-success">
                     <td>Savings</td>
-                    <td>Total Savings</td>
+                    <td>Savings</td>
                     <td></td>
                     <td>{{ total_savings |naira }}</td>
                 </tr>
@@ -33,7 +33,7 @@
                 <!-- Loans -->
                 <tr class="table-success">
                     <td>Loans</td>
-                    <td>Total Loans</td>
+                    <td>Total Debtors</td>
                     <td>{{ total_loans |naira }}</td>
                     <td></td>
                 </tr>
@@ -74,8 +74,8 @@
                 <tr>
                     <td>Liabilities</td>
                     <td>{{ liability.name }}</td>
-                    <td>{{ liability.balance |naira }} </td>
                     <td></td>
+                    <td>{{ liability.balance |naira }} </td>
             </tbody>
             {% endfor %}
             <tfoot class="table-dark">

@@ -1,5 +1,6 @@
 import calendar
 from datetime import datetime
+from decimal import Decimal
 from django.http import HttpResponse
 from django.shortcuts import render
 
@@ -9,7 +10,7 @@ from expenses.models import Expense, ExpensePayment
 from income.models import Income, IncomePayment
 from liability.models import Liability
 from loan.models import Loan, LoanPayment, LoanRepaymentSchedule
-from reports.excel_utils import client_list_to_excel
+from reports.excel_utils import client_list_to_excel, client_loans_payments_to_excel, client_savings_payments_to_excel, defaulter_report_to_excel
 from savings.models import Savings, SavingsPayment
 from main.models import ClientGroup as Group
 from django.contrib.auth.decorators import login_required
@@ -37,21 +38,39 @@ def all_clients_report(request):
 @login_required
 def all_groups_report(request):
     groups = Group.objects.all()
-    clients = Client.objects.filter(group__in=groups)
-    loans = Loan.objects.filter(client__in=clients)
-    savings = Savings.objects.filter(client__in=clients)
-    loan_payments = LoanPayment.objects.filter(loan__in=loans)
-    savings_payments = SavingsPayment.objects.filter(savings__in=savings)
+    
     context = {
         'groups': groups,
-        'clients': clients,
-        'loans': loans,
-        'savings': savings,
-        'loan_payments': loan_payments,
-        'savings_payments': savings_payments,
     }
 
     return render(request, 'all_groups_report.html', context)
+
+@login_required
+def individual_group_report(request, group_id):
+    group = Group.objects.get(pk=group_id)
+    clients = Client.objects.filter(group=group)
+    loans = Loan.objects.filter(client__in=clients)
+    
+    savings = Savings.objects.filter(client__in=clients)
+    total_loans = loans.aggregate(total=Sum('amount')).get('total', 0) or 0
+    total_loans_balance = loans.aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_savings = savings.aggregate(total=Sum('balance')).get('total', 0) or 0
+    
+    # Calculate the new field for each loan
+    for loan in loans:
+        loan.total_with_interest = loan.amount * Decimal(1 + loan.interest / 100)
+    
+    context = {
+        'group': group,
+        'clients': clients,
+        'loans': loans,
+        'savings': savings,
+        'total_loans': total_loans,
+        'total_loans_balance': total_loans_balance,
+        'total_savings': total_savings,
+    }
+
+    return render(request, 'individual_group_report.html', context)
 
 @login_required
 def all_loans_report(request):
@@ -217,8 +236,8 @@ def trial_balance_report(request):
     total_liability = Liability.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
 
     # Calculate total credit and debit
-    total_credit = total_incomes + total_savings
-    total_debit = total_expenses + total_loans + total_banks + total_liability
+    total_credit = total_incomes + total_savings + total_liability
+    total_debit = total_expenses + total_loans + total_banks 
 
     context = {
         'total_savings': total_savings,
@@ -243,4 +262,30 @@ def client_list_excel(request):
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=client_list.xlsx'
     merged_df.to_excel(response, index=False)
+    return response
+
+@login_required
+def defaulter_report_excel(request):
+    df = defaulter_report_to_excel()
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=defaulter_report.xlsx'
+    df.to_excel(response, index=False)
+    return response
+
+@login_required
+def client_savings_payments_excel(request, client_id):
+    client = Client.objects.get(pk=client_id)
+    df = client_savings_payments_to_excel(client)
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename={client.name}_savings_payments.xlsx'
+    df.to_excel(response, index=False)
+    return response
+
+@login_required
+def client_loans_payments_excel(request, client_id):
+    client = Client.objects.get(pk=client_id)
+    df = client_loans_payments_to_excel(client)
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename={client.name}_loans_payments.xlsx'
+    df.to_excel(response, index=False)
     return response

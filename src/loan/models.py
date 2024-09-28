@@ -24,6 +24,7 @@ class Loan(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property
     def is_defaulted(self):
         return self.repayment_schedule.filter(due_date__lt=date.today(), is_paid=False).exists()
 

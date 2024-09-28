@@ -11,6 +11,8 @@
 <body>
     <div class="container mt-5">
         <h1 class="text-center mb-4">Loan Detail</h1>
+        
+        <a href="{% url 'client_loans_payments_excel' loan.client.id %}" class="btn btn-primary">Download Excel</a>
 
         <!-- Loan Information Table -->
         <h3>Loan Information</h3>

@@ -116,12 +116,18 @@ def journal_entry(request):
             debit_account_type = form.cleaned_data['jv_debit']
             if credit_account == debit_account:
                 return redirect('journal_entry')
-            if credit_account_type == 'Income':
+            
+            if credit_account_type == 'Income' and debit_account_type == 'Liability' or credit_account_type == 'Liability' and debit_account_type == 'Income':
+                credit_account.record_payment(-amount,description,payment_date)
+                debit_account.record_payment(amount,description,payment_date)
+                return redirect('dashboard')
+            
+            elif credit_account_type == 'Income' or credit_account_type == 'Liability':
                 credit_account.record_payment(-amount,description,payment_date)
                 debit_account.record_payment(-amount,description,payment_date)
                 return redirect('dashboard')
 
-            if debit_account_type == 'Income':
+            elif debit_account_type == 'Income' or debit_account_type == 'Liability':
                 
                 credit_account.record_payment(amount,description,payment_date)
                 debit_account.record_payment(amount,description,payment_date)

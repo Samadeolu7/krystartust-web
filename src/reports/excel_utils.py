@@ -1,16 +1,7 @@
-from datetime import datetime
+from datetime import date
 import pandas as pd
-import csv
-import logging
-from client.models import Client
-from loan.models import Loan
-from main.models import ClientGroup as Group
-from income.utils import create_id_fee_income_payment, create_registration_fee_income_payment
-from savings.models import Savings
-from savings.utils import create_compulsory_savings
-from django.db import transaction
-from django.utils import timezone  # Import timezone module
-from loan.excel_utils import parse_date
+from loan.models import Loan, LoanPayment, LoanRepaymentSchedule
+from savings.models import Savings, SavingsPayment
 
 
 def client_list_to_excel():
@@ -35,3 +26,39 @@ def client_list_to_excel():
 
     return merged_df
 
+def defaulter_report_to_excel():
+    # Fetch savings and loan data
+    today = date.today()
+
+    # Fetch the necessary fields from the loan repayment schedule to avoid unnecessary data loading
+    overdue_schedules = LoanRepaymentSchedule.objects.filter(
+        due_date__lt=today,
+        is_paid=False
+    ).select_related('loan').only(
+        'loan__id', 'loan__client__name', 'loan__client__phone', 'loan__amount', 'loan__balance', 
+        'loan__start_date', 'loan__end_date', 'loan__status', 'due_date', 'amount_due', 'is_paid'
+    )
+
+    df = pd.DataFrame(list(overdue_schedules.values(
+        'loan__client__name', 'loan__client__phone', 'loan__amount', 'loan__balance', 'loan__start_date', 'loan__end_date', 'loan__status', 'due_date', 'amount_due', 'is_paid'
+    )))
+
+    df.columns = ['Name', 'Phone', 'Loan Amount', 'Loan Balance', 'Start Date', 'End Date', 'Status', 'Due Date', 'Amount Due', 'Is Paid']
+
+    return df
+
+def client_savings_payments_to_excel(client):
+    # Fetch savings and loan data
+    savings = SavingsPayment.objects.filter(client=client)
+    df = pd.DataFrame(list(savings.values('client__name', 'amount', 'payment_date', 'transaction_type', 'balance')))
+    df.columns = ['Name', 'Amount', 'Payment Date', 'Transaction Type', 'Balance']
+
+    return df
+
+def client_loans_payments_to_excel(client):
+    # Fetch savings and loan data
+    loans = LoanRepaymentSchedule.objects.filter(loan__client=client)
+    df = pd.DataFrame(list(loans.values('loan__client__name', 'amount', 'payment_date', 'due_date', 'is_paid')))
+    df.columns = ['Name', 'Amount', 'Payment Date', 'Due Date', 'Is Paid']
+
+    return df
