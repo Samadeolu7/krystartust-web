@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+    {% load custom_filters %}
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,38 +12,45 @@
     <div class="container mt-5">
         <h1 class="text-center">KRYSTAR</h1>
         <div class="row g-4 mt-4">
-
-            <form method="post" action="{% url 'update_app' %}">
-                {% csrf_token %}
-                <button type="submit">Update App</button>
-              </form>
+            <!-- Display User's Name -->
+            <div class="col-12 text-center">
+                {% if user.is_authenticated %}
+                    <h2>Welcome, {{ user.get_full_name|default:user.username }}!</h2>
+                {% else %}
+                    <h2>Welcome, Guest!</h2>
+                {% endif %}
+            </div>
               
             <!-- Client Management Section -->
+            {% if user|has_group:"Admin" or user|has_group:"Manager" or user|has_group:"Staff" %}
             <div class="col-md-3">
-                <div class="card">
+                <div class="card">s
                     <div class="card-body text-center">
                         <h5 class="card-title">Client Management</h5>
+                        {% if user|has_group:"Admin" %}
+                        <a href="{% url 'add_user' %}" class="btn btn-primary mb-2">Add Staff</a>
+                        <a href="{% url 'list_users' %}" class="btn btn-secondary mb-2">Staff List</a>
+                        {% endif %}
                         <a href="{% url 'create_client' %}" class="btn btn-primary mb-2">Create Client</a>
-                        <a href="{% url 'create_client_excel' %}" class="btn btn-secondary mb-2">Create Client Excel</a>
                         <a href="{% url 'list_clients' %}" class="btn btn-secondary mb-2">Clients List</a>
                         <a href="{% url 'group_create' %}" class="btn btn-secondary mb-2">Create Group</a>
                     </div>
                 </div>
             </div>
-
+            
             <!-- Savings Management Section -->
+            
             <div class="col-md-3">
                 <div class="card">
                     <div class="card-body text-center">
                         <h5 class="card-title">Savings Management</h5>
-                        <a href="{% url 'savings_registration' %}" class="btn btn-primary mb-2">Register Savings</a>
-                        <a href="{% url 'savings_upload' %}" class="btn btn-secondary mb-2">Upload Savings</a>
+                        <a href="{% url 'savings_registration' %}" class="btn btn-primary mb-2">Record Savings</a>
                         <a href="{% url 'savings_withdrawal' %}" class="btn btn-secondary mb-2">Record Withdrawal</a>
 
                     </div>
                 </div>
             </div>
-
+           
             <!-- Loan Management Section -->
             <div class="col-md-3">
                 <div class="card">
@@ -50,12 +58,12 @@
                         <h5 class="card-title">Loan Management</h5>
                         <a href="{% url 'loan_registration' %}" class="btn btn-primary mb-2">Register Loan</a>
                         <a href="{% url 'loan_payment' %}" class="btn btn-secondary mb-2">Record Payment</a>
-                        <a href="{% url 'loan_upload' %}" class="btn btn-secondary mb-2">Upload Loan</a>
-                        <a href="{% url 'loan_upload_bulk' %}" class="btn btn-secondary mb-2">Upload Loan Bulk</a>
                     </div>
                 </div>
             </div>
-
+            {% endif %}
+            
+            {% if user|has_group:"Admin" %}
             <!-- Bank Section -->
             <div class="col-md-3">
                 <div class="card">
@@ -79,6 +87,7 @@
                     </div>
                 </div>
             </div>
+            
 
             <!-- Expenses Section -->
             <div class="col-md-3">
@@ -106,7 +115,8 @@
                     </div>
                 </div>
             </div>
-
+            {% endif %}
+            {% if user|has_group:"Admin" or user|has_group:"Manager" %}
             <!-- Reports Section -->
             <div class="col-md-3">
                 <div class="card">
@@ -117,10 +127,12 @@
                         <a href="{% url 'all_groups_report' %}" class="btn btn-secondary mb-2">Group Report</a>
                         <a href="{% url 'profit_and_loss_report' %}" class="btn btn-secondary mb-2">P&L Report</a>
                         <a href="{% url 'trial_balance' %}" class="btn btn-secondary mb-2">Trial Balance</a>
+                        <a href="{% url 'list_clients' %}" class="btn btn-secondary mb-2">Debtors report</a>
                         
                     </div>
                 </div>
             </div>
+            {% endif %}
                 
         </div>
     </div>

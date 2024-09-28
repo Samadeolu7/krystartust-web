@@ -1,6 +1,8 @@
 # reports/templatetags/custom_filters.py
 
 from django import template
+from django.contrib.auth.models import Group
+
 
 register = template.Library()
 
@@ -37,3 +39,12 @@ def naira(value):
         return f"₦{formatted_value}"
     except (ValueError, TypeError):
         return value
+
+
+@register.filter(name='has_group')
+def has_group(user, group_name):
+    group = Group.objects.get(name=group_name)
+    groups = user.groups.all()
+    print(user)
+    print(groups)
+    return group in groups

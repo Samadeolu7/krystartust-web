@@ -7,6 +7,8 @@ set -e
 echo "Applying database migrations..."
 python manage.py migrate
 
+python manage.py create_groups
+
 # Collect static files
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
