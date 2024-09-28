@@ -1,3 +1,4 @@
+from liability.models import Liability
 from .models import IncomePayment, Income, IDFee, RegistrationFee, RiskPremium, UnionContribution
 from bank.models import BankPayment, Bank
 from main.models import Year
@@ -24,7 +25,7 @@ def get_risk_premium_income():
 
 def get_union_contribution_income():
     YEAR = Year.current_year()
-    return Income.objects.get_or_create(name='Union Contribution', description='Union Contribution Income', year=YEAR)[0]
+    return Liability.objects.get_or_create(name='Union Contribution', description='Union Contribution Income', year=YEAR)[0]
 
 def create_income_payment(bank,income, description, amount , payment_date):
     income_payment = IncomePayment.objects.create(income=income, description=description, amount=amount, payment_date=payment_date)
