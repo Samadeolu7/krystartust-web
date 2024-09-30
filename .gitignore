@@ -3,3 +3,4 @@
 my_env
 *.pyc
 ca.pem
+*.sqlite3

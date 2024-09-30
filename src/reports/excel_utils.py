@@ -11,7 +11,7 @@ def client_list_to_excel():
 
     # Create DataFrame for savings
     savings_df = pd.DataFrame(list(savings.values(
-        'client__name', 'client__phone', 'client__email', 'client__address', 'client__group__name', 'balance', 'created_at'
+        'client__name', 'client__phone', 'client__email', 'client__address', 'client__group__name', 'balance'
     )))
     savings_df.columns = ['Name', 'Phone', 'Email', 'Address', 'Group', 'Savings Balance']
 
