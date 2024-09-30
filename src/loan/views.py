@@ -1,5 +1,5 @@
 from decimal import Decimal
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib import messages
 
@@ -26,7 +26,6 @@ def transaction_history(request, client_id):
     transactions = Loan.objects.filter(client_id=client_id).order_by('-created_at')
     return render(request, 'transaction_history.html', {'transactions': transactions})
 
-
 @login_required
 def loan_payment(request):
     if request.method == 'POST':
@@ -34,7 +33,7 @@ def loan_payment(request):
         if form.is_valid():
             # Save the loan payment record
             loan_payment = form.save(commit=False)
-            client_id = loan_payment.client.id
+            loan_id = loan_payment.loan.id
             
             # Retrieve and update the repayment schedule
             schedule = LoanRepaymentSchedule.objects.filter(id=loan_payment.payment_schedule.id).first()
@@ -46,30 +45,41 @@ def loan_payment(request):
                 return render(request, 'loan_payment_form.html', {'form': form})
             
             # Update the loan balance
-            loan = Loan.objects.filter(client_id=client_id).first()
+            loan = Loan.objects.filter(id=loan_id).first()
             if loan:
                 loan.balance -= Decimal(loan_payment.amount)
                 loan.save()
             else:
-                messages.error(request, "Loan not found for the client.")
-                return render(request, 'payments/loan_payment_form.html', {'form': form})
+                messages.error(request, "Loan not found.")
+                return render(request, 'loan_payment_form.html', {'form': form})
             
             # Save the payment after modifying the balance and schedule
+            # include client in the payment
+            loan_payment.client = loan.client
             loan_payment.save()
 
             # Update the bank balance
             bank = form.cleaned_data.get('bank')
-            create_bank_payment(bank, loan_payment.amount, f'Loan payment from {loan.client.name}', loan_payment.payment_date)
+            create_bank_payment(bank, f'Loan payment from {loan.client.name}',loan_payment.amount, loan_payment.payment_date)
             
-
             messages.success(request, "Loan payment processed successfully.")
-            return redirect('success_page')  # Replace with your success page URL name
+            return redirect('dashboard')
         else:
             messages.error(request, "Invalid form submission. Please correct the errors below.")
     else:
-        form = LoanPaymentForm()  # Corrected the form initialization
+        form = LoanPaymentForm()
     
     return render(request, 'loan_payment_form.html', {'form': form})
+
+@login_required
+def load_payment_schedules(request):
+    loan_id = request.GET.get('loan_id')
+    try:
+        loan = Loan.objects.get(id=loan_id)
+        payment_schedules = LoanRepaymentSchedule.objects.filter(loan_id=loan.id, is_paid=False).order_by('due_date')
+        return JsonResponse(list(payment_schedules.values('id', 'due_date', 'amount_due')), safe=False)
+    except Loan.DoesNotExist:
+        return JsonResponse({'error': 'Loan not found'}, status=404)
 
 @login_required
 def loan_upload_view(request):

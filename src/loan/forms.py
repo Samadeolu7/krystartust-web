@@ -1,5 +1,6 @@
 from bank.models import Bank
-from .models import Loan, LoanPayment
+from client.models import Client
+from .models import Loan, LoanPayment, LoanRepaymentSchedule as PaymentSchedule
 from income.models import LoanRegistrationFee, RiskPremium, UnionContribution, LoanServiceFee
 
 from django import forms
@@ -40,15 +41,32 @@ class LoanForm(forms.ModelForm):
             self.fields['service_fee'].initial = LoanServiceFee.objects.filter(loan=self.instance).first().amount
 
 
-class LoanPaymentForm(forms.ModelForm):
+# forms.py
 
+# forms.py
+
+class LoanPaymentForm(forms.ModelForm):
     payment_date = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'})
     )
     bank = forms.ModelChoiceField(queryset=Bank.objects.all())
+    payment_schedule = forms.ModelChoiceField(queryset=PaymentSchedule.objects.none())
+
     class Meta:
         model = LoanPayment
-        fields = ['client', 'amount', 'payment_schedule', 'payment_date', 'loan']
+        fields = ['loan', 'amount', 'payment_schedule', 'payment_date']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'loan' in self.data:
+            try:
+                loan_id = int(self.data.get('loan'))
+                loan = Loan.objects.get(id=loan_id)
+                self.fields['payment_schedule'].queryset = PaymentSchedule.objects.filter(loan=loan).order_by('due_date')
+            except (ValueError, TypeError, Loan.DoesNotExist):
+                pass  # invalid input from the client; ignore and fallback to empty queryset
+        elif self.instance.pk:
+            self.fields['payment_schedule'].queryset = self.instance.loan.client.paymentschedule_set.order_by('due_date')
 
 class LoanRegistrationForm(forms.ModelForm):
 

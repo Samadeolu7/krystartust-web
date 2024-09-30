@@ -25,7 +25,28 @@
             <button type="submit" class="btn btn-primary">Submit Payment</button>
         </form>
     </div>
-
+       <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#id_loan').change(function() {
+                var loanId = $(this).val();
+                $.ajax({
+                    url: '{% url "load_payment_schedules" %}',
+                    data: {
+                        'loan_id': loanId
+                    },
+                    success: function(data) {
+                        var $paymentSchedule = $('#id_payment_schedule');
+                        $paymentSchedule.empty();
+                        $.each(data, function(key, value) {
+                            $paymentSchedule.append('<option value="' + value.id + '">' + value.due_date + ' - ' + value.amount_due + '</option>');
+                        });
+                    },
+                    
+                });
+            });
+        });
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
