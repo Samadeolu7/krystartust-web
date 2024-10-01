@@ -6,6 +6,7 @@ from django.shortcuts import render
 from .models import Savings, SavingsPayment
 from .forms import SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm
 from .excel_utils import savings_from_excel
+from bank.utils import create_bank_payment, get_cash_in_hand
 from django.contrib.auth.decorators import login_required
 
 
@@ -38,7 +39,14 @@ def register_savings(request):
     if request.method == 'POST':
         form = SavingsForm(request.POST)
         if form.is_valid():
-            form.save()
+            savings = form.save()
+            bank = create_bank_payment(
+                bank=get_cash_in_hand(),
+                description=f"Savings Payment by {savings.client.name}",
+                amount=form.cleaned_data['amount'],
+                payment_date=form.cleaned_data['payment_date']
+            )
+            
             return redirect('dashboard')
     else:
         form = SavingsForm()
