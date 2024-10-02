@@ -50,9 +50,10 @@
                     {% for payment in savings_payments %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
+                        <td>{{ payment.payment_date }}</td>
                         <td>{{ payment.amount|naira }}</td>
                         <td>{{ payment.balance|naira }}</td>
-                        <td>{{ payment.payment_date }}</td>
+
                         <td>{{ payment.get_transaction_type_display }}</td>
                     </tr>
                     {% endfor %}

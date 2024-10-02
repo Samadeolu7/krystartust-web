@@ -43,11 +43,19 @@ class LiabilityPayment(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.balance = self.liability.balance
-            self.liability.balance += self.amount
-            self.liability.save()
+            last_payment = LiabilityPayment.objects.filter(liability=self.liability).order_by('-payment_date', '-created_at').first()
+            balance = last_payment.balance if last_payment else 0
+            if balance:
+                self.balance = balance + self.amount
+                self.liability.balance = self.balance
+                self.liability.save()
+            else:
+                self.balance = self.amount
 
         super(LiabilityPayment, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('liability:liability_record_detail', kwargs={'pk': self.pk})
+    
+    class Meta:
+        ordering = ['-payment_date', '-created_at']

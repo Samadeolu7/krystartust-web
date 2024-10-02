@@ -35,7 +35,7 @@ class SavingsPayment(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:  # If the record is being created
-            last_payment = SavingsPayment.objects.filter(client=self.client).order_by('-created_at').first()
+            last_payment = SavingsPayment.objects.filter(client=self.client).order_by('-payment_date','-created_at').first()
 
             if last_payment:
                 self.balance = last_payment.balance + self.amount
@@ -54,6 +54,9 @@ class SavingsPayment(models.Model):
 
     def __str__(self):
         return f"{self.client} - {self.get_transaction_type_display()} - {self.amount}"
+    
+    class Meta:
+        ordering = ['-payment_date', '-created_at']
     
 
 class CompulsorySavings(SingletonModel):

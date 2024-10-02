@@ -45,7 +45,8 @@ class LoanPayment(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            balance = self.loan.balance
+            last_payment = LoanPayment.objects.filter(client=self.client).order_by('-payment_date', '-created_at').first()
+            balance = last_payment.balance if last_payment else 0
             if balance :
                 self.balance = balance - self.amount
                 # update loan balance
@@ -57,6 +58,9 @@ class LoanPayment(models.Model):
 
     def __str__(self) -> str:
         return self.client.name + ' - ' + str(self.amount) + ' - ' + str(self.balance)
+    
+    class Meta:
+        ordering = ['-payment_date', '-created_at']
 
 
 class LoanRepaymentSchedule(models.Model):

@@ -37,25 +37,26 @@
 
         <!-- Repayment Schedule Table -->
         <h3>Repayment Schedule</h3>
-        {% if loan_payments_schedule %}
+        {% if loan_payments%}
             <table class="table table-bordered">
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>
-                        <th>Due Date</th>
-                        <th>Payment Date</th>
+                        <th>Date</th>
+                        <th>Description</th>
                         <th>Amount</th>
-                        <th>Status</th>
+                        <th>Balance</th>
+
                     </tr>
                 </thead>
                 <tbody>
-                    {% for payment in loan_payments_schedule %}
+                    {% for payment in loan_payments %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ payment.due_date }}</td>
                         <td>{{ payment.payment_date }}</td>
-                        <td>{{ payment.amount_due|naira }}</td>
-                        <td>{{ payment.is_paid }}</td>
+                        <td>{{ payment.description }}</td>
+                        <td>{{ payment.amount|naira }}</td>
+                        <td>{{ payment.balance }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
