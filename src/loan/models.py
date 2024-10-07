@@ -45,8 +45,7 @@ class LoanPayment(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            last_payment = LoanPayment.objects.filter(client=self.client).order_by('-payment_date', '-created_at').first()
-            balance = last_payment.balance if last_payment else 0
+            balance = self.loan.balance
             if balance :
                 self.balance = balance - self.amount
                 # update loan balance

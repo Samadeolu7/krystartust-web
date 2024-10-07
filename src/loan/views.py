@@ -5,6 +5,7 @@ from django.contrib import messages
 
 from client.models import Client
 from income.models import IncomePayment
+from liability.utils import create_union_contribution_income_payment
 from loan.excel_utils import bulk_create_loans_from_excel, loan_from_excel
 from savings.models import Savings, SavingsPayment
 from bank.models import BankPayment
@@ -15,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 
 from bank.utils import create_bank_payment
 
-from income.utils import get_loan_interest_income, get_risk_premium_income, get_union_contribution_income
+from income.utils import create_risk_premium_income_payment, get_loan_interest_income, get_risk_premium_income
 
 from datetime import date, timedelta
 
@@ -162,26 +163,10 @@ def loan_registration(request):
                 payment_date=start_date,
             )
             income_payment.save()
+            risk_premium_amount = loan.risk_premium * amount / Decimal(100)
+            create_risk_premium_income_payment(risk_premium_amount, start_date)
 
-            risk_premium_income = get_risk_premium_income()
-            risk_premimum_amount = Decimal(loan.risk_premium) * Decimal(amount) / Decimal(100)
-            risk_premium_payment = IncomePayment.objects.create(
-                income=risk_premium_income,
-                description=f'Risk premium from {loan.client.name}',
-                amount=risk_premimum_amount,
-                payment_date=start_date,
-            )
-            risk_premium_payment.save()
-
-            union_contribution_income = get_union_contribution_income()
-            union_contribution_amount = Decimal(form.cleaned_data.get('union_contribution'))
-            union_contribution_payment = IncomePayment.objects.create(
-                income=union_contribution_income,
-                description=f'Union contribution from {loan.client.name}',
-                amount=union_contribution_amount,
-                payment_date=start_date,
-            )
-            union_contribution_payment.save()
+            create_union_contribution_income_payment(start_date,f'Union Contribution for {loan.client.name}')
 
             messages.success(request, "Loan registered successfully and repayment schedule created.")
             return redirect('dashboard')

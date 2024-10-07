@@ -7,7 +7,8 @@ from django.db import transaction
 from django.utils import timezone  # Import timezone module
 from bank.utils import create_bank_payment, get_bank_account
 from client.models import Client
-from income.utils import create_loan_interest_income_payment, create_risk_premium_income_payment, create_union_contribution_income_payment
+from income.utils import create_loan_interest_income_payment, create_risk_premium_income_payment
+from liability.utils import create_union_contribution_income_payment
 from .models import Loan, LoanRepaymentSchedule
 from .utils import create_loan_payment
 from income.models import LoanServiceFee, RiskPremium

@@ -50,21 +50,23 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% with loan.balance as running_balance %}
                     {% for payment in loan_payments %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ payment.payment_date }}</td>
                         <td>{{ payment.description }}</td>
                         <td>{{ payment.amount|naira }}</td>
-                        <td>{{ payment.balance }}</td>
+                        <td>{{ running_balance|add:payment.amount|naira }}</td>
+                        {% update_variable running_balance|add:payment.amount as running_balance %}
                     </tr>
                     {% endfor %}
+                    {% endwith %}
                 </tbody>
             </table>
         {% else %}
             <p>No repayment schedules found.</p>
         {% endif %}
-    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>

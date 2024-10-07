@@ -57,8 +57,8 @@ def client_savings_payments_to_excel(client):
 
 def client_loans_payments_to_excel(client):
     # Fetch savings and loan data
-    loans = LoanRepaymentSchedule.objects.filter(loan__client=client)
-    df = pd.DataFrame(list(loans.values('loan__client__name', 'amount', 'payment_date', 'due_date', 'is_paid')))
+    loans = LoanPayment.objects.filter(loan__client=client)
+    df = pd.DataFrame(list(loans.values('client__name', 'amount', 'payment_date','payment_schedule__due_date', 'payment_schedule__is_paid')))
     df.columns = ['Name', 'Amount', 'Payment Date', 'Due Date', 'Is Paid']
 
     return df

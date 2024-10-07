@@ -23,9 +23,6 @@ def get_risk_premium_income():
     YEAR = Year.current_year()
     return Income.objects.get_or_create(name='Risk Premium', description='Risk Premium Income', year=YEAR)[0]
 
-def get_union_contribution_income():
-    YEAR = Year.current_year()
-    return Liability.objects.get_or_create(name='Union Contribution', description='Union Contribution Income', year=YEAR)[0]
 
 def create_income_payment(bank,income, description, amount , payment_date):
     income_payment = IncomePayment.objects.create(income=income, description=description, amount=amount, payment_date=payment_date)
@@ -56,13 +53,7 @@ def create_risk_premium_income_payment( amount,payment_date):
     income = get_risk_premium_income()
     bank = get_cash_in_hand()
     return create_income_payment(bank=bank, income=income, description='Risk Premium', amount=amount, payment_date=payment_date)
-
-def create_union_contribution_income_payment( payment_date):
-    income = get_union_contribution_income()
-    amount = UnionContribution.objects.all().first().amount
-    bank = get_union_pulse()
-    return create_income_payment(bank=bank, income=income, description='Union Contribution', amount=amount, payment_date=payment_date)
-    
+   
 
 def get_income_balance(income_id):
     income = Income.objects.get(id=income_id)

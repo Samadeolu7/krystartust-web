@@ -26,7 +26,7 @@ class SavingsPayment(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     savings = models.ForeignKey(Savings, on_delete=models.SET_NULL, null=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
-    description = models.TextField(default=f'Savings for {savings}')
+    description = models.TextField(default=f'Savings for {client.name}')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_date = models.DateField()
     transaction_type = models.CharField(max_length=1, choices=TRANSACTION_TYPE_CHOICES, default=SAVINGS)
@@ -34,20 +34,15 @@ class SavingsPayment(models.Model):
     #created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     def save(self, *args, **kwargs):
-        if not self.pk:  # If the record is being created
-            last_payment = SavingsPayment.objects.filter(client=self.client).order_by('-payment_date','-created_at').first()
-
-            if last_payment:
-                self.balance = last_payment.balance + self.amount
-            else:
-                self.balance = self.amount
-
+        if not self.pk:  # If the record is being created 
             # Update the corresponding Savings balance
             savings_record = Savings.objects.get(client=self.client)
             if self.transaction_type == self.SAVINGS:
                 savings_record.balance += Decimal(self.amount)
+                self.balance = savings_record.balance
             elif self.transaction_type == self.WITHDRAWAL:
                 savings_record.balance -= Decimal(self.amount)
+                self.balance = savings_record.balance
             savings_record.save()
 
         super().save(*args, **kwargs)

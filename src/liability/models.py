@@ -7,7 +7,7 @@ from main.models import Year
 
 class Liability(models.Model):
     name = models.CharField(max_length=100)
-    balance_bf = models.DecimalField(max_digits=10, decimal_places=2)
+    balance_bf = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -42,15 +42,12 @@ class LiabilityPayment(models.Model):
         return self.liability.name
     
     def save(self, *args, **kwargs):
-        if not self.pk:
-            last_payment = LiabilityPayment.objects.filter(liability=self.liability).order_by('-payment_date', '-created_at').first()
-            balance = last_payment.balance if last_payment else 0
-            if balance:
-                self.balance = balance + self.amount
-                self.liability.balance = self.balance
-                self.liability.save()
-            else:
-                self.balance = self.amount
+        if not self.pk:  
+            balance = self.liability.balance
+
+            self.balance = balance + self.amount
+            self.liability.balance = self.balance
+            self.liability.save()
 
         super(LiabilityPayment, self).save(*args, **kwargs)
 

@@ -20,8 +20,6 @@ def dict_item(dictionary, key):
         return dictionary.get(key)
     return None
 
-from django import template
-
 
 @register.filter
 def naira(value):
@@ -37,3 +35,12 @@ def naira(value):
         return f"₦{formatted_value}"
     except (ValueError, TypeError):
         return value
+
+
+@register.filter
+def subtract(value, arg):
+    return value - arg
+
+@register.simple_tag
+def update_variable(value):
+    return value
