@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_beat',
     'main',
     'client',
     'user',
@@ -139,6 +140,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # settings.py
+
+AUTH_USER_MODEL = 'user.User'
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'  # Redirect to dashboard after login
