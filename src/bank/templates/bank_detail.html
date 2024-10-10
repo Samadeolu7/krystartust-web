@@ -36,20 +36,25 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <td> 0 </td>
-                        <td> - </td>
-                        <td> Current Balance </td>
-                        <td> - </td>
-                        <td> {{ bank.balance }} </td>
+                        
+                        {% with 0 as running_balance %}
                         {% for payment in bank_payment %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ payment.payment_date }}</td>
                             <td>{{ payment.description }}</td>
-                            <td>{{ payment.amount }}</td>
-                            <td>{{ payment.bank_balance }}</td>                
+                            <td>{{ payment.amount|naira }}</td>
+                            <td>{{ running_balance|naira }}</td>
+                            {% update_variable running_balance|add:payment.amount as running_balance %}
                         </tr>
+                        
                         {% endfor %}
+                        {% endwith %}
+                        <td> 0 </td>
+                        <td> - </td>
+                        <td> Current Balance </td>
+                        <td> - </td>
+                        <td> {{ bank.balance|naira }} </td>
                     </tbody>
                 </table>
             {% else %}
