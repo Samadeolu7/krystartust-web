@@ -166,10 +166,10 @@ def loan_registration(request):
                 payment_date=start_date,
             )
             income_payment.save()
-            risk_premium_amount = loan.risk_premium * amount / Decimal(100)
+            risk_premium_amount = Decimal(loan.risk_premium) * Decimal(amount) / 100
             create_risk_premium_income_payment(risk_premium_amount, start_date)
 
-            union = loan.union_contribution
+            union = form.cleaned_data.get('union_contribution')
             create_union_contribution_income_payment(start_date,union,f'Union Contribution for {loan.client.name}')
 
             messages.success(request, "Loan registered successfully and repayment schedule created.")
