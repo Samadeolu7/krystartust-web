@@ -10,6 +10,13 @@
 <body>
     <div class="container mt-5">
         <h1 class="text-center">KRYSTAR</h1>
+        {% if messages %}
+            <div>
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
         <div class="row g-4 mt-4">
 
             <form method="post" action="{% url 'update_app' %}">

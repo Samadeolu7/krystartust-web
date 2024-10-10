@@ -1,23 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client Form</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container mt-5">
-        <h1>{{ form.instance.id|yesno:"Edit Client,Create Client" }}</h1>
+{% extends 'base.html' %}
 
-        {% if messages %}
-            <div>
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
+{% load custom_filters %}
+
+{% block title %}Client Form{% endblock %}
+
+{% block content %}
+        <h1>{{ form.instance.id|yesno:"Edit Client,Create Client" }}</h1>
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
@@ -27,5 +15,4 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}
