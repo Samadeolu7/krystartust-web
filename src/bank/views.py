@@ -1,8 +1,11 @@
 from datetime import datetime, timezone
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from .forms import BankForm, BankPaymentForm, CashTransferForm
 from .models import Bank, BankPayment
 from django.contrib.auth.decorators import login_required
+
+from .excel_utils import bank_to_excel
 # Create your views here.
 
 @login_required
@@ -75,3 +78,12 @@ def cash_transfer(request):
         form.fields['payment_date'].initial = datetime.now().date()
 
     return render(request, 'cash_transfer.html', {'form': form})
+
+@login_required
+def bank_to_excel_view(request, pk):
+    bank = Bank.objects.get(pk=pk)
+    df = bank_to_excel(bank)
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = f'attachment; filename={bank.name}_payments.xlsx'
+    df.to_excel(response, index=False)
+    return response

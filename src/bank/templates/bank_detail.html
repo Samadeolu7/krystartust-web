@@ -6,6 +6,7 @@
 
 {% block content %}
         <h1 class="text-center mb-4">Bank Detail</h1>
+        <a href="{% url 'bank_to_excel' bank.id %}" class="btn btn-primary">Download Excel</a>
         <div class="card">
             <div class="card-header">
                 <h2>{{ bank.name }}</h2>
