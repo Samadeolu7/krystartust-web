@@ -26,9 +26,6 @@ class ClientForm(forms.ModelForm):
         self.fields['compulsory_savings'].initial = CompulsorySavings.objects.all().first().amount
         self.fields['registration_fee'].initial = RegistrationFee.objects.all().first().amount
         self.fields['id_fee'].initial = IDFee.objects.all().first().amount
-        self.fields['compulsory_savings'].widget.attrs['readonly'] = True
-        self.fields['registration_fee'].widget.attrs['readonly'] = True
-        self.fields['id_fee'].widget.attrs['readonly'] = True
 
 
 class ClientExcelForm(forms.Form):
