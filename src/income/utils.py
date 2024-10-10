@@ -53,7 +53,15 @@ def create_risk_premium_income_payment( amount,payment_date):
     income = get_risk_premium_income()
     bank = get_cash_in_hand()
     return create_income_payment(bank=bank, income=income, description='Risk Premium', amount=amount, payment_date=payment_date)
+
+def get_administrative_fee_income():
+    YEAR = Year.current_year()
+    return Income.objects.get_or_create(name='Administrative Fee', description='Administrative Fee Income', year=YEAR)[0]
    
+def create_administrative_fee_income_payment( amount,payment_date):
+    income = get_administrative_fee_income()
+    bank = get_cash_in_hand()
+    return create_income_payment(bank=bank, income=income, description='Administrative Fee', amount=amount, payment_date=payment_date)
 
 def get_income_balance(income_id):
     income = Income.objects.get(id=income_id)

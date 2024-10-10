@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 
 from bank.utils import create_bank_payment
 
-from income.utils import create_risk_premium_income_payment, get_loan_interest_income, get_risk_premium_income
+from income.utils import create_risk_premium_income_payment, get_loan_interest_income, create_administrative_fee_income_payment
 
 from datetime import date, timedelta
 
@@ -124,6 +124,9 @@ def loan_registration(request):
             start_date = loan.start_date
             amount = loan.amount
             bank = form.cleaned_data.get('bank')
+            admin_fees = form.cleaned_data.get('admin_fees')
+            if admin_fees:
+                create_administrative_fee_income_payment(admin_fees,start_date)
 
             # Calculate the total amount due per schedule
 
@@ -166,7 +169,8 @@ def loan_registration(request):
             risk_premium_amount = loan.risk_premium * amount / Decimal(100)
             create_risk_premium_income_payment(risk_premium_amount, start_date)
 
-            create_union_contribution_income_payment(start_date,f'Union Contribution for {loan.client.name}')
+            union = loan.union_contribution
+            create_union_contribution_income_payment(start_date,union,f'Union Contribution for {loan.client.name}')
 
             messages.success(request, "Loan registered successfully and repayment schedule created.")
             return redirect('dashboard')

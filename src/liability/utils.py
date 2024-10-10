@@ -16,8 +16,7 @@ def get_union_contribution_income():
     YEAR = Year.current_year()
     return Liability.objects.get_or_create(name='Union Contribution', description='Union Contribution Income', year=YEAR)[0]
 
-def create_union_contribution_income_payment( payment_date,description):
+def create_union_contribution_income_payment( payment_date,amount,description):
     liability = get_union_contribution_income()
-    amount = UnionContribution.objects.all().first().amount
     bank = get_cash_in_hand()
     return create_liability_payment(bank=bank, liability=liability, description=description, amount=amount, payment_date=payment_date)
