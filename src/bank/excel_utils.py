@@ -10,8 +10,8 @@ from .models import Bank, BankPayment
 
 def bank_to_excel(bank):
     payments = BankPayment.objects.filter(bank=bank)
-    df = pd.DataFrame(list(payments.values('bank__name', 'amount','description', 'payment_date')))
-    df.columns = ['Bank', 'Amount', 'Description', 'Payment Date']
+    df = pd.DataFrame(list(payments.values('bank__name', 'payment_date','description', 'amount')))
+    df.columns = ['Bank', 'Payment Date', 'Description', 'Amount']
 
     return df
 

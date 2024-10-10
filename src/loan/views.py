@@ -125,6 +125,7 @@ def loan_registration(request):
             amount = loan.amount
             bank = form.cleaned_data.get('bank')
             admin_fees = form.cleaned_data.get('admin_fees')
+            admin_fee_amount = Decimal(admin_fees) * Decimal(amount) / Decimal(100)
             if admin_fees:
                 create_administrative_fee_income_payment(admin_fees,start_date)
 
@@ -134,6 +135,7 @@ def loan_registration(request):
             time_increment = {
                 'Daily': timedelta(days=1),
                 'Weekly': timedelta(weeks=1),
+                'Monthly': timedelta(weeks=4),
                 # Add more loan types as needed
             }.get(loan_type, timedelta(weeks=1))  # Default to weekly if the loan type is not specifically listed
 
