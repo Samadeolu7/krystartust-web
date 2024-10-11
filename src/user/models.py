@@ -32,8 +32,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     
-    groups = models.ManyToManyField(Group, blank=True, related_name='custom_user_set')
-    user_permissions = models.ManyToManyField(Permission, blank=True, related_name='custom_user_set')
+    groups = models.ManyToManyField(Group, blank=True)
+    user_permissions = models.ManyToManyField(Permission, blank=True)
 
     objects = CustomUserManager()
 
