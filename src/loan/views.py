@@ -125,9 +125,9 @@ def loan_registration(request):
             amount = loan.amount
             bank = form.cleaned_data.get('bank')
             admin_fees = form.cleaned_data.get('admin_fees')
-            admin_fee_amount = Decimal(admin_fees) * Decimal(amount) / Decimal(100)
             if admin_fees:
-                create_administrative_fee_income_payment(admin_fees,start_date)
+                admin_fee_amount = Decimal(admin_fees) * Decimal(amount) / Decimal(100)
+                create_administrative_fee_income_payment(admin_fee_amount,start_date)
 
             # Calculate the total amount due per schedule
 
