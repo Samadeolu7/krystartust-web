@@ -1,16 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    {% load custom_filters %}
-    
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profit and Loss Report</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container mt-5">
+{% extends 'base.html' %}
+
+{% load custom_filters %}
+
+{% block title %}Profit and Loss Report{% endblock %}
+
+{% block content %}
         <h1 class="text-center mb-4">Profit and Loss Report</h1>
 
         <!-- Profit and Loss Table -->
@@ -49,14 +43,12 @@
                     {% endfor %}
                     <td><strong>{{ yearly_income_total|naira }}</strong></td>
                 </tr>
-            
-                <!-- Expense Rows -->
+                                <!-- Expense Type Rows -->
                 {% for expense_type in yearly_expense_by_type.keys %}
                 <tr class="table-danger">
                     <td>{{ expense_type }}</td>
                     {% for month_number, _ in months %}
                     <td>
-                        {# Access the total expense for this type and month #}
                         {% with monthly_expenses|get_item:month_number as expense_dict %}
                             {{ expense_dict|get_item:expense_type|get_item:"total"|default:"0"|naira }}
                         {% endwith %}
@@ -64,8 +56,34 @@
                     {% endfor %}
                     <td>{{ yearly_expense_by_type|get_item:expense_type|default:"0"|naira }}</td>
                 </tr>
+
+                <!-- Individual Expense Rows -->
+                {% for month_number, _ in months %}
+                    {% with monthly_expenses|get_item:month_number as expense_dict %}
+                        {% with expense_dict|get_item:expense_type|get_item:"expenses" as expenses %}
+                            {% for expense_name, expense_total in expenses.items %}
+                            <tr>
+                                <td>{{ expense_name }}</td>
+                                {% for _ in months %}
+                                    <td>{{ expense_total|default:"0"|naira }}</td>
+                                {% endfor %}
+                                <td>{{ expense_total|naira }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% endwith %}
+                    {% endwith %}
                 {% endfor %}
-            
+                {% endfor %}
+
+                <!-- Total Row for All Months -->
+                <tr class="table-danger">
+                    <td><strong>Total Expenses</strong></td>
+                    {% for month_number, _ in months %}
+                    <td><strong>{{ monthly_expense_totals|get_item:month_number|default:"0"|naira }}</strong></td>
+                    {% endfor %}
+                    <td><strong>{{ yearly_expense_total|naira }}</strong></td>
+                </tr>
+
                 <!-- Total Expense Row -->
                 <tr class="table-danger">
                     <td><strong>Total Expenses</strong></td>
@@ -88,5 +106,4 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}

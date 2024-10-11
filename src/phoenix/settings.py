@@ -147,6 +147,8 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'  # Redirect to dashboard after login
 LOGOUT_REDIRECT_URL = 'login'     # Redirect to login after logout
 
+AUTH_USER_MODEL = 'user.User'
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 

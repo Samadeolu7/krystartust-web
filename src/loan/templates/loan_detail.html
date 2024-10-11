@@ -1,15 +1,10 @@
-<!DOCTYPE html>
+{% extends 'base.html' %}
 
-<html lang="en">
-<head>
-    {% load custom_filters %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loan Detail</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container mt-5">
+{% load custom_filters %}
+
+{% block title %}Loan Detail{% endblock %}
+
+{% block content %}
         <h1 class="text-center mb-4">Loan Detail</h1>
         
         <a href="{% url 'client_loans_payments_excel' loan.client.id %}" class="btn btn-primary">Download Excel</a>
@@ -69,5 +64,4 @@
         {% endif %}
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}

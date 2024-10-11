@@ -1,0 +1,17 @@
+<!-- templates/registration/add_user.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add User</title>
+</head>
+<body>
+    <h1>Add User</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Add User</button>
+    </form>
+    <a href="{% url 'user_list' %}">Back to User List</a>
+</body>
+</html>

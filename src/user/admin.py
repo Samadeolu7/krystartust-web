@@ -10,12 +10,12 @@ class UserAdmin(DefaultUserAdmin):
     ordering = ('email',)
     search_fields = ('email', 'username')
     fieldsets = (
-        (None, {'fields': ('email', 'username', 'password')}),  # Ensure these fields exist in your User model
-        (_('Personal info'), {'fields': ('salary',)}),  # Ensure 'salary' exists in your User model
+        (None, {'fields': ('email', 'username', 'password')}),
+        (_('Personal info'), {'fields': ('salary',)}),
         (_('Permissions'), {
             'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
         }),
-        (_('Important dates'), {'fields': ('last_login',)}),  # Ensure 'last_login' exists in your User model
+        (_('Important dates'), {'fields': ('last_login',)}),
     )
 
 admin.site.register(User, UserAdmin)

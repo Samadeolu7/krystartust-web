@@ -2,6 +2,8 @@ import os
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.utils.timezone import now
+from bank.utils import get_cash_in_hand
 from client.excel_utils import create_clients_from_excel
 from client.models import Client
 from loan.models import Loan, LoanPayment
@@ -19,13 +21,16 @@ def create_client(request):
     if request.method == 'POST':
         form = ClientForm(request.POST)
         if form.is_valid():
+            client = form.save(commit=False)
+            client.created_at = now().date()
             form.save()
             messages.success(request, 'Client created successfully.')
             register_savings(client=form.instance, amount=form.cleaned_data["compulsory_savings"] )
             income = get_registration_fee_income()
             id_fee = get_id_fee_income()
-            create_income_payment(bank=form.cleaned_data['bank'], income=income, description='Registration Fee', amount=form.cleaned_data['registration_fee'], payment_date=form.instance.created_at)
-            create_income_payment(bank=form.cleaned_data['bank'], income=id_fee, description='ID Fee', amount=form.cleaned_data['id_fee'], payment_date=form.instance.created_at)
+            bank = get_cash_in_hand()
+            create_income_payment(bank, income=income, description='Registration Fee', amount=form.cleaned_data['registration_fee'], payment_date=form.instance.created_at)
+            create_income_payment(bank, income=id_fee, description='ID Fee', amount=form.cleaned_data['id_fee'], payment_date=form.instance.created_at)
             
             
             return redirect('list_clients')  # Redirect to a client list or relevant page

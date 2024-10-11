@@ -1,0 +1,33 @@
+<!-- templates/registration/user_list.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User List</title>
+</head>
+<body>
+    <h1>User List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Username</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.email }}</td>
+                <td>{{ user.username }}</td>
+                <td>
+                    <a href="{% url 'user_detail' user.id %}">View</a>
+                    <a href="{% url 'user_update' user.id %}">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'add_user' %}">Add New User</a>
+</body>
+</html>

@@ -47,5 +47,5 @@ class BankPayment(models.Model):
         super(BankPayment, self).save(*args, **kwargs)
     
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['payment_date', '-created_at']
 

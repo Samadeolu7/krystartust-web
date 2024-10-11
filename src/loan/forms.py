@@ -82,6 +82,10 @@ class LoanRegistrationForm(forms.ModelForm):
         label='Union Contribution',
         required=False
     )
+    admin_fees = forms.DecimalField(
+        label='Admin Fees',
+        required=False
+    )
     interest = forms.DecimalField(
         label='Interest',
         required=False
@@ -101,10 +105,6 @@ class LoanRegistrationForm(forms.ModelForm):
         self.fields['risk_premium'].initial = RiskPremium.objects.all().first().amount
         self.fields['union_contribution'].initial = UnionContribution.objects.all().first().amount
         self.fields['interest'].initial = LoanServiceFee.objects.all().first().amount
-        self.fields['registration_fee'].widget.attrs['readonly'] = True
-        self.fields['risk_premium'].widget.attrs['readonly'] = True
-        self.fields['union_contribution'].widget.attrs['readonly'] = True
-        self.fields['interest'].widget.attrs['readonly'] = True
 
 
 class LoanExcelForm(forms.Form):

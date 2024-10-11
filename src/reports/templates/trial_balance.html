@@ -1,15 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    {% load custom_filters %}
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trial Balance Report</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container mt-5">
+{% extends 'base.html' %}
+
+{% load custom_filters %}
+
+{% block title %}Trial Balance Report{% endblock %}
+
+        {% block content %}
         <h1 class="text-center mb-4">Trial Balance Report - {{ current_year }}</h1>
         <table class="table table-bordered">
             <thead class="table-dark">
@@ -91,5 +86,4 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}

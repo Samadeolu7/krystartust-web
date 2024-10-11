@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 
 from bank.utils import create_bank_payment
 
-from income.utils import create_risk_premium_income_payment, get_loan_interest_income, get_risk_premium_income
+from income.utils import create_risk_premium_income_payment, get_loan_interest_income, create_administrative_fee_income_payment
 
 from datetime import date, timedelta
 
@@ -124,6 +124,10 @@ def loan_registration(request):
             start_date = loan.start_date
             amount = loan.amount
             bank = form.cleaned_data.get('bank')
+            admin_fees = form.cleaned_data.get('admin_fees')
+            if admin_fees:
+                admin_fee_amount = Decimal(admin_fees) * Decimal(amount) / Decimal(100)
+                create_administrative_fee_income_payment(admin_fee_amount,start_date)
 
             # Calculate the total amount due per schedule
 
@@ -131,6 +135,7 @@ def loan_registration(request):
             time_increment = {
                 'Daily': timedelta(days=1),
                 'Weekly': timedelta(weeks=1),
+                'Monthly': timedelta(weeks=4),
                 # Add more loan types as needed
             }.get(loan_type, timedelta(weeks=1))  # Default to weekly if the loan type is not specifically listed
 
@@ -163,10 +168,11 @@ def loan_registration(request):
                 payment_date=start_date,
             )
             income_payment.save()
-            risk_premium_amount = loan.risk_premium * amount / Decimal(100)
+            risk_premium_amount = Decimal(loan.risk_premium) * Decimal(amount) / 100
             create_risk_premium_income_payment(risk_premium_amount, start_date)
 
-            create_union_contribution_income_payment(start_date,f'Union Contribution for {loan.client.name}')
+            union = form.cleaned_data.get('union_contribution')
+            create_union_contribution_income_payment(start_date,union,f'Union Contribution for {loan.client.name}')
 
             messages.success(request, "Loan registered successfully and repayment schedule created.")
             return redirect('dashboard')

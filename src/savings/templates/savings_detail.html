@@ -1,14 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    {% load custom_filters %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Savings Detail</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container mt-5">
+{% extends 'base.html' %}
+
+{% load custom_filters %}
+
+{% block title %}Savings Detail{% endblock %}
+
+{% block content %}
         <h1 class="text-center mb-4">Savings Detail</h1>
 
         <!-- Savings Information Table -->
@@ -65,5 +61,4 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}

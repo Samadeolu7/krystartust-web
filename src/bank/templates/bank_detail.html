@@ -1,15 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bank Detail</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container mt-5">
+{% extends 'base.html' %}
+
+{% load custom_filters %}
+
+{% block title %}Bank Detail{% endblock %}
+
+{% block content %}
         <h1 class="text-center mb-4">Bank Detail</h1>
+        <a href="{% url 'bank_to_excel' bank.id %}" class="btn btn-primary">Download Excel</a>
         <div class="card">
             <div class="card-header">
                 <h2>{{ bank.name }}</h2>
@@ -39,20 +36,25 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <td> 0 </td>
-                        <td> - </td>
-                        <td> Current Balance </td>
-                        <td> - </td>
-                        <td> {{ bank.balance }} </td>
+                        
+                        {% with 0 as running_balance %}
                         {% for payment in bank_payment %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ payment.payment_date }}</td>
                             <td>{{ payment.description }}</td>
-                            <td>{{ payment.amount }}</td>
-                            <td>{{ payment.bank_balance }}</td>                
+                            <td>{{ payment.amount|naira }}</td>
+                            <td>{{ running_balance|naira }}</td>
+                            {% update_variable running_balance|add:payment.amount as running_balance %}
                         </tr>
+                        
                         {% endfor %}
+                        {% endwith %}
+                        <td> 0 </td>
+                        <td> - </td>
+                        <td> Current Balance </td>
+                        <td> - </td>
+                        <td> {{ bank.balance|naira }} </td>
                     </tbody>
                 </table>
             {% else %}
@@ -66,5 +68,4 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}
