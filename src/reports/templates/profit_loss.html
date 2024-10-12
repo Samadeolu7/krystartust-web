@@ -64,10 +64,10 @@
                             {% for expense_name, expense_total in expenses.items %}
                             <tr>
                                 <td>{{ expense_name }}</td>
-                                {% for _ in months %}
-                                    <td>{{ expense_total|default:"0"|naira }}</td>
+                                {% for month_number,_ in months %}
+                                    <td>{{ expense_total|get_item:month_number|default:"0"|naira }}</td>
                                 {% endfor %}
-                                <td>{{ expense_total|naira }}</td>
+                                <td>{{ expense_total|get_item:'year' }}</td>
                             </tr>
                             {% endfor %}
                         {% endwith %}
