@@ -1,6 +1,8 @@
 from .views import all_clients_report, all_groups_report, client_loans_payments_excel, client_savings_payments_excel, daily_transactions_report, defaulter_report_excel, individual_group_report, profit_and_loss_report, trial_balance_report, client_list_excel
 
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('all-clients-report/', all_clients_report, name='all_clients_report'),
@@ -15,3 +17,6 @@ urlpatterns = [
     path('client-loans-payments-excel/<int:client_id>/', client_loans_payments_excel, name='client_loans_payments_excel'),
     
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

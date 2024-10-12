@@ -1,36 +1,138 @@
-<!-- templates/registration/login.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
-    <title>Login</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krystar Trust Investment Limited - Login</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #E7EDF3;
+        }
+        .container {
+            display: flex;
+            width: 60%;
+            max-width: 900px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .logo-section {
+            background-color: #E7EDF3;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+        .logo-section img {
+            width: 100px;
+            margin-bottom: 20px;
+        }
+        .logo-section h1 {
+            font-size: 24px;
+            color: #866C3A;
+            margin: 0;
+        }
+        .logo-section p {
+            font-size: 14px;
+            color: #2E3D62;
+            font-weight: bold;
+            margin: 0;
+        }
+        .nav-links {
+            margin-top: 20px;
+        }
+        .nav-links a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #2E3D62;
+            font-size: 12px;
+        }
+        .login-section {
+            background-color: #0D1240;
+            color: #C0C0C0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px;
+            color: #C0C0C0;
+        }
+        .login-section h2 {
+            color: #E0CC6E;
+            margin-bottom: 20px;
+        }
+        .login-section label {
+            margin: 10px 0 5px;
+            display: block;
+        }
+        .login-section input[type="text"],
+        .login-section input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 20px;
+            border: none;
+            border-bottom: 1px solid #C0C0C0;
+            background-color: #0D1240;
+            color: #FFF;
+        }
+        .login-section input[type="submit"] {
+            background-color: #E0CC6E;
+            color: #0D1240;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .login-section a {
+            color: #E0CC6E;     
+            font-size: 14px;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h2 class="text-center">Login</h2>
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="id_username" class="form-label">Username</label>
-                        <input type="text" name="username" autofocus required id="id_username" class="form-control">
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_password" class="form-label">Password</label>
-                        <input type="password" name="password" required id="id_password" class="form-control">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Login</button>
-                    {% if form.errors %}
-                        <div class="alert alert-danger mt-3">
-                            <strong>Invalid credentials. Please try again.</strong>
-                        </div>
-                    {% endif %}
-                </form>
+    <div class="container">
+        <div class="logo-section">
+            <img src="{% static 'images/logo.svg' %}" alt="Krystar Trust Logo" style="width: 100%; height: 100%;">
+            <div class="nav-links">
+                <a href="#">ABOUT</a>
+                <a href="#">PRIVACY</a>
+                <a href="#">TERMS OF USE</a>
+                <a href="#">FAQ</a>
             </div>
         </div>
+        <div class="login-section">
+            <h2>Log In</h2>
+            <form method="post">
+                {% csrf_token %}
+                <label for="id_username">Username</label>
+                <input type="text" id="id_username" name="username" required>
+                
+                <label for="id_password">Password</label>
+                <input type="password" id="id_password" name="password" required>
+                
+                <input type="submit" value="Log In">
+            </form>
+            <a href="#">Forgot password?</a>
+            {% if messages %}
+                <div class="alert alert-danger mt-3">
+                    {% for message in messages %}
+                        <strong>{{ message }}</strong>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

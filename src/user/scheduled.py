@@ -1,4 +1,6 @@
 from datetime import timezone
+
+from user.pdf_gen import generate_payslip
 from .models import User
 from expenses.models import Expense, ExpensePayment
 from bank.utils import get_bank_account, create_bank_payment
@@ -30,12 +32,13 @@ def record_salary_expense():
     bank_payment = create_bank_payment(bank, f"Salary Payment for the month of {timezone.now().strftime('%B')}", salary, timezone.now())
     return expense_payment
 
-def generate_payslip():
-    pass
+def generate_payslip_f():
+    
+    return generate_payslip()
 
 def schedule():
     record_salary_expense()
-    generate_payslip()
+    generate_payslip_f()
     return True
 
 

@@ -6,3 +6,4 @@ ca.pem
 *.sqlite3
 *.csv
 *.json
+*.pdf
