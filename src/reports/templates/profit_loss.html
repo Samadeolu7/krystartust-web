@@ -39,22 +39,14 @@
                 <tr class="table-success">
                     <td><strong>Total Income</strong></td>
                     {% for month_number, _ in months %}
-                    <td>{{ monthly_income_totals|get_item:month_number|default:"0"|naira }}</td>
+                    <td><strong>{{ monthly_income_totals|get_item:month_number|default:"0"|naira }}</strong></td>
                     {% endfor %}
                     <td><strong>{{ yearly_income_total|naira }}</strong></td>
                 </tr>
                                 <!-- Expense Type Rows -->
                 {% for expense_type in yearly_expense_by_type.keys %}
                 <tr class="table-danger">
-                    <td>{{ expense_type }}</td>
-                    {% for month_number, _ in months %}
-                    <td>
-                        {% with monthly_expenses|get_item:month_number as expense_dict %}
-                            {{ expense_dict|get_item:expense_type|get_item:"total"|default:"0"|naira }}
-                        {% endwith %}
-                    </td>
-                    {% endfor %}
-                    <td>{{ yearly_expense_by_type|get_item:expense_type|default:"0"|naira }}</td>
+                    <td colspan="14"><strong>{{ expense_type }}</strong></td>
                 </tr>
 
                 <!-- Individual Expense Rows -->
@@ -73,6 +65,17 @@
                         {% endwith %}
                     {% endwith %}
                 {% endfor %}
+                <tr class="table-danger">
+                    <td>Total</td>
+                    {% for month_number, _ in months %}
+                    <td>
+                        {% with monthly_expenses|get_item:month_number as expense_dict %}
+                            {{ expense_dict|get_item:expense_type|get_item:"total"|default:"0"|naira }}
+                        {% endwith %}
+                    </td>
+                    {% endfor %}
+                    <td>{{ yearly_expense_by_type|get_item:expense_type|default:"0"|naira }}</td>
+                </tr>
                 {% endfor %}
 
                 <!-- Total Row for All Months -->
@@ -84,22 +87,13 @@
                     <td><strong>{{ yearly_expense_total|naira }}</strong></td>
                 </tr>
 
-                <!-- Total Expense Row -->
-                <tr class="table-danger">
-                    <td><strong>Total Expenses</strong></td>
-                    {% for month_number, _ in months %}
-                    <td>{{ monthly_expense_totals|get_item:month_number|default:"0"|naira }}</td>
-                    {% endfor %}
-                    <td><strong>{{ yearly_expense_total|naira }}</strong></td>
-                </tr>
-            
                 <!-- Net Profit/Loss Row -->
                 <tr class="table-warning">
                     <td><strong>Net Profit/Loss</strong></td>
                     {% for month_number, _ in months %}
                     <td>{{ monthly_profit|get_item:month_number|naira }}</td>
                     {% endfor %}
-                    <td><strong>{{ yearly_income_total|floatformat:2|add:"-"|add:yearly_expense_total|floatformat:2|naira }}</strong></td>
+                    <td><strong>{{ yearly_income_total|floatformat:2|subtract:yearly_expense_total|floatformat:2|naira }}</strong></td>
                 </tr>
             </tbody>
         </table>

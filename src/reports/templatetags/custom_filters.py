@@ -1,6 +1,8 @@
 # reports/templatetags/custom_filters.py
 
 from django import template
+from django.utils.safestring import SafeString
+from decimal import Decimal
 
 register = template.Library()
 
@@ -36,10 +38,22 @@ def naira(value):
     except (ValueError, TypeError):
         return value
 
-
 @register.filter
 def subtract(value, arg):
-    return value - arg
+    try:
+        # Convert SafeString to float
+        if isinstance(value, SafeString):
+            value = float(value)
+        if isinstance(arg, SafeString):
+            arg = float(arg)
+        
+        # Convert to Decimal for precise arithmetic
+        value = Decimal(value)
+        arg = Decimal(arg)
+        
+        return value - arg
+    except (ValueError, TypeError, Decimal.InvalidOperation):
+        return ''
 
 @register.simple_tag
 def update_variable(value):
