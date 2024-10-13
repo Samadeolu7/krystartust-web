@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% load custom_filters %}
+
+{% block title %}Income Detail{% endblock %}
+
+{% block content %}
+        <h1 class="text-center mb-4">Income Detail</h1>
+        <div class="card">
+            <div class="card-header">
+                <h2>{{ income.name }}</h2>
+            </div>
+            <div class="card-body">
+                <p><strong>Description:</strong> {{ income.description }}</p>
+                <p><strong>Balance:</strong> {{ income.balance }}</p>
+                <p><strong>Balance BF:</strong> {{ income.balance_bf }}</p>
+                <p><strong>Year:</strong> {{ income.year }}</p>
+                <p><strong>Created At:</strong> {{ income.created_at }}</p>
+            </div>
+        </div>
+
+        <!-- income Payments Section -->
+        <div class="mt-5">
+            <h3>income Payments</h3>
+            {% if income_payment %}
+                <table class="table table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Balance</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        {% with 0 as running_balance %}
+                        {% for payment in income_payment %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ payment.payment_date }}</td>
+                            <td>{{ payment.description }}</td>
+                            <td>{{ payment.amount|naira }}</td>
+                            <td>{{ running_balance|naira }}</td>
+                            {% update_variable running_balance|add:payment.amount as running_balance %}
+                        </tr>
+                        
+                        {% endfor %}
+                        {% endwith %}
+                        <td> 0 </td>
+                        <td> - </td>
+                        <td> Current Balance </td>
+                        <td> - </td>
+                        <td> {{ income.balance|naira }} </td>
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No payments found for this income.</p>
+            {% endif %}
+        </div>
+
+        <div class="mt-4">
+            <a href="{% url 'income_list' %}" class="btn btn-primary">Back to income List</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 
 from bank.utils import create_bank_payment
 
-from income.utils import create_risk_premium_income_payment, get_loan_interest_income, create_administrative_fee_income_payment
+from income.utils import create_risk_premium_income_payment, get_loan_interest_income, create_administrative_fee_income_payment, create_loan_registration_fee_income_payment
 
 from datetime import date, timedelta
 
@@ -123,11 +123,16 @@ def loan_registration(request):
             duration = loan.duration
             start_date = loan.start_date
             amount = loan.amount
+            registration_fee = form.cleaned_data.get('registration_fee')
             bank = form.cleaned_data.get('bank')
             admin_fees = form.cleaned_data.get('admin_fees')
             if admin_fees:
                 admin_fee_amount = Decimal(admin_fees) * Decimal(amount) / Decimal(100)
                 create_administrative_fee_income_payment(admin_fee_amount,start_date)
+
+            if registration_fee:
+                create_loan_registration_fee_income_payment(registration_fee,start_date)
+
 
             # Calculate the total amount due per schedule
 

@@ -19,4 +19,4 @@ def create_loan_payment(client, loan,amount,date):
     loan_payment_schedule.save()
     bank = get_cash_in_hand()
     bank_payment = create_bank_payment(bank, f'Loan payment from {client.name}', amount, date)
-    
+    return loan_payment

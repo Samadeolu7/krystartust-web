@@ -1,8 +1,25 @@
 from django.shortcuts import redirect, render
 
 from .forms import RegistrationFeeForm, IDFeeForm, LoanRegistrationFeeForm, RiskPremiumForm, UnionContributionForm, LoanServiceFeeForm
+from .models import Income, IncomePayment
 from django.contrib.auth.decorators import login_required
 # Create your views here.
+
+@login_required
+def income_list(request):
+    incomes = Income.objects.all()
+    return render(request, 'income_list.html', {'incomes': incomes})
+
+@login_required
+def income_details(request, pk):
+    income = Income.objects.get(pk=pk)
+    income_payment = IncomePayment.objects.filter(income_id=pk)
+
+    context = {
+        'income': income,
+        'income_payment': income_payment
+    }
+    return render(request, 'income_details.html', context)
 
 @login_required
 def set_fees(request):

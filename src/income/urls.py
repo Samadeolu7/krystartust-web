@@ -1,4 +1,4 @@
-from .views import registration_fee, id_fee, loan_registration_fee, risk_premium, union_contribution, loan_service_fee, set_fees
+from .views import registration_fee, id_fee, loan_registration_fee, risk_premium, union_contribution, loan_service_fee, set_fees, income_details, income_list
 from django.urls import path
 
 urlpatterns = [
@@ -9,4 +9,6 @@ urlpatterns = [
     path('risk_premium/', risk_premium, name='risk_premium'),
     path('union_contribution/', union_contribution, name='union_contribution'),
     path('loan_service_fee/', loan_service_fee, name='loan_service_fee'),
+    path('income_details/<int:pk>/', income_details, name='income_details'),
+    path('income_list/', income_list, name='income_list'),
 ]

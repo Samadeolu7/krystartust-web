@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% load custom_filters %}
+
+{% block title %}Income List{% endblock %}
+
+{% block content %}
+        <h1 class="text-center mb-4">Income List</h1>
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Balance</th>
+                    <th>Balance BF</th>
+                    <th>Year</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for income in incomes %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <a href="{% url 'income_details' income.id %}">{{ income.name }}</a>
+                    </td>
+                    <td>{{ income.description }}</td>
+                    <td>{{ income.balance }}</td>
+                    <td>{{ income.balance_bf }}</td>
+                    <td>{{ income.year }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    {% endblock %}
