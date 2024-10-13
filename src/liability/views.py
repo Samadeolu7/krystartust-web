@@ -1,9 +1,12 @@
+from gettext import translation
 from django.shortcuts import render
 
 # Create your views here.
 
 from datetime import datetime, timezone
 from django.shortcuts import redirect, render
+
+from main.utils import verify_trial_balance
 from .forms import LiabilityForm, LiabilityPaymentForm
 from .models import Liability, LiabilityPayment
 from django.contrib.auth.decorators import login_required
@@ -25,10 +28,13 @@ def liability_payment(request):
     if request.method == 'POST':
         form = LiabilityPaymentForm(request.POST)
         if form.is_valid():
-            form.save()
-            bank = get_bank_account()
-            amount = form.cleaned_data['amount'] * -1
-            create_bank_payment(bank,f'liability payment for {form.cleaned_data["liability"]}', amount, form.cleaned_data['payment_date'])
+            with translation.atomic():
+                form.save()
+                bank = get_bank_account()
+                amount = form.cleaned_data['amount'] * -1
+                create_bank_payment(bank,f'liability payment for {form.cleaned_data["liability"]}', amount, form.cleaned_data['payment_date'])
+                verify_trial_balance()
+            return redirect('dashboard')
     return render(request, 'create_liability_payment.html', {'form': form})
 
 @login_required

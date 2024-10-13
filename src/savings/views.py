@@ -3,12 +3,14 @@ from django.shortcuts import render, redirect
 
 # Create your views here.
 from django.shortcuts import render
+
+from main.utils import verify_trial_balance
 from .models import Savings, SavingsPayment
 from .forms import SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm
 from .excel_utils import savings_from_excel
 from bank.utils import create_bank_payment, get_cash_in_hand
 from django.contrib.auth.decorators import login_required
-
+from django.db import transaction
 
 
 @login_required
@@ -39,13 +41,15 @@ def register_savings(request):
     if request.method == 'POST':
         form = SavingsForm(request.POST)
         if form.is_valid():
-            savings = form.save()
-            bank = create_bank_payment(
-                bank=get_cash_in_hand(),
-                description=f"Savings Payment by {savings.client.name}",
-                amount=form.cleaned_data['amount'],
-                payment_date=form.cleaned_data['payment_date']
-            )
+            with transaction.atomic():
+                savings = form.save()
+                create_bank_payment(
+                    bank=get_cash_in_hand(),
+                    description=f"Savings Payment by {savings.client.name}",
+                    amount=form.cleaned_data['amount'],
+                    payment_date=form.cleaned_data['payment_date']
+                )
+                verify_trial_balance()
             
             return redirect('dashboard')
     else:
@@ -58,6 +62,7 @@ def record_withdrawal(request):
         form = WithdrawalForm(request.POST)
         if form.is_valid():
             form.save()
+
             return redirect('dashboard')
     else:
         form = WithdrawalForm()

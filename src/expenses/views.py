@@ -1,8 +1,11 @@
 from datetime import datetime, timezone
 from django.shortcuts import redirect, render
+
+from main.utils import verify_trial_balance
 from .forms import ExpenseForm, ExpensePaymentForm, ExpenseTypeForm
 from .models import Expense, ExpensePayment, ExpenseType
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 
 from bank.utils import create_bank_payment, get_bank_account
 # Create your views here.
@@ -31,11 +34,15 @@ def expense_payment(request):
     if request.method == 'POST':
         form = ExpensePaymentForm(request.POST)
         if form.is_valid():
-            form.save()
-            bank = get_bank_account()
-            amount = form.cleaned_data['amount'] * -1
-            create_bank_payment(bank,f'expense for {form.cleaned_data["expense"]}', amount, form.cleaned_data['payment_date'])
-            
+            with transaction.atomic():
+                form.save()
+                bank = get_bank_account()
+                amount = form.cleaned_data['amount'] * -1
+                create_bank_payment(bank,f'expense for {form.cleaned_data["expense"]}', amount, form.cleaned_data['payment_date'])
+
+                verify_trial_balance()
+            return redirect('dashboard')
+                
     return render(request, 'expense_payment.html', {'form': form})
 
 @login_required
