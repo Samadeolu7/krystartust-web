@@ -1,4 +1,4 @@
-from .views import group_view, group_detail, group_create, dashboard, update_app, get_accounts, journal_entry
+from .views import group_view, group_detail, group_create, dashboard, update_app, get_accounts, journal_entry, fake_dashboard
 
 from django.urls import path
 
@@ -10,4 +10,5 @@ urlpatterns = [
     path('view_groups/', group_view, name='group_view'),
     path('journal_entry/', journal_entry, name='journal_entry'),
     path('get-accounts/', get_accounts, name='get_accounts'),
+    path('2/', fake_dashboard, name='fake_dashboard'),
 ]

@@ -1,22 +1,29 @@
+import json
+from datetime import timedelta
+from subprocess import Popen
+
 from django.shortcuts import redirect, render
+from django.http import JsonResponse, HttpResponse
+from django.template.loader import render_to_string
+from django.contrib.auth.decorators import login_required
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Sum, Q
+from django.utils import timezone
 
 from bank.models import Bank
+from client.models import Client
 from expenses.models import Expense
 from income.models import Income
 from liability.models import Liability
-from loan.models import Loan, LoanPayment
+from loan.models import Loan, LoanPayment, LoanRepaymentSchedule as LoanRepayment
 from savings.models import Savings, SavingsPayment
 
 from .models import ClientGroup as Group
 from .forms import GroupForm, JVForm
-from client.models import Client
-# Create your views here.
+from django.core.cache import cache
+from django.db.models.functions import ExtractWeek
 
-from django.http import JsonResponse
-from django.template.loader import render_to_string
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
-from subprocess import Popen
+
 
 @login_required
 def update_app(request):
@@ -25,11 +32,89 @@ def update_app(request):
     Popen(["git", "pull", "origin", "main"])
     Popen(["docker-compose", "up", "--build", "-d"])
     return HttpResponse("App is updating. Please wait...")
-
 @login_required
 def dashboard(request):
     """View to render the main dashboard."""
+    
+    today = timezone.now().date()
+    start_of_week = today - timedelta(days=today.weekday())
+
+    # Cache total loan data
+    total_loan_data = cache.get('total_loan_data')
+    if total_loan_data is None:
+        total_loan_data = Loan.objects.values('loan_type').annotate(
+            total_amount=Sum('amount'),
+            total_balance=Sum('balance')
+        )
+        cache.set('total_loan_data', total_loan_data, timeout=3600)
+
+    loan_types = [loan['loan_type'] for loan in total_loan_data]
+    total_amounts = [loan['total_amount'] or 0 for loan in total_loan_data]
+    total_balances = [loan['total_balance'] or 0 for loan in total_loan_data]
+
+    # Optimized weekly inflows query
+    weekly_inflows = [0] * 7  # Initialize weekly inflows
+
+    savings_inflows = (
+        SavingsPayment.objects.filter(payment_date__gte=start_of_week, payment_date__lte=today)
+        .values('payment_date')
+        .annotate(total=Sum('amount'))
+    )
+
+    loan_payment_inflows = (
+        LoanPayment.objects.filter(payment_date__gte=start_of_week, payment_date__lte=today)
+        .values('payment_date')
+        .annotate(total=Sum('amount'))
+    )
+
+    transactions = list(savings_inflows) + list(loan_payment_inflows)
+    for transaction in transactions:
+        day_of_week = transaction['payment_date'].weekday()  # 0 = Monday, ..., 6 = Sunday
+        weekly_inflows[day_of_week] += transaction['total']
+
+    # Aggregate paid loan repayments
+    loan_repayments = LoanRepayment.objects.filter(
+        Q(payment_date__isnull=False) |
+        Q(due_date__gte=today, due_date__lte=today + timedelta(days=6))
+    ).annotate(
+        due_week=ExtractWeek('due_date'),
+        payment_week=ExtractWeek('payment_date')
+    ).values('due_week', 'payment_week', 'amount_due', 'due_date', 'payment_date')
+
+    due_dates = [0] * 53
+    payment_dates = [0] * 53
+    expected_cash_in = 0
+    actual_cash_in = 0
+
+    for repayment in loan_repayments:
+        if repayment['due_week'] is not None:
+            due_dates[repayment['due_week'] - 1] += repayment['amount_due']
+        if repayment['payment_week'] is not None:
+            payment_dates[repayment['payment_week'] - 1] += repayment['amount_due']
+
+        # Cash in calculations
+        if repayment['due_date'] and repayment['due_date'] >= today and repayment['due_date'] <= today + timedelta(days=6):
+            expected_cash_in += repayment['amount_due']
+        if repayment['payment_date'] and repayment['payment_date'] >= today and repayment['payment_date'] <= today + timedelta(days=6):
+            actual_cash_in += repayment['amount_due']
+
+    current_defaulters = Loan.objects.with_is_defaulted().filter(is_defaulted=True).count()
+
+    return render(request, 'dash.html', {
+        'loan_types': loan_types,
+        'total_amounts': total_amounts,
+        'total_balances': total_balances,
+        'weekly_inflows': weekly_inflows,
+        'due_dates': due_dates,
+        'payment_dates': payment_dates,
+        'current_defaulters': current_defaulters,
+        'expected_cash_in': expected_cash_in,
+        'actual_cash_in': actual_cash_in,
+    })
+
+def fake_dashboard(request):
     return render(request, 'dashboard.html')
+
 
 @login_required
 def group_detail(request, pk):

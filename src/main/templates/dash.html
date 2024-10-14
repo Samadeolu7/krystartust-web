@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    {% load custom_filters %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krystar Trust Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+        <style>
+        body {
+            background-color: #F5F7FA;
+        }
+        .sidebar {
+            background: linear-gradient(180deg, #0D1240, #1A1E50);
+            color: #FFF;
+            padding: 15px;
+            height: 100vh;
+            font-size: 14px;
+        }
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .sidebar h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            color: #FFF;
+            text-decoration: none;
+            display: block;
+            font-size: 14px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #1A1E50;
+            transition: background-color 0.3s;
+        }
+        .sidebar a:hover {
+            background-color: #2A2E70;
+        }
+        .sidebar .sub-item {
+            font-size: 12px;
+            color: #C0C0C0;
+        }
+        .sidebar .sub-item a {
+            color: #C0C0C0 !important;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            background-color: #1A1E50;
+            transition: background-color 0.3s;
+        }
+        .sidebar .sub-item a:hover {
+            background-color: #2A2E70;
+            color: #FFF !important;
+        }
+        .sidebar .sub-sub-item {
+            font-size: 11px;
+            color: #C0C0C0;
+        }
+        .sidebar .sub-sub-item a {
+            color: #C0C0C0 !important;
+            padding: 6px;
+            margin-bottom: 3px;
+            border-radius: 3px;
+            background-color: #1A1E50;
+            transition: background-color 0.3s;
+        }
+        .sidebar .sub-sub-item a:hover {
+            background-color: #2A2E70;
+            color: #FFF !important;
+        }
+        .status-box {
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFF;
+        }
+        .status-red { background-color: #E57373; }
+        .status-green { background-color: #81C784; }
+        .status-yellow { background-color: #FFB74D; }
+        .chart-container {
+            background-color: #FFF;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            height: 80px; /* Adjust height to fit logo better */
+        }
+        
+        .logo-img {
+            max-width: 80%; /* Adjust size based on sidebar width */
+            height: auto;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar">
+                <div class="logo-container">
+                    <img src="{% static 'images/logo.svg' %}" alt="Krystar Trust Logo" class="logo-img">
+                 </div>
+                <div id="sidebarAccordion">
+                    <a href="{% url 'dashboard' %}">
+                        <i class="fas fa-tachometer-alt"></i> DASHBOARD
+                    </a>
+                    
+                    <a href="#userManagementSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
+                        <i class="fas fa-user"></i> USER MANAGEMENT
+                    </a>
+                    <ul class="collapse list-unstyled" id="userManagementSubmenu" data-parent="#sidebarAccordion">
+                        <li class="sub-item"><a href="#">User List</a></li>
+                        <li class="sub-item"><a href="#">Add User</a></li>
+                    </ul>
+            
+                    <a href="#customerManagementSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
+                        <i class="fas fa-users"></i> CUSTOMER MANAGEMENT
+                    </a>
+                    <ul class="collapse list-unstyled" id="customerManagementSubmenu" data-parent="#sidebarAccordion">
+                        <li class="sub-item"><a href="{% url 'list_clients' %}">Customer List</a></li>
+                        <li class="sub-item"><a href="{% url 'create_client' %}">Add Customer</a></li>
+                    </ul>
+            
+                    <a href="#financialServicesSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
+                        <i class="fas fa-wallet"></i> FINANCIAL SERVICES
+                    </a>
+                    <ul class="collapse list-unstyled" id="financialServicesSubmenu" data-parent="#sidebarAccordion">
+                        <li class="sub-item">
+                            <a href="#savingsManagementSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#financialServicesSubmenu">
+                                Savings Management
+                            </a>
+                            <ul class="collapse list-unstyled" id="savingsManagementSubmenu" data-parent="#financialServicesSubmenu">
+                                <li class="sub-sub-item"><a href="{% url 'savings_registration' %}">Register Savings</a></li>
+                                <li class="sub-sub-item"><a href="{% url 'savings_withdrawal' %}">Record Withdrawal</a></li>
+                            </ul>
+                        </li>
+                        <li class="sub-item">
+                            <a href="#loanManagementSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#financialServicesSubmenu">
+                                Loan Management
+                            </a>
+                            <ul class="collapse list-unstyled" id="loanManagementSubmenu" data-parent="#financialServicesSubmenu">
+                                <li class="sub-sub-item"><a href="{% url 'loan_registration' %}">Register Loan</a></li>
+                                <li class="sub-sub-item"><a href="{% url 'loan_payment' %}">Record Payment</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+            
+                    <a href="#transactionsSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
+                        <i class="fas fa-exchange-alt"></i> TRANSACTIONS
+                    </a>
+                    <ul class="collapse list-unstyled" id="transactionsSubmenu" data-parent="#sidebarAccordion">
+                        <li class="sub-item"><a href="{% url 'cash_transfer' %}">Bank Transfer</a></li>
+                        <li class="sub-item"><a href="{% url 'expense_payment' %}">Petty Cash</a></li>
+                        <li class="sub-item"><a href="{% url 'journal_entry' %}">Ledger Transactions</a></li>
+                    </ul>
+            
+                    <a href="#reportsSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
+                        <i class="fas fa-chart-line"></i> REPORTS AND ANALYTICS
+                    </a>
+                    <ul class="collapse list-unstyled" id="reportsSubmenu" data-parent="#sidebarAccordion">
+                        <li class="sub-item"><a href="{% url 'list_clients' %}">Debtors Reports</a></li>
+                        <li class="sub-item"><a href="{% url 'all_groups_report' %}">Group Report</a></li>
+                        <li class="sub-item"><a href="{% url 'daily_transactions_report' %}">Remittance Reports</a></li>
+                        <li class="sub-item"><a href="{% url 'profit_and_loss_report' %}">P & L Report</a></li>
+                        <li class="sub-item"><a href="{% url 'trial_balance' %}">Trial Balance</a></li>
+                        <li class="sub-item"><a href="#">Balance Sheet</a></li>
+                        <li class="sub-item"><a href="{% url 'loan_defaulters_report' %}">Defaulters Report</a></li>
+                    </ul>
+            
+                    <a href="#settingsSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
+                        <i class="fas fa-cogs"></i> SETTINGS
+                    </a>
+                    <ul class="collapse list-unstyled" id="settingsSubmenu" data-parent="#sidebarAccordion">
+                        <li class="sub-item"><a href="#">User Settings</a></li>
+                        <li class="sub-item"><a href="#">Financial Settings</a></li>
+                        <li class="sub-item"><a href="#">Transaction Settings</a></li>
+                        <li class="sub-item"><a href="#">Report Settings</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 p-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Welcome Israel</h2>
+                    <div>
+                        <input type="search" class="form-control d-inline-block" placeholder="Search transactions, customers, subscription" style="width: 250px;">
+                        <form method="post" action="{% url 'logout' %}" class="d-inline-block">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-dark ml-2">LOG OUT</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Status Boxes -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <a href="{% url 'daily_transactions_report' %}">
+                        <div class="status-box status-yellow">Expected Cash Inflow -{{expected_cash_in|naira}}</div>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'daily_transactions_report' %}">
+                        <div class="status-box status-green">Current Cash Inflow -  {{actual_cash_in|naira}} </div>
+                        </a>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <a href="{% url 'loan_defaulters_report' %}">
+                        <div class="status-box status-red">Current Defaulters - {{current_defaulters}}</div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="chart-container">
+                            <h5>Progress</h5>
+                            <!-- Placeholder for Bar Chart -->
+                            <canvas id="loanPerformanceChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                
+                    <div class="col-md-4 mb-4">
+                        <div class="chart-container">
+                            <h5>Weekly Inflow</h5>
+                            <!-- Placeholder for Line Chart -->
+                            <canvas id="weeklyInflowChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="chart-container">
+                            <h5>Loan Repayment Schedule</h5>
+                            <canvas id="repaymentChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    
+    <!-- Include JSON Script Tags -->
+    {{ loan_types|json_script:"loan_types" }}
+    {{ total_amounts|json_script:"total_amounts" }}
+    {{ total_balances|json_script:"total_balances" }}
+    {{ weekly_inflows|json_script:"weekly_inflows" }}
+    {{ due_dates|json_script:"due_dates" }}
+    {{ payment_dates|json_script:"payment_dates" }}
+
+    <script>
+        // Parse data from JSON Script Tags
+        var loanTypes = JSON.parse(document.getElementById('loan_types').textContent);
+        var totalAmounts = JSON.parse(document.getElementById('total_amounts').textContent);
+        var totalBalances = JSON.parse(document.getElementById('total_balances').textContent);
+        var weeklyInflows = JSON.parse(document.getElementById('weekly_inflows').textContent);
+        var dueDates = JSON.parse(document.getElementById('due_dates').textContent);
+        var paymentDates = JSON.parse(document.getElementById('payment_dates').textContent);
+
+        // Loan Performance Chart
+        var ctx = document.getElementById('loanPerformanceChart').getContext('2d');
+        var loanPerformanceChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: loanTypes,
+                datasets: [
+                    {
+                        label: 'Total Loan Amount',
+                        data: totalAmounts,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Total Balance',
+                        data: totalBalances,
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Weekly Inflow Chart
+        var ctx2 = document.getElementById('weeklyInflowChart').getContext('2d');
+        var weeklyInflowChart = new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                datasets: [{
+                    label: 'Weekly Inflow',
+                    data: weeklyInflows,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                    fill: true
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Loan Repayment Schedule Chart
+        var ctx3 = document.getElementById('repaymentChart').getContext('2d');
+        var repaymentChart = new Chart(ctx3, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 53}, (_, i) => `Week ${i + 1}`),
+                datasets: [
+                    {
+                        label: 'Due Dates',
+                        data: dueDates,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                        fill: false,
+                    },
+                    {
+                        label: 'Payment Dates',
+                        data: paymentDates,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        fill: false,
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
