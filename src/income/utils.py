@@ -7,9 +7,14 @@ from bank.utils import get_cash_in_hand, get_union_pulse
 
 
 
-def get_loan_interest_income():
+def get_loan_interest_income(type):
     YEAR = Year.current_year()
-    return Income.objects.get_or_create(name='Loan Interest', description='Loan Interest Income', year=YEAR)[0]
+    if type == 'Daily':
+        return Income.objects.get_or_create(name='Daily Loan Interest', description='Loan Interest Income Daily', year=YEAR)[0]
+    elif type == 'Weekly':
+        return Income.objects.get_or_create(name='Weekly Loan Interest', description='Loan Interest Income Weekly', year=YEAR)[0]
+    else:
+        return Income.objects.get_or_create(name='Monthly Loan Interest', description='Loan Interest Income Monthly', year=YEAR)[0]
 
 def get_registration_fee_income():
     YEAR = Year.current_year()

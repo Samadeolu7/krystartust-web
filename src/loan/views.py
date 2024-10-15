@@ -178,7 +178,12 @@ def loan_registration(request):
                 bank_payment.save()
 
                 interest_amount = Decimal(loan.interest) * Decimal(amount) / Decimal(100)
-                interest_income = get_loan_interest_income()
+                if loan_type == 'Daily':
+                    interest_income = get_loan_interest_income(type='Daily')
+                elif loan_type == 'Weekly':
+                    interest_income = get_loan_interest_income(type='Weekly')
+                else:
+                    interest_income = get_loan_interest_income(type='Monthly')
                 income_payment = IncomePayment.objects.create(
                     income=interest_income,
                     description=f'Interest income from {loan.client.name}',
