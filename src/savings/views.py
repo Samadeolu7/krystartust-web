@@ -45,7 +45,7 @@ def register_savings(request):
             with transaction.atomic():
                 savings = form.save()
                 create_bank_payment(
-                    bank=get_cash_in_hand(),
+                    bank=form.cleaned_data['bank'],
                     description=f"Savings Payment by {savings.client.name}",
                     amount=form.cleaned_data['amount'],
                     payment_date=form.cleaned_data['payment_date']

@@ -35,6 +35,7 @@ class WithdrawalForm(forms.ModelForm):
         return instance
 
 class SavingsForm(forms.ModelForm):
+    bank = forms.ModelChoiceField(queryset=Bank.objects.all(), required=False)
     class Meta:
         model = SavingsPayment
         fields = ['savings', 'amount', 'payment_date']

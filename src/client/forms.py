@@ -17,6 +17,7 @@ class ClientForm(forms.ModelForm):
         label='ID Fee',
         required=False
     )
+    bank = forms.ModelChoiceField(queryset=Bank.objects.all(), required=False)
     class Meta:
         model = Client
         fields = ['name', 'email', 'phone', 'address', 'group']

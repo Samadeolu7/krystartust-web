@@ -3,7 +3,7 @@ from bank.models import BankPayment
 from bank.utils import get_cash_in_hand, create_bank_payment
 from .models import Savings, SavingsPayment, CompulsorySavings
 
-def register_savings(client, amount):
+def register_savings(bank,client, amount):
     savings = Savings.objects.create(client=client, balance=0)
     savings.save()
     savingspayment = SavingsPayment.objects.create(client=client,savings=savings, amount=amount, description=f'Savings for {client.name}', payment_date=savings.created_at)

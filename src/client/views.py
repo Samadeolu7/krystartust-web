@@ -25,10 +25,11 @@ def create_client(request):
             client.created_at = now().date()
             form.save()
             messages.success(request, 'Client created successfully.')
-            register_savings(client=form.instance, amount=form.cleaned_data["compulsory_savings"] )
+            bank = form.cleaned_data['bank']
+            register_savings(bank,client=form.instance, amount=form.cleaned_data["compulsory_savings"] )
             income = get_registration_fee_income()
             id_fee = get_id_fee_income()
-            bank = get_cash_in_hand()
+            bank = form.cleaned_data['bank']
             create_income_payment(bank, income=income, description='Registration Fee', amount=form.cleaned_data['registration_fee'], payment_date=form.instance.created_at)
             create_income_payment(bank, income=id_fee, description='ID Fee', amount=form.cleaned_data['id_fee'], payment_date=form.instance.created_at)
             
