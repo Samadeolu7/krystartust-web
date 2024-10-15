@@ -85,6 +85,16 @@ def load_payment_schedules(request):
         return JsonResponse(list(payment_schedules.values('id', 'due_date', 'amount_due')), safe=False)
     except Loan.DoesNotExist:
         return JsonResponse({'error': 'Loan not found'}, status=404)
+    
+@login_required
+def load_payment_schedules_com(request):
+    client_id = request.GET.get('client_id')
+    try:
+        loan = Loan.objects.get(client_id=client_id)
+        payment_schedules = LoanRepaymentSchedule.objects.filter(loan_id=loan.id, is_paid=False).order_by('due_date')
+        return JsonResponse(list(payment_schedules.values('id', 'due_date', 'amount_due')), safe=False)
+    except Loan.DoesNotExist:
+        return JsonResponse({'error': 'Loan not found'}, status=404)
 
 @login_required
 def loan_upload_view(request):

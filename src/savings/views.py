@@ -6,11 +6,12 @@ from django.shortcuts import render
 
 from main.utils import verify_trial_balance
 from .models import Savings, SavingsPayment
-from .forms import SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm
+from .forms import SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm, CombinedPaymentForm
 from .excel_utils import savings_from_excel
 from bank.utils import create_bank_payment, get_cash_in_hand
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.contrib import messages
 
 
 @login_required
@@ -50,11 +51,43 @@ def register_savings(request):
                     payment_date=form.cleaned_data['payment_date']
                 )
                 verify_trial_balance()
+            messages.success(request, 'Savings registered successfully')    
             
             return redirect('dashboard')
+        else:
+            messages.error(request, f'An error occurred while registering savings {form.errors}')
+
     else:
         form = SavingsForm()
     return render(request, 'savings_form.html', {'form': form})
+
+@login_required
+def register_payment(request):
+    if request.method == 'POST':
+        form = CombinedPaymentForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                loan,savings = form.save()
+                bank = form.cleaned_data['bank']
+                create_bank_payment(
+                    bank=bank,
+                    description=form.cleaned_data['description'],
+                    amount=loan.amount,
+                    payment_date=form.cleaned_data['payment_date']
+                )
+                create_bank_payment(
+                    bank=bank,
+                    description=f"Savings Payment by {savings.client.name}",
+                    amount=savings.amount,
+                    payment_date=form.cleaned_data['payment_date']
+                )
+                verify_trial_balance()
+            
+            return redirect('dashboard')
+    else:
+        form = CombinedPaymentForm()
+    return render(request, 'combined_payment_form.html', {'form': form})
+
 
 @login_required
 def record_withdrawal(request):

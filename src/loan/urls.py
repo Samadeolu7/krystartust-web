@@ -1,4 +1,4 @@
-from .views import  group_report, load_payment_schedules, loan_upload_view, transaction_history, loan_payment, loan_registration, loan_detail, loan_schedule, loan_defaulters_report, loan_upload
+from .views import  group_report, load_payment_schedules, loan_upload_view, transaction_history, loan_payment, loan_registration, loan_detail, loan_schedule, loan_defaulters_report, loan_upload, load_payment_schedules_com
 
 from django.urls import path
 
@@ -13,4 +13,6 @@ urlpatterns = [
     path('upload/', loan_upload, name='loan_upload'),
     path('upload-loans/', loan_upload_view, name='loan_upload_bulk'),
     path('ajax/load-payment-schedules/', load_payment_schedules, name='load_payment_schedules'),
+    path('ajax/load-payment-schedules-com/', load_payment_schedules_com, name='load_payment_schedules_com'),
+
 ]

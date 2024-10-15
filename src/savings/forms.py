@@ -1,4 +1,7 @@
+from bank.models import Bank
+from loan.models import Loan, LoanPayment
 from .models import SavingsPayment, CompulsorySavings, Savings
+from loan.models import LoanRepaymentSchedule as PaymentSchedule
 
 from django import forms
 
@@ -11,11 +14,6 @@ class SavingsExcelForm(forms.Form):
     excel_file = forms.FileField(
         label='Excel File'
     )
-
-# class SavingsForm(forms.ModelForm):
-#     class Meta:
-#         model = SavingsPayment
-#         fields = ['client', 'amount']
 
 class WithdrawalForm(forms.ModelForm):
     class Meta:
@@ -67,3 +65,67 @@ class SavingsForm(forms.ModelForm):
 #     payment_date = models.DateField()
 #     created_at = models.DateTimeField(auto_now_add=True)
 #     #created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+
+class CombinedPaymentForm(forms.ModelForm):
+    payment_date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        required=False
+    )
+    bank = forms.ModelChoiceField(queryset=Bank.objects.all(), required=False)
+    payment_schedule = forms.ModelChoiceField(queryset=PaymentSchedule.objects.none(), required=False)
+    amount = forms.DecimalField(required=False)
+
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 2}),
+        required=False
+    )
+
+    class Meta:
+        model = LoanPayment
+        fields = ['client', 'payment_schedule', 'payment_date']
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if 'client' in self.data:
+            try:
+                client_id = int(self.data.get('client'))
+                loan = Loan.objects.get(client=client_id)
+                savings = Savings.objects.get(client=client_id)
+                self.fields['payment_schedule'].queryset = PaymentSchedule.objects.filter(loan=loan).order_by('due_date')
+                self.instance.loan = loan
+                self.instance.savings = savings
+                
+                
+            except (ValueError, TypeError, Loan.DoesNotExist):
+                pass  # invalid input from the client; ignore and fallback to empty queryset
+        elif self.instance.pk:
+            self.fields['payment_schedule'].queryset = self.instance.loan.client.paymentschedule_set.order_by('due_date')
+
+    def save(self, commit=True):
+        loan_payment_instance = super().save(commit=False)
+        savings_payment_instance = SavingsPayment()
+
+        # Handle loan payment
+        if self.cleaned_data['payment_date']:
+            loan_payment_instance.payment_date = self.cleaned_data['payment_date']
+            loan_payment_instance.client = loan_payment_instance.loan.client
+            loan_payment_instance.amount = loan_payment_instance.loan.emi
+            # if self.user:
+            #     loan_payment_instance.created_by = self.user
+            if commit:
+                loan_payment_instance.save()
+
+        # Handle savings payment
+        if self.cleaned_data['payment_date']:
+            savings_payment_instance.client = self.cleaned_data['client']
+            savings_payment_instance.amount = self.cleaned_data['amount']-loan_payment_instance.amount
+            savings_payment_instance.payment_date = self.cleaned_data['payment_date']
+            savings_payment_instance.client = loan_payment_instance.savings.client
+            # if self.user:
+            #     savings_payment_instance.created_by = self.user
+            savings_payment_instance.transaction_type = SavingsPayment.SAVINGS
+            if commit:
+                savings_payment_instance.save()
+
+        return loan_payment_instance, savings_payment_instance
