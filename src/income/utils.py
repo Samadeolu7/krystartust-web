@@ -54,28 +54,28 @@ def create_loan_interest_income_payment( amount, payment_date):
     income_payment.save()
     return income_payment
 
-def create_risk_premium_income_payment( amount,payment_date):
+def create_risk_premium_income_payment( amount,payment_date, description):
     income = get_risk_premium_income()
     bank = get_cash_in_hand()
-    return create_income_payment(bank=bank, income=income, description='Risk Premium', amount=amount, payment_date=payment_date)
+    return create_income_payment(bank=bank, income=income, description=description, amount=amount, payment_date=payment_date)
 
 def get_loan_registration_fee_income():
     YEAR = Year.current_year()
     return Income.objects.get_or_create(name='Loan Registration Fee', description='Loan Registration Fee Income', year=YEAR)[0]
 
-def create_loan_registration_fee_income_payment( amount,payment_date):
+def create_loan_registration_fee_income_payment( amount,payment_date, description):
     income = get_loan_registration_fee_income()
     bank = get_cash_in_hand()
-    return create_income_payment(bank=bank, income=income, description='Loan Registration Fee', amount=amount, payment_date=payment_date)
+    return create_income_payment(bank=bank, income=income, description=description, amount=amount, payment_date=payment_date)
 
 def get_administrative_fee_income():
     YEAR = Year.current_year()
     return Income.objects.get_or_create(name='Administrative Fee', description='Administrative Fee Income', year=YEAR)[0]
    
-def create_administrative_fee_income_payment( amount,payment_date):
+def create_administrative_fee_income_payment( amount,payment_date, description):
     income = get_administrative_fee_income()
     bank = get_cash_in_hand()
-    return create_income_payment(bank=bank, income=income, description='Administrative Fee', amount=amount, payment_date=payment_date)
+    return create_income_payment(bank=bank, income=income, description=description, amount=amount, payment_date=payment_date)
 
 def get_income_balance(income_id):
     income = Income.objects.get(id=income_id)

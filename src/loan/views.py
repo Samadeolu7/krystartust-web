@@ -144,10 +144,10 @@ def loan_registration(request):
                 admin_fees = form.cleaned_data.get('admin_fees')
                 if admin_fees:
                     admin_fee_amount = Decimal(admin_fees) * Decimal(amount) / Decimal(100)
-                    create_administrative_fee_income_payment(admin_fee_amount,start_date)
+                    create_administrative_fee_income_payment(admin_fee_amount,start_date, f'Administrative Fee for {loan.client.name}')
 
                 if registration_fee:
-                    create_loan_registration_fee_income_payment(registration_fee,start_date)
+                    create_loan_registration_fee_income_payment(registration_fee,start_date, f'Loan Registration Fee for {loan.client.name}')
 
                 # Determine the increment based on loan type
                 time_increment = {
@@ -192,7 +192,7 @@ def loan_registration(request):
                 )
                 income_payment.save()
                 risk_premium_amount = Decimal(loan.risk_premium) * Decimal(amount) / 100
-                create_risk_premium_income_payment(risk_premium_amount, start_date)
+                create_risk_premium_income_payment(risk_premium_amount, start_date, f'Risk Premium for {loan.client.name}')
 
                 union = form.cleaned_data.get('union_contribution')
                 create_union_contribution_income_payment(start_date,union,f'Union Contribution for {loan.client.name}')
