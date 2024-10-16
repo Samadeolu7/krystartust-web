@@ -26,12 +26,13 @@ def create_client(request):
             form.save()
             messages.success(request, 'Client created successfully.')
             bank = form.cleaned_data['bank']
-            register_savings(bank,client=form.instance, amount=form.cleaned_data["compulsory_savings"] )
+            date = form.cleaned_data['date']
+            register_savings(bank,client=form.instance, amount=form.cleaned_data["compulsory_savings"],date=date ) 
             income = get_registration_fee_income()
             id_fee = get_id_fee_income()
             bank = form.cleaned_data['bank']
-            create_income_payment(bank, income=income, description='Registration Fee', amount=form.cleaned_data['registration_fee'], payment_date=form.instance.created_at)
-            create_income_payment(bank, income=id_fee, description='ID Fee', amount=form.cleaned_data['id_fee'], payment_date=form.instance.created_at)
+            create_income_payment(bank, income=income, description='Registration Fee', amount=form.cleaned_data['registration_fee'], payment_date=date)
+            create_income_payment(bank, income=id_fee, description='ID Fee', amount=form.cleaned_data['id_fee'], payment_date=date)
             
             
             return redirect('list_clients')  # Redirect to a client list or relevant page

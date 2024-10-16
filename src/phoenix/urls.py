@@ -33,4 +33,5 @@ urlpatterns = [
     path('asset/', include('asset.urls')),
     path('liability/', include('liability.urls')),
     path('user/', include('user.urls')),
+    path('administration/', include('administration.urls')),
 ]

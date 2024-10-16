@@ -39,6 +39,10 @@ class Loan(models.Model):
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
     objects = LoanManager()
+    approved = models.BooleanField(default=False)
+
+    def is_approved(self):
+        return self.approved
 
     @property
     def is_defaulted(self):

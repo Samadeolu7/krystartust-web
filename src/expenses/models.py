@@ -20,6 +20,10 @@ class Expense(models.Model):
     expense_type = models.ForeignKey(ExpenseType, on_delete=models.CASCADE, related_name='expenses')
     created_at = models.DateTimeField(auto_now_add=True)
     year = models.IntegerField()
+    approved = models.BooleanField(default=False)
+
+    def is_approved(self):
+        return self.approved
 
     def save(self, *args, **kwargs):
         if not self.year:

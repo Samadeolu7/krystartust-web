@@ -18,6 +18,12 @@ class ClientForm(forms.ModelForm):
         required=False
     )
     bank = forms.ModelChoiceField(queryset=Bank.objects.all(), required=False)
+
+    date = forms.DateField(
+        label='Date',
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
+    
     class Meta:
         model = Client
         fields = ['name', 'email', 'phone', 'address', 'group']

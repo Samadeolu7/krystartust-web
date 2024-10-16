@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'main',
     'client',
     'user',
-    # 'crispy_forms',
+    'administration',
     'loan',
     'savings',
     'reports',
