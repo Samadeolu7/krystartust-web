@@ -25,11 +25,11 @@ class Command(BaseCommand):
                 #get the loan repayment schedule for the payment
                 loan_repayment_schedule = loan.repayment_schedule.filter(due_date=loan_payment.payment_date).first()
                 if loan_repayment_schedule:
-                    if loan_repayment_schedule.is_paid == False:
-                        print(f"Loan payment {loan_payment.id} is not marked as paid")
-                        loan_repayment_schedule.is_paid = True
+                    if loan_repayment_schedule.is_paid == True:
+                        loan_repayment_schedule.payment_date = loan_payment.payment_date
                         loan_repayment_schedule.save()
 
-        print("All loan payments have been processed")
+        #success message
+        self.stdout.write(self.style.SUCCESS('Successfully found entries'))
 
                     

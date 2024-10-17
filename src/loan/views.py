@@ -47,6 +47,7 @@ def loan_payment(request):
                     raise ValueError("Payment schedule has already been marked as paid.")
                 else:
                     schedule.is_paid = True
+                    schedule.payment_date = loan_payment.payment_date
                     schedule.save()
                 
                 # Update the loan balance

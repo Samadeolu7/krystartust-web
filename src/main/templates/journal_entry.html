@@ -5,43 +5,63 @@
 {% block title %}Journal Voucher Form{% endblock %}
 
 {% block content %}
-        <h1 class="text-center mb-4">Journal Voucher Form</h1>
-        <form method="post">
-            {% csrf_token %}
-            <div class="mb-3">
-                {{ form.jv_credit.label_tag }}<br>
-                {{ form.jv_credit }}
-            </div>
-            <div class="mb-3">
-                {{ form.jv_credit_account.label_tag }}<br>
-                {{ form.jv_credit_account }}
-            </div>
-            <div class="mb-3">
-                {{ form.jv_debit.label_tag }}<br>
-                {{ form.jv_debit }}
-            </div>
-            <div class="mb-3">
-                {{ form.jv_debit_account.label_tag }}<br>
-                {{ form.jv_debit_account }}
-            </div>
-            <div class="mb-3">
-                {{ form.amount.label_tag }}<br>
-                {{ form.amount }}
-            </div>
-            <div class="mb-3">
-                {{ form.payment_date.label_tag }}<br>
-                {{ form.payment_date }}
-            </div>
-            <div class="mb-3">
-                {{ form.description.label_tag }}<br>
-                {{ form.description }}
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-    </div>
+    <h1 class="text-center mb-4">Journal Voucher Form</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.jv_credit.label_tag }}<br>
+            {{ form.jv_credit }}
+        </div>
+        <div class="mb-3">
+            {{ form.jv_credit_account.label_tag }}<br>
+            {{ form.jv_credit_account }}
+        </div>
+        <div class="mb-3">
+            {{ form.jv_debit.label_tag }}<br>
+            {{ form.jv_debit }}
+        </div>
+        <div class="mb-3">
+            {{ form.jv_debit_account.label_tag }}<br>
+            {{ form.jv_debit_account }}
+        </div>
+        <div class="mb-3">
+            {{ form.amount.label_tag }}<br>
+            {{ form.amount }}
+        </div>
+        <div class="mb-3">
+            {{ form.payment_date.label_tag }}<br>
+            {{ form.payment_date }}
+        </div>
+        <div class="mb-3">
+            {{ form.description.label_tag }}<br>
+            {{ form.description }}
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+
+    <!-- Include Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
     <script>
         $(document).ready(function() {
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            const csrftoken = getCookie('csrftoken');
+
             function updateAccountOptions(typeField, accountField) {
                 var typeValue = $(typeField).val();
                 var url = "{% url 'get_accounts' %}";  // URL to fetch accounts based on type
@@ -50,8 +70,14 @@
                     data: {
                         'type': typeValue
                     },
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    },
                     success: function(data) {
                         $(accountField).html(data);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX Error: ", status, error);
                     }
                 });
             }
