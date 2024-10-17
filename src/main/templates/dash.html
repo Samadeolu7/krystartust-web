@@ -221,7 +221,7 @@
             <div class="col-md-10 p-4">
                 <!-- Header -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2>Welcome Israel</h2>
+                    <h2>Welcome {{ user.username|fist_word }} </h2>
                     <div>
                         <input type="search" class="form-control d-inline-block" placeholder="Search transactions, customers, subscription" style="width: 250px;">
                         <form method="post" action="{% url 'logout' %}" class="d-inline-block">

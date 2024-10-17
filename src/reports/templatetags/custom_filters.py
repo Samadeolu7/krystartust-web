@@ -58,3 +58,8 @@ def subtract(value, arg):
 @register.simple_tag
 def update_variable(value):
     return value
+
+
+@register.filter
+def first_word(value):
+    return value.split()[0] if value else ''
