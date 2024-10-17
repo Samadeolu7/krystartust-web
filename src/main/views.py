@@ -156,6 +156,7 @@ def group_create(request):
             return redirect('group_view')
     else:
         form = GroupForm()
+        
     
     return render(request, 'group_form.html', {'form': form})
 
@@ -173,6 +174,7 @@ def group_edit(request, pk):
         form = GroupForm(request.POST, instance=group)
         if form.is_valid():
             form.save()
+            return redirect('group_view')
     else:
         form = GroupForm(instance=group)
     
