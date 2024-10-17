@@ -51,7 +51,7 @@ class SavingsPayment(models.Model):
         return f"{self.client} - {self.get_transaction_type_display()} - {self.amount}"
     
     class Meta:
-        ordering = ['-payment_date', '-created_at']
+        ordering = ['payment_date', 'created_at']
     
 
 class CompulsorySavings(SingletonModel):

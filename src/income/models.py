@@ -13,7 +13,7 @@ class Income(models.Model):
         return f'{self.name} - {self.description}'
     
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['created_at']
 
     def record_payment(self, amount,description, payment_date):
         payment = IncomePayment(income=self, amount=amount,description=description, payment_date=payment_date)
@@ -39,7 +39,7 @@ class IncomePayment(models.Model):
             super(IncomePayment, self).save(*args, **kwargs)
     
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['created_at']
 
 class SingletonModel(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)

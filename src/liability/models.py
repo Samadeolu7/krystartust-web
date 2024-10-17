@@ -55,4 +55,4 @@ class LiabilityPayment(models.Model):
         return reverse('liability:liability_record_detail', kwargs={'pk': self.pk})
     
     class Meta:
-        ordering = ['-payment_date', '-created_at']
+        ordering = ['payment_date', 'created_at']

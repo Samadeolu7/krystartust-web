@@ -119,7 +119,7 @@ class LoanPayment(models.Model):
         return self.client.name + ' - ' + str(self.amount) + ' - ' + str(self.balance)
     
     class Meta:
-        ordering = ['-payment_date', '-created_at']
+        ordering = ['payment_date', 'created_at']
         indexes = [
             models.Index(fields=['client', 'loan']),
         ]
