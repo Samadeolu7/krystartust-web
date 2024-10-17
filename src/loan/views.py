@@ -39,11 +39,14 @@ def loan_payment(request):
                 loan_id = loan_payment.loan.id
                 
                 # Retrieve and update the repayment schedule
-                schedule = LoanRepaymentSchedule.objects.filter(id=loan_payment.payment_schedule.id).first()
-                if schedule:
+                schedule = form.payment_schedule
+                if schedule.is_paid:
+                    messages.error(request, "Payment schedule has already been marked as paid.")
+                    return render(request, 'loan_payment_form.html', {'form': form})
+                else:
                     schedule.is_paid = True
                     schedule.save()
-                else:
+
                     messages.error(request, "Payment schedule not found.")
                     return render(request, 'loan_payment_form.html', {'form': form})
                 
@@ -129,7 +132,8 @@ def loan_registration(request):
             with transaction.atomic():
                 loan = form.save(commit=False)
                 loan.balance = loan.amount * (Decimal(1) + (Decimal(loan.interest)/Decimal(100)))
-                loan.end_date = loan.start_date + timedelta(days=loan.duration) + timedelta(weeks=1)  # Extend end date by 1 week
+                loan.start_date = loan.start_date + timedelta(weeks=2)  # Start 2 weeks after registration
+                loan.end_date = loan.start_date + timedelta(weeks=loan.duration)
                 loan.emi = loan.balance / loan.duration
                 loan.status = 'Active'
                 loan.save()
@@ -160,7 +164,7 @@ def loan_registration(request):
                 # Create repayment schedule based on the loan type and duration
                 amount_due = loan.balance / duration
                 for i in range(duration):
-                    due_date = start_date + timedelta(weeks=1) + (i * time_increment)  # Start 1 week after the start date
+                    due_date = start_date + (i * time_increment)  # Start 1 week after the start date
 
                     LoanRepaymentSchedule.objects.create(
                         loan=loan,

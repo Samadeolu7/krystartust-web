@@ -9,104 +9,97 @@
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
-        <style>
-        body {
-            background-color: #F5F7FA;
-        }
-        .sidebar {
-            background: linear-gradient(180deg, #0D1240, #1A1E50);
-            color: #FFF;
-            padding: 15px;
-            height: 100vh;
-            font-size: 14px;
-        }
-        .logo-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .sidebar h2 {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-        .sidebar a {
-            color: #FFF;
-            text-decoration: none;
-            display: block;
-            font-size: 14px;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            background-color: #1A1E50;
-            transition: background-color 0.3s;
-        }
-        .sidebar a:hover {
-            background-color: #2A2E70;
-        }
-        .sidebar .sub-item {
-            font-size: 12px;
-            color: #C0C0C0;
-        }
-        .sidebar .sub-item a {
-            color: #C0C0C0 !important;
-            padding: 8px;
-            margin-bottom: 5px;
-            border-radius: 4px;
-            background-color: #1A1E50;
-            transition: background-color 0.3s;
-        }
-        .sidebar .sub-item a:hover {
-            background-color: #2A2E70;
-            color: #FFF !important;
-        }
-        .sidebar .sub-sub-item {
-            font-size: 11px;
-            color: #C0C0C0;
-        }
-        .sidebar .sub-sub-item a {
-            color: #C0C0C0 !important;
-            padding: 6px;
-            margin-bottom: 3px;
-            border-radius: 3px;
-            background-color: #1A1E50;
-            transition: background-color 0.3s;
-        }
-        .sidebar .sub-sub-item a:hover {
-            background-color: #2A2E70;
-            color: #FFF !important;
-        }
-        .status-box {
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            color: #FFF;
-        }
-        .status-red { background-color: #E57373; }
-        .status-green { background-color: #81C784; }
-        .status-yellow { background-color: #FFB74D; }
-        .chart-container {
-            background-color: #FFF;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .logo-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-            height: 80px; /* Adjust height to fit logo better */
-        }
-        
-        .logo-img {
-            max-width: 80%; /* Adjust size based on sidebar width */
-            height: auto;
-        }
-        
-    </style>
+<style>
+    body {
+        background-color: #F5F7FA;
+    }
+    .sidebar {
+        background: linear-gradient(180deg, #0D1240, #1A1E50);
+        color: #FFF;
+        padding: 15px;
+        height: 100vh;
+        font-size: 14px;
+        overflow-y: auto; /* Add scrollbar for overflow */
+    }
+    .logo-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+        height: 80px; /* Adjust height to fit logo better */
+    }
+    .logo-img {
+        max-width: 80%; /* Adjust size based on sidebar width */
+        height: auto;
+    }
+    .sidebar h2 {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+    .sidebar a {
+        color: #FFF;
+        text-decoration: none;
+        display: block;
+        font-size: 14px;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #1A1E50;
+        transition: background-color 0.3s;
+    }
+    .sidebar a:hover {
+        background-color: #2A2E70;
+    }
+    .sidebar .sub-item {
+        font-size: 12px;
+        color: #C0C0C0;
+    }
+    .sidebar .sub-item a {
+        color: #C0C0C0 !important;
+        padding: 8px;
+        margin-bottom: 5px;
+        border-radius: 4px;
+        background-color: #1A1E50;
+        transition: background-color 0.3s;
+    }
+    .sidebar .sub-item a:hover {
+        background-color: #2A2E70;
+        color: #FFF !important;
+    }
+    .sidebar .sub-sub-item {
+        font-size: 11px;
+        color: #C0C0C0;
+    }
+    .sidebar .sub-sub-item a {
+        color: #C0C0C0 !important;
+        padding: 6px;
+        margin-bottom: 3px;
+        border-radius: 3px;
+        background-color: #1A1E50;
+        transition: background-color 0.3s;
+    }
+    .sidebar .sub-sub-item a:hover {
+        background-color: #2A2E70;
+        color: #FFF !important;
+    }
+    .status-box {
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        color: #FFF;
+    }
+    .status-red { background-color: #E57373; }
+    .status-green { background-color: #81C784; }
+    .status-yellow { background-color: #FFB74D; }
+    .chart-container {
+        background-color: #FFF;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+</style>
 </head>
 <body>
     <div class="container-fluid">
@@ -122,75 +115,83 @@
                     </a>
                     
                     <a href="#userManagementSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
-                        <i class="fas fa-user"></i> USER MANAGEMENT
+                        <i class="fas fa-user"></i> HUMAN RESOURCES
                     </a>
                     <ul class="collapse list-unstyled" id="userManagementSubmenu" data-parent="#sidebarAccordion">
-                        <li class="sub-item"><a href="#">User List</a></li>
-                        <li class="sub-item"><a href="#">Add User</a></li>
+                        <li class="sub-item"><a href="{% url 'create_users' %}">CREATE EMPLOYEE</a></li>
+                        <li class="sub-item"><a href="{% url 'user_list' %}">EMPLOYEE LIST</a></li>
+                        <li class="sub-item"><a href="#">SALARY MANAGEMENT</a></li>
                     </ul>
             
                     <a href="#customerManagementSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
-                        <i class="fas fa-users"></i> CUSTOMER MANAGEMENT
+                        <i class="fas fa-users"></i> CUSTOMER MASTER
                     </a>
                     <ul class="collapse list-unstyled" id="customerManagementSubmenu" data-parent="#sidebarAccordion">
-                        <li class="sub-item"><a href="{% url 'list_clients' %}">Customer List</a></li>
-                        <li class="sub-item"><a href="{% url 'create_client' %}">Add Customer</a></li>
+                        <li class="sub-item"><a href="{% url 'create_client' %}">Create Customer</a></li>
+                        <li class="sub-item"><a href="{% url 'group_create' %}">Create Group</a></li>
+                        <li class="sub-item"><a href="{% url 'loan_registration' %}">Create Loan</a></li>
+                        
                     </ul>
             
                     <a href="#financialServicesSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
-                        <i class="fas fa-wallet"></i> FINANCIAL SERVICES
+                        <i class="fas fa-wallet"></i> FINANCE
                     </a>
                     <ul class="collapse list-unstyled" id="financialServicesSubmenu" data-parent="#sidebarAccordion">
-                        <li class="sub-item">
-                            <a href="#savingsManagementSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#financialServicesSubmenu">
-                                Savings Management
-                            </a>
-                            <ul class="collapse list-unstyled" id="savingsManagementSubmenu" data-parent="#financialServicesSubmenu">
-                                <li class="sub-sub-item"><a href="{% url 'savings_registration' %}">Register Savings</a></li>
-                                <li class="sub-sub-item"><a href="{% url 'savings_withdrawal' %}">Record Withdrawal</a></li>
-                            </ul>
-                        </li>
-                        <li class="sub-item">
-                            <a href="#loanManagementSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#financialServicesSubmenu">
-                                Loan Management
-                            </a>
-                            <ul class="collapse list-unstyled" id="loanManagementSubmenu" data-parent="#financialServicesSubmenu">
-                                <li class="sub-sub-item"><a href="{% url 'loan_registration' %}">Register Loan</a></li>
-                                <li class="sub-sub-item"><a href="{% url 'loan_payment' %}">Record Payment</a></li>
-                            </ul>
-                        </li>
+                            
+                        <li class="sub-sub-item"><a href="{% url 'create_liability' %}">Create Payables</a></li>
+                        <li class="sub-sub-item"><a href="{% url 'liability_list' %}">Payables Report</a></li>
+                        <li class="sub-sub-item"><a href="{% url 'liability_payment' %}">Payables Payment</a></li>
+
                     </ul>
+
+                    <a href="#bankSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
+                        <i class="fas fa-exchange-alt"></i> BANK
+                    </a>
+                    <ul class="collapse list-unstyled" id="bankSubmenu" data-parent="#sidebarAccordion">
+                    <li class="sub-item"><a href="{% url 'create_bank' %}">Create Bank</a></li>
+                    <li class="sub-item"><a href="{% url 'bank_list' %}">Bank Report</a></li>
+                    <li class="sub-item"><a href="{% url 'cash_transfer' %}">Cash Transfer</a></li>
+                </ul>
             
                     <a href="#transactionsSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
                         <i class="fas fa-exchange-alt"></i> TRANSACTIONS
                     </a>
                     <ul class="collapse list-unstyled" id="transactionsSubmenu" data-parent="#sidebarAccordion">
-                        <li class="sub-item"><a href="{% url 'cash_transfer' %}">Bank Transfer</a></li>
-                        <li class="sub-item"><a href="{% url 'expense_payment' %}">Petty Cash</a></li>
+                        <li class="sub-item"><a href="{% url 'savings_registration' %}">Reciept Savings</a></li>
+                        <li class="sub-item"><a href="{% url 'register_payment' %}">Reciept Combined</a></li>
+                        <li class="sub-item"><a href="{% url 'savings_withdrawal' %}">Savings withdrawal</a></li>
+                        <li class="sub-item"><a href="{% url 'loan_registration' %}">Reciept Loan</a></li>
                         <li class="sub-item"><a href="{% url 'journal_entry' %}">Ledger Transactions</a></li>
                     </ul>
-            
+                    
+                    <a href="#expenseSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
+                        <i class="fas fa-exchange-alt"></i> PETTY CASH
+                    </a>
+                    <ul class="collapse list-unstyled" id="expenseSubmenu" data-parent="#sidebarAccordion">
+                        <li class="sub-item"><a href="{% url 'create_expense_type' %}">Create Expense Category</a></li>
+                        <li class="sub-item"><a href="{% url 'create_expense' %}">Create Expense</a></li>
+                        <li class="sub-item"><a href="{% url 'expense_payment' %}">Petty Cash Request</a></li>
+                        <li class="sub-item"><a href="{% url 'expense_list' %}">Expense Report</a></li>
+                    </ul>
+                        
                     <a href="#reportsSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
                         <i class="fas fa-chart-line"></i> REPORTS AND ANALYTICS
                     </a>
                     <ul class="collapse list-unstyled" id="reportsSubmenu" data-parent="#sidebarAccordion">
+                        <li class="sub-item"><a href="{% url 'income_list' %}">Income Report</a></li>
                         <li class="sub-item"><a href="{% url 'list_clients' %}">Debtors Reports</a></li>
                         <li class="sub-item"><a href="{% url 'all_groups_report' %}">Group Report</a></li>
                         <li class="sub-item"><a href="{% url 'daily_transactions_report' %}">Remittance Reports</a></li>
                         <li class="sub-item"><a href="{% url 'profit_and_loss_report' %}">P & L Report</a></li>
                         <li class="sub-item"><a href="{% url 'trial_balance' %}">Trial Balance</a></li>
-                        <li class="sub-item"><a href="#">Balance Sheet</a></li>
                         <li class="sub-item"><a href="{% url 'loan_defaulters_report' %}">Defaulters Report</a></li>
                     </ul>
             
                     <a href="#settingsSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
-                        <i class="fas fa-cogs"></i> SETTINGS
+                        <i class="fas fa-cogs"></i> ADMIN
                     </a>
                     <ul class="collapse list-unstyled" id="settingsSubmenu" data-parent="#sidebarAccordion">
-                        <li class="sub-item"><a href="#">User Settings</a></li>
-                        <li class="sub-item"><a href="#">Financial Settings</a></li>
-                        <li class="sub-item"><a href="#">Transaction Settings</a></li>
-                        <li class="sub-item"><a href="#">Report Settings</a></li>
+                    
                     </ul>
                 </div>
             </div>
