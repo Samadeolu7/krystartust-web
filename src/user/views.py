@@ -2,12 +2,16 @@
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm, CustomUserChangeForm
+
+from administration.decorators import allowed_users
+from .forms import CustomUserCreationForm, CustomUserChangeForm, PasswordChangeForm
 from .models import User
 from django.contrib.auth import get_user_model
+from django.contrib.auth import update_session_auth_hash
 
 
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def add_user(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -23,6 +27,7 @@ def add_user(request):
     return render(request, 'registration/add_user.html', {'form': form})
 
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def user_list(request):
     User = get_user_model()
     users = User.objects.all()
@@ -31,12 +36,14 @@ def user_list(request):
     return render(request, 'registration/user_list.html', {'users': users})
 
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def user_detail(request, user_id):
     User = get_user_model()
     user = User.objects.get(id=user_id)
     return render(request, 'registration/user_detail.html', {'user': user})
 
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def user_update(request, user_id):
     User = get_user_model()
     user = User.objects.get(id=user_id)
@@ -52,3 +59,17 @@ def user_update(request, user_id):
     else:
         form = CustomUserChangeForm(instance=user)
     return render(request, 'registration/user_update.html', {'form': form})
+
+@login_required
+def change_password(request, user_id):
+    User = get_user_model()
+    user = User.objects.get(id=user_id)
+    if request.method == 'POST':
+        form = PasswordChangeForm(user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            return redirect('dashboard')
+    else:
+        form = PasswordChangeForm(user)
+    return render(request, 'registration/change_password.html', {'form': form})

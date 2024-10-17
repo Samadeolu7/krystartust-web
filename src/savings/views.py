@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 # Create your views here.
 from django.shortcuts import render
 
+from administration.decorators import allowed_users
 from main.utils import verify_trial_balance
 from .models import Savings, SavingsPayment
 from .forms import SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm, CombinedPaymentForm
@@ -15,6 +16,7 @@ from django.contrib import messages
 
 
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def compulsory_savings(request):
     if request.method == 'POST':
         form = CompulsorySavingsForm(request.POST)
@@ -28,6 +30,7 @@ def compulsory_savings(request):
         return render(request, 'fees.html', {'form': form,'title': title})
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def savings_detail(request, client_id):
     savings = Savings.objects.get(client_id=client_id)
     savings_payments = SavingsPayment.objects.filter(client_id=client_id)
@@ -90,6 +93,7 @@ def register_payment(request):
 
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def record_withdrawal(request):
     if request.method == 'POST':
         form = WithdrawalForm(request.POST)
@@ -102,6 +106,7 @@ def record_withdrawal(request):
     return render(request, 'withdrawal_form.html', {'form': form})
 
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def upload_savings(request):
     if request.method == 'POST':
         form = SavingsExcelForm(request.POST, request.FILES)

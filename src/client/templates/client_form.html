@@ -2,10 +2,10 @@
 
 {% load custom_filters %}
 
-{% block title %}Client Form{% endblock %}
+{% block title %}Create New Customer{% endblock %}
 
         {% block content %}
-        <h1>{{ form.instance.id|yesno:"Edit Client,Create Client" }}</h1>
+        <h1>{{ form.instance.id|yesno:"Edit Client,Create New Customer" }}</h1>
 
         <form method="POST">
             {% csrf_token %}

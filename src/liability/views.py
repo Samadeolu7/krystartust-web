@@ -5,6 +5,7 @@ from django.shortcuts import render
 
 from datetime import datetime, timezone
 from django.shortcuts import redirect, render
+from administration.decorators import allowed_users
 
 from main.utils import verify_trial_balance
 from .forms import LiabilityForm, LiabilityPaymentForm
@@ -13,7 +14,9 @@ from django.contrib.auth.decorators import login_required
 from bank.utils import create_bank_payment, get_bank_account
 # Create your views here.
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def create_liability(request):
     form = LiabilityForm()
     if request.method == 'POST':
@@ -22,7 +25,9 @@ def create_liability(request):
             form.save()
     return render(request, 'create_liability.html', {'form': form})
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def liability_payment(request):
     form = LiabilityPaymentForm()
     if request.method == 'POST':
@@ -37,12 +42,16 @@ def liability_payment(request):
             return redirect('dashboard')
     return render(request, 'create_liability_payment.html', {'form': form})
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def liability_list(request):
     liability = Liability.objects.all()
     return render(request, 'liability_list.html', {'liability': liability})
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def liability_detail(request, pk):
     liability = Liability.objects.get(pk=pk)
     liability_payment = LiabilityPayment.objects.filter(liability=liability).all()

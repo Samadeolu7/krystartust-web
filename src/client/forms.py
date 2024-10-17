@@ -26,7 +26,7 @@ class ClientForm(forms.ModelForm):
     
     class Meta:
         model = Client
-        fields = ['name', 'email', 'phone', 'address', 'group']
+        fields = ['name', 'email', 'phone', 'address', 'group', 'marital_status', 'next_of_kin', 'next_of_kin_phone', 'bank_name', 'account_number', 'date']
 
     def __init__(self, *args, **kwargs):
         super(ClientForm, self).__init__(*args, **kwargs)

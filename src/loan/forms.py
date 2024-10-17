@@ -1,6 +1,5 @@
 from bank.models import Bank
-from client.models import Client
-from .models import Loan, LoanPayment, LoanRepaymentSchedule as PaymentSchedule
+from .models import Loan, LoanPayment, LoanRepaymentSchedule as PaymentSchedule, Guarantor
 from income.models import LoanRegistrationFee, RiskPremium, UnionContribution, LoanServiceFee
 
 from django import forms
@@ -41,9 +40,10 @@ class LoanForm(forms.ModelForm):
             self.fields['service_fee'].initial = LoanServiceFee.objects.filter(loan=self.instance).first().amount
 
 
-# forms.py
-
-# forms.py
+class GuarantorForm(forms.ModelForm):
+    class Meta:
+        model = Guarantor
+        fields = '__all__'
 
 class LoanPaymentForm(forms.ModelForm):
     payment_date = forms.DateField(

@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import User
 from administration.models import Salary
 from django.contrib.auth.models import Group, Permission
+from django.contrib.auth import update_session_auth_hash
 
 
 
@@ -46,3 +47,24 @@ class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = User
         fields = ('email', 'username', 'salary', 'is_active', 'is_staff', 'groups', 'user_permissions')
+
+class PasswordChangeForm(forms.Form):
+    password1 = forms.CharField(label='New password', widget=forms.PasswordInput)
+    password2 = forms.CharField(label='Confirm new password', widget=forms.PasswordInput)
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super(PasswordChangeForm, self).__init__(*args, **kwargs)
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get('password1')
+        password2 = self.cleaned_data.get('password2')
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError('Passwords do not match')
+        return password2
+
+    def save(self):
+        password = self.cleaned_data['password1']
+        self.user.set_password(password)
+        self.user.save()
+        update_session_auth_hash(self.user, self.user)  # Update the session hash to prevent the user from being logged out

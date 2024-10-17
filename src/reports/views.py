@@ -4,6 +4,7 @@ from decimal import Decimal
 from django.http import HttpResponse
 from django.shortcuts import render
 
+from administration.decorators import allowed_users
 from bank.models import Bank
 from client.models import Client
 from expenses.models import Expense, ExpensePayment
@@ -18,7 +19,9 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 # Create your views here.
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def all_clients_report(request):
     clients = Client.objects.all()
     loans = Loan.objects.filter(client__in=clients)
@@ -36,6 +39,7 @@ def all_clients_report(request):
     return render(request, 'all_clients_report.html', context)
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def all_groups_report(request):
     groups = Group.objects.all()
     
@@ -46,6 +50,7 @@ def all_groups_report(request):
     return render(request, 'all_groups_report.html', context)
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def individual_group_report(request, group_id):
     group = Group.objects.get(pk=group_id)
     clients = Client.objects.filter(group=group)
@@ -73,6 +78,7 @@ def individual_group_report(request, group_id):
     return render(request, 'individual_group_report.html', context)
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def all_loans_report(request):
     loans = Loan.objects.all()
     clients = Client.objects.filter(loan__in=loans)
@@ -86,6 +92,7 @@ def all_loans_report(request):
     return render(request, 'all_loans_report.html', context)
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def all_savings_report(request):
     savings = Savings.objects.all()
     clients = Client.objects.filter(savings__in=savings)
@@ -99,6 +106,7 @@ def all_savings_report(request):
     return render(request, 'all_savings_report.html', context)
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def all_transactions_report(request):
     loan_payments = LoanPayment.objects.all()
     savings_payments = SavingsPayment.objects.all()
@@ -116,10 +124,13 @@ def all_transactions_report(request):
     return render(request, 'all_transactions_report.html', context)
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def daily_collection_form(request):
     return render(request, 'daily_collection_form.html')
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def daily_transactions_report(request):
     if request.method == 'POST':
         date = request.POST.get('date')
@@ -137,6 +148,7 @@ def daily_transactions_report(request):
 
 
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def profit_and_loss_report(request):
     current_year = datetime.now().year
 
@@ -227,6 +239,7 @@ def profit_and_loss_report(request):
 
 
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def trial_balance_report(request):
     # Fetch all objects
     incomes = Income.objects.all()
@@ -264,6 +277,7 @@ def trial_balance_report(request):
 
 
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def client_list_excel(request):
     merged_df = client_list_to_excel()
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -272,6 +286,7 @@ def client_list_excel(request):
     return response
 
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def defaulter_report_excel(request):
     df = defaulter_report_to_excel()
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -280,6 +295,7 @@ def defaulter_report_excel(request):
     return response
 
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def client_savings_payments_excel(request, client_id):
     client = Client.objects.get(pk=client_id)
     df = client_savings_payments_to_excel(client)
@@ -289,6 +305,7 @@ def client_savings_payments_excel(request, client_id):
     return response
 
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def client_loans_payments_excel(request, client_id):
     client = Client.objects.get(pk=client_id)
     df = client_loans_payments_to_excel(client)

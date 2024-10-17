@@ -5,7 +5,7 @@
 {% block title %}Loan Registration{% endblock %}
 
 {% block content %}
-        <h1>Loan Registration</h1>
+        <h1>Loan Guarantor</h1>
         
         {% if messages %}
             <div>
@@ -18,7 +18,7 @@
         <form method="POST">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Register Guarantor</button>
+            <button type="submit" class="btn btn-primary">Register Loan</button>
         </form>
     </div>
 

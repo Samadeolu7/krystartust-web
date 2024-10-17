@@ -3,14 +3,19 @@ from django.shortcuts import redirect, render
 from .forms import RegistrationFeeForm, IDFeeForm, LoanRegistrationFeeForm, RiskPremiumForm, UnionContributionForm, LoanServiceFeeForm
 from .models import Income, IncomePayment
 from django.contrib.auth.decorators import login_required
+from administration.decorators import allowed_users
 # Create your views here.
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def income_list(request):
     incomes = Income.objects.all()
     return render(request, 'income_list.html', {'incomes': incomes})
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def income_details(request, pk):
     income = Income.objects.get(pk=pk)
     income_payment = IncomePayment.objects.filter(income_id=pk)
@@ -21,11 +26,15 @@ def income_details(request, pk):
     }
     return render(request, 'income_details.html', context)
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def set_fees(request):
     return render(request, 'set_fees.html')
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def registration_fee(request):
     if request.method == 'POST':
         form = RegistrationFeeForm(request.POST)
@@ -38,7 +47,9 @@ def registration_fee(request):
         title = 'Registration Fee'
         return render(request, 'fees.html', {'form': form,'title': title})
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def id_fee(request):
     if request.method == 'POST':
         form = IDFeeForm(request.POST)
@@ -51,7 +62,9 @@ def id_fee(request):
         title = 'ID Fee'
         return render(request, 'fees.html', {'form': form,'title': title})
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def loan_registration_fee(request):
     if request.method == 'POST':
         form = LoanRegistrationFeeForm(request.POST)
@@ -64,7 +77,9 @@ def loan_registration_fee(request):
         title = 'Loan Registration Fee'
         return render(request, 'fees.html', {'form': form,'title': title})
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def risk_premium(request):
     if request.method == 'POST':
         form = RiskPremiumForm(request.POST)
@@ -77,7 +92,9 @@ def risk_premium(request):
         title = 'Risk Premium'
         return render(request, 'fees.html', {'form': form,'title': title})
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def union_contribution(request):
     if request.method == 'POST':
         form = UnionContributionForm(request.POST)
@@ -90,7 +107,9 @@ def union_contribution(request):
         title = 'Union Contribution'
         return render(request, 'fees.html', {'form': form,'title': title})
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def loan_service_fee(request):
     if request.method == 'POST':
         form = LoanServiceFeeForm(request.POST)
@@ -102,4 +121,3 @@ def loan_service_fee(request):
         form = LoanServiceFeeForm()
         title = 'Loan Service Fee'
         return render(request, 'fees.html', {'form': form,'title': title})
-

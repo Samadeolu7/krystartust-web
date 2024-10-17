@@ -8,6 +8,7 @@ from django.db import models
 from django.db.models import Case, When, BooleanField
 from datetime import date
 
+
 class LoanManager(models.Manager):
     def with_is_defaulted(self):
         return self.annotate(
@@ -80,6 +81,17 @@ class Loan(models.Model):
             models.Index(fields=['client', 'loan_type']),
             models.Index(fields=['start_date', 'end_date']),
         ]
+
+class Guarantor(models.Model): 
+    loan = models.ForeignKey(Loan, on_delete=models.CASCADE, db_index=True, related_name='guarantor')
+    name = models.CharField(max_length=100)
+    relationship = models.CharField(max_length=100)
+    phone = models.CharField(max_length=15)
+    address_1 = models.TextField()
+    address_2 = models.TextField()
+    occupation = models.CharField(max_length=100)
+    email = models.EmailField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class LoanPayment(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE, db_index=True)

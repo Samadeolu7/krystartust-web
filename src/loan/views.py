@@ -3,6 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib import messages
 
+from administration.decorators import allowed_users
 from client.models import Client
 from income.models import IncomePayment
 from liability.utils import create_union_contribution_income_payment
@@ -11,7 +12,7 @@ from savings.models import Savings, SavingsPayment
 from bank.models import BankPayment
 from main.models import ClientGroup as Group
 from .models import Loan, LoanPayment, LoanRepaymentSchedule
-from .forms import LoanRegistrationForm, LoanPaymentForm, LoanExcelForm, LoanUploadForm
+from .forms import GuarantorForm, LoanRegistrationForm, LoanPaymentForm, LoanExcelForm, LoanUploadForm
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 
@@ -28,6 +29,7 @@ def transaction_history(request, client_id):
     transactions = Loan.objects.filter(client_id=client_id).order_by('-created_at')
     return render(request, 'transaction_history.html', {'transactions': transactions})
 
+
 @login_required
 def loan_payment(request):
     if request.method == 'POST':
@@ -42,13 +44,10 @@ def loan_payment(request):
                 schedule = form.payment_schedule
                 if schedule.is_paid:
                     messages.error(request, "Payment schedule has already been marked as paid.")
-                    return render(request, 'loan_payment_form.html', {'form': form})
+                    raise ValueError("Payment schedule has already been marked as paid.")
                 else:
                     schedule.is_paid = True
                     schedule.save()
-
-                    messages.error(request, "Payment schedule not found.")
-                    return render(request, 'loan_payment_form.html', {'form': form})
                 
                 # Update the loan balance
                 loan = Loan.objects.filter(id=loan_id).first()
@@ -100,6 +99,7 @@ def load_payment_schedules_com(request):
         return JsonResponse({'error': 'Loan not found'}, status=404)
 
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def loan_upload_view(request):
     if request.method == 'POST':
         form = LoanUploadForm(request.POST, request.FILES)
@@ -123,6 +123,7 @@ def loan_upload_view(request):
     return render(request, 'upload_loan.html', {'form': form})
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def loan_registration(request):
     if request.method == 'POST':
         form = LoanRegistrationForm(request.POST)
@@ -204,7 +205,7 @@ def loan_registration(request):
                 verify_trial_balance()
 
             messages.success(request, "Loan registered successfully and repayment schedule created.")
-            return redirect('dashboard')
+            return redirect('guarantor_for_loan', loan_id=loan.id) 
         else:
             messages.error(request, "There was an error with the form. Please correct it below.")
     else:
@@ -213,6 +214,24 @@ def loan_registration(request):
     return render(request, 'loan_register.html', {'form': form})
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
+def guarantor_for_loan(request, loan_id):
+    form = GuarantorForm()
+    loan = Loan.objects.get(id=loan_id)
+    form.fields['loan'].initial = loan
+    if request.method == 'POST':
+        form = GuarantorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Guarantor added successfully.")
+            return redirect('dashboard')
+        else:
+            messages.error(request, "There was an error with the form. Please correct it below.")
+
+    return render(request, 'guarantor_form.html', {'form': form})
+
+@login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def loan_detail(request, client_id):
     loan = Loan.objects.filter(client=client_id).first()
     loan_payments = LoanPayment.objects.filter(loan=loan)
@@ -231,6 +250,7 @@ def loan_schedule(request, loan_id):
 
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def loan_defaulters_report(request):
     today = date.today()
 
@@ -260,6 +280,7 @@ def loan_defaulters_report(request):
 
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def group_report(request, pk):
     group = Group.objects.get(pk=pk)
     clients = Client.objects.filter(group=group)
@@ -280,6 +301,7 @@ def group_report(request, pk):
 
 
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def loan_upload(request):
     if request.method == 'POST':
         form = LoanExcelForm(request.POST, request.FILES)

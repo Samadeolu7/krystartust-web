@@ -13,6 +13,8 @@ from income.utils import create_income_payment, get_id_fee_income, get_registrat
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import ClientExcelForm, ClientForm
 from django.contrib.auth.decorators import login_required
+
+from administration.decorators import admin_required, allowed_users
 # Create your views here.
 
 @login_required
@@ -61,7 +63,9 @@ def edit_client(request, client_id):
     return render(request, 'client_form.html', {'form': form})
 
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin, Manager'])
 def list_clients(request):
     """View to list paginated and optimized clients."""
     
@@ -91,6 +95,7 @@ def list_clients(request):
 
 
 @login_required
+@allowed_users(allowed_roles=['Admin, Manager'])
 def individual_report(request, pk):
     client = Client.objects.get(pk=pk)
     loans = Loan.objects.filter(client=client)
@@ -109,6 +114,7 @@ def individual_report(request, pk):
 
 
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def create_client_excel(request):
     """View to create clients from an excel file."""
     if request.method == 'POST':

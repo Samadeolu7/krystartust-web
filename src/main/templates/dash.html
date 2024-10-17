@@ -113,7 +113,7 @@
                     <a href="{% url 'dashboard' %}">
                         <i class="fas fa-tachometer-alt"></i> DASHBOARD
                     </a>
-                    
+                    {% if is_admin %}
                     <a href="#userManagementSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
                         <i class="fas fa-user"></i> HUMAN RESOURCES
                     </a>
@@ -122,17 +122,20 @@
                         <li class="sub-item"><a href="{% url 'user_list' %}">EMPLOYEE LIST</a></li>
                         <li class="sub-item"><a href="#">SALARY MANAGEMENT</a></li>
                     </ul>
+                    {% endif %}
             
                     <a href="#customerManagementSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
                         <i class="fas fa-users"></i> CUSTOMER MASTER
                     </a>
                     <ul class="collapse list-unstyled" id="customerManagementSubmenu" data-parent="#sidebarAccordion">
                         <li class="sub-item"><a href="{% url 'create_client' %}">Create Customer</a></li>
+                        {% if is_admin or is_manager %}
                         <li class="sub-item"><a href="{% url 'group_create' %}">Create Group</a></li>
+                        {% endif %}
                         <li class="sub-item"><a href="{% url 'loan_registration' %}">Create Loan</a></li>
                         
                     </ul>
-            
+                    {% if is_admin %}
                     <a href="#financialServicesSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
                         <i class="fas fa-wallet"></i> FINANCE
                     </a>
@@ -143,16 +146,23 @@
                         <li class="sub-sub-item"><a href="{% url 'liability_payment' %}">Payables Payment</a></li>
 
                     </ul>
+                    {% endif %}
+
+                    {% if is_admin or is_manager %}
 
                     <a href="#bankSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
                         <i class="fas fa-exchange-alt"></i> BANK
                     </a>
                     <ul class="collapse list-unstyled" id="bankSubmenu" data-parent="#sidebarAccordion">
+                    {% if is_admin %}
                     <li class="sub-item"><a href="{% url 'create_bank' %}">Create Bank</a></li>
+                    {% endif %}
                     <li class="sub-item"><a href="{% url 'bank_list' %}">Bank Report</a></li>
                     <li class="sub-item"><a href="{% url 'cash_transfer' %}">Cash Transfer</a></li>
                 </ul>
-            
+                    {% endif %}
+
+
                     <a href="#transactionsSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
                         <i class="fas fa-exchange-alt"></i> TRANSACTIONS
                     </a>
@@ -161,36 +171,47 @@
                         <li class="sub-item"><a href="{% url 'register_payment' %}">Reciept Combined</a></li>
                         <li class="sub-item"><a href="{% url 'savings_withdrawal' %}">Savings withdrawal</a></li>
                         <li class="sub-item"><a href="{% url 'loan_registration' %}">Reciept Loan</a></li>
+                        {% if is_admin %}
                         <li class="sub-item"><a href="{% url 'journal_entry' %}">Ledger Transactions</a></li>
+                        {% endif %}
                     </ul>
                     
                     <a href="#expenseSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
                         <i class="fas fa-exchange-alt"></i> PETTY CASH
                     </a>
                     <ul class="collapse list-unstyled" id="expenseSubmenu" data-parent="#sidebarAccordion">
+                        {% if is_admin %}
                         <li class="sub-item"><a href="{% url 'create_expense_type' %}">Create Expense Category</a></li>
                         <li class="sub-item"><a href="{% url 'create_expense' %}">Create Expense</a></li>
+                        {% endif %}
                         <li class="sub-item"><a href="{% url 'expense_payment' %}">Petty Cash Request</a></li>
                         <li class="sub-item"><a href="{% url 'expense_list' %}">Expense Report</a></li>
                     </ul>
-                        
+                     {% if is_admin or is_manager %}  
                     <a href="#reportsSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
-                        <i class="fas fa-chart-line"></i> REPORTS AND ANALYTICS
+                        <i class="fas fa-chart-line"></i> REPORTS
                     </a>
                     <ul class="collapse list-unstyled" id="reportsSubmenu" data-parent="#sidebarAccordion">
+                        {% if is_admin %}
                         <li class="sub-item"><a href="{% url 'income_list' %}">Income Report</a></li>
+                        {% endif %}
                         <li class="sub-item"><a href="{% url 'list_clients' %}">Debtors Reports</a></li>
                         <li class="sub-item"><a href="{% url 'all_groups_report' %}">Group Report</a></li>
                         <li class="sub-item"><a href="{% url 'daily_transactions_report' %}">Remittance Reports</a></li>
+                        {% if is_admin %}
                         <li class="sub-item"><a href="{% url 'profit_and_loss_report' %}">P & L Report</a></li>
                         <li class="sub-item"><a href="{% url 'trial_balance' %}">Trial Balance</a></li>
+                        {% endif %}
                         <li class="sub-item"><a href="{% url 'loan_defaulters_report' %}">Defaulters Report</a></li>
                     </ul>
+                    {% endif %}
+
             
                     <a href="#settingsSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
                         <i class="fas fa-cogs"></i> ADMIN
                     </a>
                     <ul class="collapse list-unstyled" id="settingsSubmenu" data-parent="#sidebarAccordion">
+                        <li class="sub-item"><a href="{% url 'change_password' user.id %}">Change Password</a></li>
                     
                     </ul>
                 </div>

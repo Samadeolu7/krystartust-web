@@ -6,11 +6,14 @@ from .forms import ExpenseForm, ExpensePaymentForm, ExpenseTypeForm
 from .models import Expense, ExpensePayment, ExpenseType
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from administration.decorators import allowed_users
 
 from bank.utils import create_bank_payment, get_bank_account
 # Create your views here.
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def create_expense(request):
     form = ExpenseForm()
     if request.method == 'POST':
@@ -19,7 +22,9 @@ def create_expense(request):
             form.save()
     return render(request, 'create_expense.html', {'form': form})
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def create_expense_type(request):
     form = ExpenseTypeForm()
     if request.method == 'POST':
@@ -27,6 +32,7 @@ def create_expense_type(request):
         if form.is_valid():
             form.save()
     return render(request, 'create_expense_type.html', {'form': form})
+
 
 @login_required
 def expense_payment(request):
@@ -45,12 +51,16 @@ def expense_payment(request):
                 
     return render(request, 'expense_payment.html', {'form': form})
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def expense_list(request):
     expense = Expense.objects.all()
     return render(request, 'expense_list.html', {'expense': expense})
 
+
 @login_required
+@allowed_users(allowed_roles=['Admin'])
 def expense_detail(request, pk):
     expense = Expense.objects.get(pk=pk)
     

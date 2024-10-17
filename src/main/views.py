@@ -10,6 +10,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Sum, Q
 from django.utils import timezone
 
+from administration.decorators import allowed_users
 from bank.models import Bank
 from client.models import Client
 from expenses.models import Expense
@@ -99,8 +100,9 @@ def dashboard(request):
             actual_cash_in += repayment['amount_due']
 
     current_defaulters = Loan.objects.with_is_defaulted().filter(is_defaulted=True).count()
-
-    return render(request, 'dash.html', {
+    user = request.user
+    context = {
+        'user': user,
         'loan_types': loan_types,
         'total_amounts': total_amounts,
         'total_balances': total_balances,
@@ -110,18 +112,28 @@ def dashboard(request):
         'current_defaulters': current_defaulters,
         'expected_cash_in': expected_cash_in,
         'actual_cash_in': actual_cash_in,
-    })
+    }
+    if user.groups.filter(name='Admin').exists():
+        context['is_admin'] = True
+    elif user.groups.filter(name='Manager').exists():
+        context['is_manager'] = True
+    elif user.groups.filter(name='Staff').exists():
+        context['is_employee'] = True
+
+    return render(request, 'dash.html', context)
 
 def fake_dashboard(request):
     return render(request, 'dashboard.html')
 
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def group_detail(request, pk):
     group = Client.objects.get(group=pk)
     return render(request, 'group_detail.html', {'group': group})
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def group_create(request):
     if request.method == 'POST':
         form = GroupForm(request.POST)
@@ -134,11 +146,13 @@ def group_create(request):
     return render(request, 'group_form.html', {'form': form})
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def group_view(request):
     groups = Group.objects.all()
     return render(request, 'group_view.html', {'groups': groups})
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def group_edit(request, pk):
     group = Group.objects.get(pk=pk)
     if request.method == 'POST':
@@ -151,6 +165,7 @@ def group_edit(request, pk):
     return render(request, 'group_form.html', {'form': form})
 
 @login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def group_report(request, pk):
     group = Group.objects.get(pk=pk)
     clients = Client.objects.filter(group=group)
@@ -188,6 +203,8 @@ def get_accounts(request):
     html = render_to_string('account_options.html', {'accounts': accounts})
     return JsonResponse(html, safe=False)
 
+@login_required
+@allowed_users(allowed_roles=['Admin'])
 def journal_entry(request):
     if request.method == 'POST':
         form = JVForm(request.POST)
