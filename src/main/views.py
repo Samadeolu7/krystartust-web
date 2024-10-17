@@ -92,15 +92,22 @@ def dashboard(request):
     )
 
     # Calculate yearly inflows by week for visualization
-    due_dates = [0] * 53
-    payment_dates = [0] * 53
+    start_of_month = today.replace(day=1)
+    next_month = today.replace(day=28) + timedelta(days=4)  # this will never fail
+    end_of_month = next_month - timedelta(days=next_month.day)
+
+    # Initialize lists to hold daily amounts for the current month
+    days_in_month = (end_of_month - start_of_month).days + 1
+    due_dates = [0] * days_in_month
+    payment_dates = [0] * days_in_month
+
     for repayment in loan_repayments:
-        if repayment['due_date']:
-            due_week = repayment['due_date'].isocalendar()[1] - 1
-            due_dates[due_week] += repayment['amount_due']
-        if repayment['payment_date']:
-            payment_week = repayment['payment_date'].isocalendar()[1] - 1
-            payment_dates[payment_week] += repayment['amount_due']
+        if repayment['due_date'] and start_of_month <= repayment['due_date'] <= end_of_month:
+            due_day = (repayment['due_date'] - start_of_month).days
+            due_dates[due_day] += repayment['amount_due']
+        if repayment['payment_date'] and start_of_month <= repayment['payment_date'] <= end_of_month:
+            payment_day = (repayment['payment_date'] - start_of_month).days
+            payment_dates[payment_day] += repayment['amount_due']
 
     current_defaulters = Loan.objects.with_is_defaulted().filter(is_defaulted=True).count()
 

@@ -359,41 +359,58 @@
             }
         });
 
-        // Loan Repayment Schedule Chart
-        var ctx3 = document.getElementById('repaymentChart').getContext('2d');
-        var repaymentChart = new Chart(ctx3, {
-            type: 'line',
-            data: {
-                labels: Array.from({length: 53}, (_, i) => `Week ${i + 1}`),
-                datasets: [
-                    {
-                        label: 'Due Dates',
-                        data: dueDates,
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1,
-                        fill: false,
-                    },
-                    {
-                        label: 'Payment Dates',
-                        data: paymentDates,
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1,
-                        fill: false,
-                    }
-                ]
-            },
-            options: {
-                scales: {
-                    x: {
-                        beginAtZero: true
-                    },
-                    y: {
-                        beginAtZero: true
+    </script>
+        <!-- Loan Repayment Schedule Chart -->
+    <script>
+        $(document).ready(function() {
+            // Calculate the start and end dates of the current month
+            var today = new Date();
+            var startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            var endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            var daysInMonth = endOfMonth.getDate();
+    
+            // Generate labels for each day of the current month
+            var labels = Array.from({length: daysInMonth}, (_, i) => `Day ${i + 1}`);
+    
+            // Example data for dueDates and paymentDates
+            var dueDates = Array.from({length: daysInMonth}, () => Math.floor(Math.random() * 100));
+            var paymentDates = Array.from({length: daysInMonth}, () => Math.floor(Math.random() * 100));
+    
+            var ctx3 = document.getElementById('repaymentChart').getContext('2d');
+            var repaymentChart = new Chart(ctx3, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Due Dates',
+                            data: dueDates,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1,
+                            fill: false,
+                        },
+                        {
+                            label: 'Payment Dates',
+                            data: paymentDates,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            fill: false,
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            beginAtZero: true
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
-            }
+            });
         });
     </script>
 </body>
