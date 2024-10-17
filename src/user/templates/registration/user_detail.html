@@ -10,6 +10,13 @@
     <p><strong>Email:</strong> {{ user.email }}</p>
     <p><strong>Username:</strong> {{ user.username }}</p>
     <p><strong>Salary:</strong> {{ user.salary }}</p>
+    <p><strong>Is Staff:</strong> {{ user.is_staff }}</p>
+    <p><strong>Transportation:</strong> {{ salary.transportation }}</p>
+    <p><strong>House Allowance:</strong> {{ salary.house_rent }}</p>
+    <p><strong>Utility:</strong> {{ salary.utility }}</p>
+    <p><strong>Entertainment:</strong> {{ salary.entertainment }}</p>
+    <p><strong>Leave:</strong> {{ salary.leave }}</p>
+
     <p><strong>Groups:</strong> 
         {% for group in user.groups.all %}
             {{ group.name }}{% if not forloop.last %}, {% endif %}
@@ -17,4 +24,4 @@
     </p>
     <a href="{% url 'user_list' %}">Back to User List</a>
 </body>
-</html>
+</html> 

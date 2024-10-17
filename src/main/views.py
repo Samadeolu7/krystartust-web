@@ -1,5 +1,5 @@
 import json
-from datetime import timedelta
+from datetime import datetime, timedelta
 from subprocess import Popen
 
 from django.shortcuts import redirect, render
@@ -82,21 +82,19 @@ def dashboard(request):
         payment_week=ExtractWeek('payment_date')
     ).values('due_week', 'payment_week', 'amount_due', 'due_date', 'payment_date')
 
-    due_dates = [0] * 53
-    payment_dates = [0] * 53
+    today = datetime.now().date()
+
+# Calculate the start (Monday) and end (Friday) dates of the current week
+    start_of_week = today - timedelta(days=today.weekday())  # Monday
+    end_of_week = start_of_week + timedelta(days=5)  # Friday
+
     expected_cash_in = 0
     actual_cash_in = 0
 
     for repayment in loan_repayments:
-        if repayment['due_week'] is not None:
-            due_dates[repayment['due_week'] - 1] += repayment['amount_due']
-        if repayment['payment_week'] is not None:
-            payment_dates[repayment['payment_week'] - 1] += repayment['amount_due']
-
-        # Cash in calculations
-        if repayment['due_date'] and repayment['due_date'] >= today and repayment['due_date'] <= today + timedelta(days=6):
+        if repayment['due_date'] and start_of_week <= repayment['due_date'] <= end_of_week:
             expected_cash_in += repayment['amount_due']
-        if repayment['payment_date'] and repayment['payment_date'] >= today and repayment['payment_date'] <= today + timedelta(days=6):
+        if repayment['payment_date'] and start_of_week <= repayment['payment_date'] <= end_of_week:
             actual_cash_in += repayment['amount_due']
 
     current_defaulters = Loan.objects.with_is_defaulted().filter(is_defaulted=True).count()
@@ -107,8 +105,8 @@ def dashboard(request):
         'total_amounts': total_amounts,
         'total_balances': total_balances,
         'weekly_inflows': weekly_inflows,
-        'due_dates': due_dates,
-        'payment_dates': payment_dates,
+        # 'due_dates': due_dates,
+        # 'payment_dates': payment_dates,
         'current_defaulters': current_defaulters,
         'expected_cash_in': expected_cash_in,
         'actual_cash_in': actual_cash_in,

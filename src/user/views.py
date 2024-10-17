@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
 from administration.decorators import allowed_users
+from administration.models import Salary
 from .forms import CustomUserCreationForm, CustomUserChangeForm, PasswordChangeForm
 from .models import User
 from django.contrib.auth import get_user_model
@@ -32,7 +33,6 @@ def user_list(request):
     User = get_user_model()
     users = User.objects.all()
 
-    print(users)
     return render(request, 'registration/user_list.html', {'users': users})
 
 @login_required
@@ -40,7 +40,12 @@ def user_list(request):
 def user_detail(request, user_id):
     User = get_user_model()
     user = User.objects.get(id=user_id)
-    return render(request, 'registration/user_detail.html', {'user': user})
+    salary = Salary.objects.filter(user=user).first()
+    context = {
+        'user': user,
+        'salary': salary
+    }
+    return render(request, 'registration/user_detail.html', context)
 
 @login_required
 @allowed_users(allowed_roles=['Admin'])
