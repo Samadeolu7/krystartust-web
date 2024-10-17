@@ -10,24 +10,19 @@
 
         <!-- Loan Information Table -->
         <h3>Group Detail</h3>
-        <table class="table table-bordered">
-            <tr>
-                <th>Group Name</th>
-                <td>{{ group.name }}</td>
-            </tr>
-            <tr>
-                <th>Total Loan Amount</th>
-                <td>{{ total_loans|naira }}</td>
-            </tr>
-            <tr>
-                <th>Total Loan Balance</th>
-                <td>{{ total_loans_balance|naira }}</td>
-            </tr>
-            <tr>
-                <th>Total Savings</th>
-                <td>{{ total_savings|naira }}</td>
-            </tr>
-        </table>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                Group Information  <a href="{% url 'group_edit' group.id %}" class="btn btn-light btn-sm float-end">Edit</a>
+            </div>
+            <div class="card-body">
+                <p><strong>Name:</strong> {{ group.name }}</p>
+                <p><strong>Account Manager:</strong> {{ group.user.name }}</p>
+                <p><strong>Total Loan Amount:</strong> {{ total_loans|naira }}</p>
+                <p><strong>Total Loan Balance:</strong> {{ total_loans_balance|naira }}</p>
+                <p><strong>Total Savings:</strong> {{ total_savings|naira }}</p>
+            </div>
+        </div>
 
         <!-- Repayment Schedule Table -->
         <h3>Loan Information</h3>
