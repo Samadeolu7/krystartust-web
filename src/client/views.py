@@ -65,7 +65,7 @@ def edit_client(request, client_id):
 
 
 @login_required
-@allowed_users(allowed_roles=['Admin, Manager'])
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def list_clients(request):
     """View to list paginated and optimized clients."""
     
@@ -95,7 +95,7 @@ def list_clients(request):
 
 
 @login_required
-@allowed_users(allowed_roles=['Admin, Manager'])
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def individual_report(request, pk):
     client = Client.objects.get(pk=pk)
     loans = Loan.objects.filter(client=client)
