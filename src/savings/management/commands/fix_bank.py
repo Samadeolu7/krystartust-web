@@ -29,15 +29,27 @@ class Command(BaseCommand):
             for payment in bank_payments:
                 payment.payment_date = payment.payment_date - timezone.timedelta(days=14)
                 payment.save()
+                print(f"Fixed bank payment for {bank.name}")
                 
         for income in Income.objects.all():
             income_payments = IncomePayment.objects.filter(income=income, payment_date__gt=timezone.now())
+            if not income_payments.exists():
+                print(f"No future income payments found for {income.name}")
             for payment in income_payments:
-                payment.payment_date = payment.payment_date - timezone.timedelta(days=14)
-                payment.save()
+                try:
+                    print(f"Original payment date for {income.name}: {payment.payment_date}")
+                    payment.payment_date = payment.payment_date - timezone.timedelta(days=14)
+                    payment.save()
+                    print(f"Fixed income payment for {income.name}")
+                except Exception as e:
+                    print(f"Error fixing income payment for {income.name}: {e}")
         
         for liability in Liability.objects.all():
             liability_payments = LiabilityPayment.objects.filter(liability=liability, payment_date__gt=timezone.now())
             for payment in liability_payments:
                 payment.payment_date = payment.payment_date - timezone.timedelta(days=14)
                 payment.save()
+                print(f"Fixed liability payment for {liability.name}")
+
+        # Success message
+        self.stdout.write(self.style.SUCCESS('Successfully fixed payments'))

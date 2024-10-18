@@ -36,7 +36,7 @@ class IncomePayment(models.Model):
             self.income_balance = self.income.balance + self.amount
             self.income.balance = self.income_balance
             self.income.save()
-            super(IncomePayment, self).save(*args, **kwargs)
+        super(IncomePayment, self).save(*args, **kwargs)
     
     class Meta:
         ordering = ['created_at']
