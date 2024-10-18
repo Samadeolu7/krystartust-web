@@ -4,93 +4,84 @@
 
 {% block title %}Group Detail{% endblock %}
 
-        {% block content %}
-        <h1 class="text-center mb-4">Group Detail</h1>
-        
+{% block content %}
+    <h1 class="text-center mb-4">Group Detail</h1>
 
-        <!-- Loan Information Table -->
-        <h3>Group Detail</h3>
-        
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                Group Information  <a href="{% url 'group_edit' group.id %}" class="btn btn-light btn-sm float-end">Edit</a>
-            </div>
-            <div class="card-body">
-                <p><strong>Name:</strong> {{ group.name }}</p>
-                <p><strong>Account Manager:</strong> {{ group.user.name }}</p>
-                <p><strong>Total Loan Amount:</strong> {{ total_loans|naira }}</p>
-                <p><strong>Total Loan Balance:</strong> {{ total_loans_balance|naira }}</p>
-                <p><strong>Total Savings:</strong> {{ total_savings|naira }}</p>
-            </div>
+    <!-- Group Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            Group Information <a href="{% url 'group_edit' group.id %}" class="btn btn-light btn-sm float-end">Edit</a>
         </div>
-
-        <!-- Repayment Schedule Table -->
-        <h3>Loan Information</h3>
-        {% if loans %}
-            <table class="table table-bordered">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Client Name</th>
-                        <th>Loan Amount</th>
-                        <th>Loan Balance</th>
-                        <th>Payment Date</th>
-                        <th>Status</th>
-                        <th>Defaulted</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for loan in loans %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>
-                                <a href="{% url 'loan_detail' loan.client.id %}">{{ loan.client.name }}</a>
-
-                                </td>
-                            <td>{{ loan.total_with_interest|naira }}</td>
-                            <td>{{ loan.balance|naira }}</td>
-                            <td>{{ loan.payment_date|date:"d M Y" }}</td>
-                            <td>{{ loan.status }}</td>
-                            <td>{{ loan.is_defaulted }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            
-            </table>
-        {% else %}
-            <p>No repayment schedules found.</p>
-        {% endif %}
-
-        <!-- Savings Information Table -->
-        <h3>Savings Information</h3>
-        {% if savings %}
-            <table class="table table-bordered">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Client Name</th>
-                        <th>Balance</th>
-                        <th>Created At</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for saving in savings %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>
-                                <a href="{% url 'savings_detail' saving.client.id %}">{{ saving.client.name }}</a>
-
-                                </td>
-                            <td>{{ saving.balance|naira }}</td>
-                            <td>{{ saving.created_at|date:"d M Y" }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No savings found.</p>
-        {% endif %}
+        <div class="card-body">
+            <p><strong>Name:</strong> {{ group.name }}</p>
+            <p><strong>Account Manager:</strong> {{ group.user.name }}</p>
+            <p><strong>Total Loan Amount:</strong> {{ total_loans|naira }}</p>
+            <p><strong>Total Loan Balance:</strong> {{ total_loans_balance|naira }}</p>
+            <p><strong>Total Savings:</strong> {{ total_savings|naira }}</p>
+        </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- Loan Information Table -->
+    <h3>Loan Information</h3>
+    {% if loans %}
+        <table class="table-report">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Client Name</th>
+                    <th>Loan Amount</th>
+                    <th>Loan Balance</th>
+                    <th>Payment Date</th>
+                    <th>Status</th>
+                    <th>Defaulted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for loan in loans %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <a href="{% url 'loan_detail' loan.client.id %}">{{ loan.client.name }}</a>
+                        </td>
+                        <td>{{ loan.total_with_interest|naira }}</td>
+                        <td>{{ loan.balance|naira }}</td>
+                        <td>{{ loan.payment_date|date:"d M Y" }}</td>
+                        <td>{{ loan.status }}</td>
+                        <td>{{ loan.is_defaulted }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No repayment schedules found.</p>
+    {% endif %}
+
+    <!-- Savings Information Table -->
+    <h3>Savings Information</h3>
+    {% if savings %}
+        <table class="table-report">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Client Name</th>
+                    <th>Balance</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for saving in savings %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <a href="{% url 'savings_detail' saving.client.id %}">{{ saving.client.name }}</a>
+                        </td>
+                        <td>{{ saving.balance|naira }}</td>
+                        <td>{{ saving.created_at|date:"d M Y" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No savings found.</p>
+    {% endif %}
 {% endblock %}

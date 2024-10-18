@@ -274,6 +274,12 @@
                             <canvas id="repaymentChart" width="400" height="200"></canvas>
                         </div>
                     </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="chart-container">
+                            <h5>Staff Performance</h5>
+                            <!-- Placeholder for Line Chart -->
+                            <canvas id="staffPerformanceChart" width="400" height="200"></canvas>
+                        </div>
                 </div>
             </div>
         </div>
@@ -293,6 +299,7 @@
     {{ weekly_inflows|json_script:"weekly_inflows" }}
     {{ due_dates|json_script:"due_dates" }}
     {{ payment_dates|json_script:"payment_dates" }}
+    {{ group_clients|json_script:"group_clients" }}
 
     <script>
         // Parse data from JSON Script Tags
@@ -302,6 +309,7 @@
         var weeklyInflows = JSON.parse(document.getElementById('weekly_inflows').textContent);
         var dueDates = JSON.parse(document.getElementById('due_dates').textContent);
         var paymentDates = JSON.parse(document.getElementById('payment_dates').textContent);
+        var groupClients = JSON.parse(document.getElementById('group_clients').textContent);
 
         // Loan Performance Chart
         var ctx = document.getElementById('loanPerformanceChart').getContext('2d');
@@ -359,9 +367,33 @@
             }
         });
 
-    </script>
-        <!-- Loan Repayment Schedule Chart -->
-    <script>
+        // Staff Performance Chart
+        var staffLabels = Object.keys(groupClients);
+        var staffData = Object.values(groupClients);
+
+        var ctx3 = document.getElementById('staffPerformanceChart').getContext('2d');
+        var staffPerformanceChart = new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: staffLabels,
+                datasets: [{
+                    label: 'Number of Clients',
+                    data: staffData,
+                    backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Loan Repayment Schedule Chart
         $(document).ready(function() {
             // Calculate the start and end dates of the current month
             var today = new Date();
@@ -376,8 +408,8 @@
             var dueDates = Array.from({length: daysInMonth}, () => Math.floor(Math.random() * 100));
             var paymentDates = Array.from({length: daysInMonth}, () => Math.floor(Math.random() * 100));
     
-            var ctx3 = document.getElementById('repaymentChart').getContext('2d');
-            var repaymentChart = new Chart(ctx3, {
+            var ctx4 = document.getElementById('repaymentChart').getContext('2d');
+            var repaymentChart = new Chart(ctx4, {
                 type: 'line',
                 data: {
                     labels: labels,

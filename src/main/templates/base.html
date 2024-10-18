@@ -2,32 +2,264 @@
 <html lang="en">
 <head>
     {% load static %}
+    {% load custom_filters %}
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}My Application{% endblock %}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <title>{% block title %}Dashboard{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding-top: 80px; /* Adjust based on the height of your fixed navbar */
+        }
+        /* Navigation Bar Styling */
+        nav {
+            background: linear-gradient(180deg, #0D1240, #1A1E50);
+            padding: 15px;
+            font-size: 14px;
+            position: fixed !important;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Optional: adds a shadow to give a slight separation from the content */
+        }
+        nav a {
+            color: #FFF;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: inline-block;
+            border-radius: 5px; /* Add border-radius to match sidebar links */
+            transition: background-color 0.3s;
+            background-color: #1A1E50; /* Default background color */
+        }
+        nav a:hover {
+            background-color: #2A2E70; /* Same hover effect as sidebar */
+        }
+        .dropdown-menu {
+            background-color: #1A1E50; /* Match the background with navbar */
+            border: none; /* Remove default border */
+        }
+        .dropdown-menu a {
+            color: white !important; /* Make text white */
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            font-size: 0.875rem; /* Reduce font size */
+        }
+        .dropdown-menu a:hover {
+            background-color: #2A2E70; /* Use a lighter blue for hover effect */
+        }
+        /* Logo styling */
+        .navbar-brand img {
+            margin-right: 10px; /* Adds spacing between logo and dashboard text */
+            height: 60px; /* Maintain the height */
+            transform: scale(1.5); /* Zoom into the logo */
+            transition: transform 0.3s; /* Smooth transition */
+        }
+        .navbar-brand img:hover {
+            transform: scale(1.3); /* Slightly more zoom on hover */
+        }
+        /* Card Styling */
+        .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #1A1E50;
+            color: white;
+            padding: 10px 15px;
+            border-bottom: 1px solid #ddd;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        .card-body {
+            padding: 15px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 5px 10px;
+            font-size: 0.875rem;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .btn-light {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        .btn-light:hover {
+            background-color: #e2e6ea;
+        }
+        .float-end {
+            float: right;
+        }
+        /* Group Details and Loan Information Tables */
+        .group-details, .loan-information {
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 80%;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .group-details h3, .loan-information h3 {
+            margin-top: 0;
+            color: #1A1E50;
+        }
+        .group-details p, .loan-information p {
+            margin: 5px 0;
+        }
+        .group-details a, .loan-information a {
+            color: #1A1E50;
+            text-decoration: none;
+        }
+        .group-details a:hover, .loan-information a:hover {
+            text-decoration: underline;
+        }
+        .table-report {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+        .table-report thead th {
+            background-color: #1A1E50;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 1rem;
+        }
+        .table-report tbody td {
+            padding: 12px;
+            border: 1px solid #ddd;
+        }
+        .table-report tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .table-report tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="{% url 'dashboard' %}">Dashboard</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-        </nav>
-        {% if messages %}
-            <div>
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                {% endfor %}
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg">
+        <!-- Add Logo Here -->
+        <a href="{% url 'dashboard' %}" class="navbar-brand">
+            <img src="{% static 'images/logo.svg' %}" alt="Krystar Trust Logo" class="logo-img">
+        </a>
+        <a href="{% url 'dashboard' %}" class="navbar-brand text-white">Dashboard</a>
+        <div class="navbar-nav">
+            {% if is_admin %}
+            <div class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Human Resources</a>
+                <div class="dropdown-menu">
+                    <a href="{% url 'create_users' %}" class="dropdown-item">Create Employee</a>
+                    <a href="{% url 'user_list' %}" class="dropdown-item">Employee List</a>
+                    <a href="#" class="dropdown-item">Salary Management</a>
+                </div>
             </div>
-        {% endif %}
+            {% endif %}
+            <div class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Customer Master</a>
+                <div class="dropdown-menu">
+                    <a href="{% url 'create_client' %}" class="dropdown-item">Create Customer</a>
+                    {% if is_admin or is_manager %}
+                    <a href="{% url 'group_create' %}" class="dropdown-item">Create Group</a>
+                    {% endif %}
+                    <a href="{% url 'loan_registration' %}" class="dropdown-item">Create Loan</a>
+                </div>
+            </div>
+            {% if is_admin %}
+            <div class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Finance</a>
+                <div class="dropdown-menu">
+                    <a href="{% url 'create_liability' %}" class="dropdown-item">Create Payables</a>
+                    <a href="{% url 'liability_list' %}" class="dropdown-item">Payables Report</a>
+                    <a href="{% url 'liability_payment' %}" class="dropdown-item">Payables Payment</a>
+                </div>
+            </div>
+            {% endif %}
+            {% if is_admin or is_manager %}
+            <div class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Bank</a>
+                <div class="dropdown-menu">
+                    {% if is_admin %}
+                    <a href="{% url 'create_bank' %}" class="dropdown-item">Create Bank</a>
+                    {% endif %}
+                    <a href="{% url 'bank_list' %}" class="dropdown-item">Bank Report</a>
+                    <a href="{% url 'cash_transfer' %}" class="dropdown-item">Cash Transfer</a>
+                </div>
+            </div>
+            {% endif %}
+            <div class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Transactions</a>
+                <div class="dropdown-menu">
+                    <a href="{% url 'savings_registration' %}" class="dropdown-item">Reciept Savings</a>
+                    <a href="{% url 'register_payment' %}" class="dropdown-item">Reciept Combined</a>
+                    <a href="{% url 'savings_withdrawal' %}" class="dropdown-item">Savings Withdrawal</a>
+                    <a href="{% url 'loan_registration' %}" class="dropdown-item">Reciept Loan</a>
+                    {% if is_admin %}
+                    <a href="{% url 'journal_entry' %}" class="dropdown-item">Ledger Transactions</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Petty Cash</a>
+                <div class="dropdown-menu">
+                    {% if is_admin %}
+                    <a href="{% url 'create_expense_type' %}" class="dropdown-item">Create Expense Category</a>
+                    <a href="{% url 'create_expense' %}" class="dropdown-item">Create Expense</a>
+                    {% endif %}
+                    <a href="{% url 'expense_payment' %}" class="dropdown-item">Petty Cash Request</a>
+                    <a href="{% url 'expense_list' %}" class="dropdown-item">Expense Report</a>
+                </div>
+            </div>
+            {% if is_admin or is_manager %}
+            <div class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Reports</a>
+                <div class="dropdown-menu">
+                    {% if is_admin %}
+                    <a href="{% url 'income_list' %}" class="dropdown-item">Income Report</a>
+                    {% endif %}
+                    <a href="{% url 'list_clients' %}" class="dropdown-item">Debtors Reports</a>
+                    <a href="{% url 'all_groups_report' %}" class="dropdown-item">Group Report</a>
+                    <a href="{% url 'daily_transactions_report' %}" class="dropdown-item">Remittance Reports</a>
+                    {% if is_admin %}
+                    <a href="{% url 'profit_and_loss_report' %}" class="dropdown-item">P & L Report</a>
+                    <a href="{% url 'trial_balance' %}" class="dropdown-item">Trial Balance</a>
+                    {% endif %}
+                    <a href="{% url 'loan_defaulters_report' %}" class="dropdown-item">Defaulters Report</a>
+                </div>
+            </div>
+            {% endif %}
+            <div class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Admin</a>
+                <div class="dropdown-menu">
+                    <a href="{% url 'change_password' user.id %}" class="dropdown-item">Change Password</a>
+                </div>
+            </div>
+        </div>
+        <form class="form-inline ml-auto">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search">
+        </form>
+    </nav>
+
+    <div class="main-content">
         {% block content %}
         {% endblock %}
     </div>
-        <!-- Include jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

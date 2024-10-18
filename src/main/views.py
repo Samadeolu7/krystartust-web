@@ -18,6 +18,7 @@ from income.models import Income
 from liability.models import Liability
 from loan.models import Loan, LoanPayment, LoanRepaymentSchedule as LoanRepayment
 from savings.models import Savings, SavingsPayment
+from user.models import User
 
 from .models import ClientGroup as Group
 from .forms import GroupForm, JVForm
@@ -111,6 +112,17 @@ def dashboard(request):
 
     current_defaulters = Loan.objects.with_is_defaulted().filter(is_defaulted=True).count()
 
+    #count number of clients in client groups for each user assigned to them
+    staff = User.objects.filter().all()
+    group_clients = {}
+    for user in staff:
+        user_groups = Group.objects.filter(user=user)
+        if user_groups:
+            group_clients[user.username.split()[0]] = 0
+            for group in user_groups:
+                clients = Client.objects.filter(group=group)
+                group_clients[user.username.split()[0]] += clients.count()
+
     # Determine user role for template context
     user = request.user
     is_admin = user.groups.filter(name='Admin').exists()
@@ -131,6 +143,7 @@ def dashboard(request):
         'is_admin': is_admin,
         'is_manager': is_manager,
         'is_employee': is_employee,
+        'group_clients': group_clients,
     }
 
     return render(request, 'dash.html', context)
