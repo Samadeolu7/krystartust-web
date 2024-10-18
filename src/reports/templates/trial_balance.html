@@ -71,17 +71,18 @@
                     <td>{{ liability.name }}</td>
                     <td></td>
                     <td>{{ liability.balance |naira }} </td>
+                </tr>    
+                    {% endfor %}
+                    <tr>
+                        <td><strong>Total</strong></td>
+                        <td></td>
+                        <td><strong>{{ total_debit |naira }}</strong></td>
+                        <td><strong>{{ total_credit |naira }}</strong></td>
+    
+                    </tr>
             </tbody>
-            {% endfor %}
-            <tfoot class="table-dark">
-                <tr>
-                    <td>Total</td>
-                    <td></td>
-                    <td>{{ total_debit |naira }}</td>
-                    <td>{{ total_credit |naira }}</td>
+            
 
-                </tr>
-            </tfoot>
         </table>
     </div>
 

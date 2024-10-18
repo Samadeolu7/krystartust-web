@@ -134,7 +134,6 @@ def loan_registration(request):
             with transaction.atomic():
                 loan = form.save(commit=False)
                 loan.balance = loan.amount * (Decimal(1) + (Decimal(loan.interest)/Decimal(100)))
-                loan.start_date = loan.start_date + timedelta(weeks=2)  # Start 2 weeks after registration
                 loan.end_date = loan.start_date + timedelta(weeks=loan.duration)
                 loan.emi = loan.balance / loan.duration
                 loan.status = 'Active'
@@ -166,7 +165,7 @@ def loan_registration(request):
                 # Create repayment schedule based on the loan type and duration
                 amount_due = loan.balance / duration
                 for i in range(duration):
-                    due_date = start_date + (i * time_increment)  # Start 1 week after the start date
+                    due_date = start_date + (i * time_increment) + timedelta(weeks=2)  # Start 2 weeks after registration # Start 1 week after the start date
 
                     LoanRepaymentSchedule.objects.create(
                         loan=loan,

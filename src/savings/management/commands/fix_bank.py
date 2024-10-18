@@ -19,9 +19,25 @@ class Command(BaseCommand):
     help = 'Fix payments that did not hit the bank'
 
     def handle(self, *args, **kwargs):
-        #calculate 15% of the total loan amount
-        total_loan_amount = 0
-        for loan in Loan.objects.all():
-            total_loan_amount += loan.amount
-        result = total_loan_amount * Decimal(0.15)
-        print(f"15% of the total loan amount is {result}")
+        # Calculate 15% of the total loan amount
+        # Find all income payments and liability that are ahead of today in date
+        # Find all loan payments that are ahead of today in date
+
+        for bank in Bank.objects.all():
+            bank_payments = BankPayment.objects.filter(bank=bank, payment_date__gt=timezone.now())
+            # Reduce the date of such payments by 14 days
+            for payment in bank_payments:
+                payment.payment_date = payment.payment_date - timezone.timedelta(days=14)
+                payment.save()
+                
+        for income in Income.objects.all():
+            income_payments = IncomePayment.objects.filter(income=income, payment_date__gt=timezone.now())
+            for payment in income_payments:
+                payment.payment_date = payment.payment_date - timezone.timedelta(days=14)
+                payment.save()
+        
+        for liability in Liability.objects.all():
+            liability_payments = LiabilityPayment.objects.filter(liability=liability, payment_date__gt=timezone.now())
+            for payment in liability_payments:
+                payment.payment_date = payment.payment_date - timezone.timedelta(days=14)
+                payment.save()
