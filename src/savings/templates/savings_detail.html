@@ -10,7 +10,7 @@
         <!-- Savings Information Table -->
         <a href="{% url 'client_savings_payments_excel' savings.client.id %}" class="btn btn-primary">Download Excel</a>
         <h3>Savings Information</h3>
-        <table class="table table-bordered">
+        <table class="table-report">
             <tr>
                 <th>Client Name</th>
                 <td>{{ savings.client.name }}</td>
@@ -32,7 +32,7 @@
         <!-- Savings Payments Table -->
         <h3>Savings Payments</h3>
         {% if savings_payments %}
-            <table class="table table-bordered">
+            <table class="table-report">
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>

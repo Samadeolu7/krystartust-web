@@ -5,6 +5,7 @@
 {% block title %}Client List{% endblock %}
 
 {% block content %}
+
     <h2 class="text-center">Clients List</h2>
     <table class="table table-striped mt-4">
         <a href="{% url 'client_list_excel' %}" class="btn btn-primary">Download Excel</a>
@@ -57,7 +58,8 @@
     </table>
 
     <!-- Pagination Controls -->
-    <nav aria-label="Page navigation">
+        <!-- Pagination Controls -->
+    <nav aria-label="Page navigation" class="pagination-bottom">
         <ul class="pagination justify-content-center">
             {% if clients.has_previous %}
                 <li class="page-item">
@@ -82,7 +84,7 @@
                     </a>
                 </li>
             {% endif %}
-
+    
             <!-- Display page numbers -->
             {% for num in clients.paginator.page_range %}
                 {% if clients.number == num %}
@@ -95,7 +97,7 @@
                     </li>
                 {% endif %}
             {% endfor %}
-
+    
             {% if clients.has_next %}
                 <li class="page-item">
                     <a class="page-link" href="?page={{ clients.next_page_number }}" aria-label="Next">
@@ -121,6 +123,5 @@
             {% endif %}
         </ul>
     </nav>
-
     <a href="{% url 'create_client' %}" class="btn btn-primary">Create New Client</a>
 {% endblock %}
