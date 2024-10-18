@@ -209,7 +209,7 @@
                         <li class="sub-item"><a href="{% url 'expense_payment' %}">Petty Cash Request</a></li>
                         <li class="sub-item"><a href="{% url 'expense_list' %}">Expense Report</a></li>
                     </ul>
-                     {% if is_admin or is_manager %}  
+                     
                     <a href="#reportsSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
                         <i class="fas fa-chart-line"></i> REPORTS
                     </a>
@@ -217,16 +217,18 @@
                         {% if is_admin %}
                         <li class="sub-item"><a href="{% url 'income_list' %}">Income Report</a></li>
                         {% endif %}
+                        {% if is_admin or is_manager %}  
                         <li class="sub-item"><a href="{% url 'list_clients' %}">Debtors Reports</a></li>
-                        <li class="sub-item"><a href="{% url 'all_groups_report' %}">Group Report</a></li>
+                        <li class="sub-item"><a href="{% url 'loan_defaulters_report' %}">Defaulters Report</a></li>
                         <li class="sub-item"><a href="{% url 'daily_transactions_report' %}">Remittance Reports</a></li>
+                        {% endif %}
                         {% if is_admin %}
                         <li class="sub-item"><a href="{% url 'profit_and_loss_report' %}">P & L Report</a></li>
                         <li class="sub-item"><a href="{% url 'trial_balance' %}">Trial Balance</a></li>
                         {% endif %}
-                        <li class="sub-item"><a href="{% url 'loan_defaulters_report' %}">Defaulters Report</a></li>
+                        <li class="sub-item"><a href="{% url 'all_groups_report' %}">Group Report</a></li>
                     </ul>
-                    {% endif %}
+                    
 
             
                     <a href="#settingsSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">

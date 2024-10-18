@@ -39,18 +39,15 @@ def all_clients_report(request):
     return render(request, 'all_clients_report.html', context)
 
 @login_required
-@allowed_users(allowed_roles=['Admin', 'Manager'])
 def all_groups_report(request):
     groups = Group.objects.all()
     
     context = {
         'groups': groups,
     }
-
     return render(request, 'all_groups_report.html', context)
 
 @login_required
-@allowed_users(allowed_roles=['Admin', 'Manager'])
 def individual_group_report(request, group_id):
     group = Group.objects.get(pk=group_id)
     clients = Client.objects.filter(group=group)
@@ -313,3 +310,19 @@ def client_loans_payments_excel(request, client_id):
     response['Content-Disposition'] = f'attachment; filename={client.name}_loans_payments.xlsx'
     df.to_excel(response, index=False)
     return response
+
+@login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
+def weekly_cash_flow_report(request):
+    
+    # Get the current year and month
+    current_year = datetime.now().year
+    current_month = datetime.now().month
+    seven_weeks = {week:0 for week in range(1, 8)}
+    # Get the current week
+    current_week = datetime.now().isocalendar()[1]
+    # Get the cash flow for the current week
+    incomes = IncomePayment.objects.filter(payment_date__year=current_year, payment_date__week=current_week)
+    expenses = ExpensePayment.objects.filter(payment_date__year=current_year, payment_date__week=current_week)
+    loan_payments = LoanPayment.objects.filter(payment_date__year=current_year, payment_date__week=current_week)
+    savings_payments = SavingsPayment.objects.filter(payment_date__year=current_year, payment_date__week=current_week)
