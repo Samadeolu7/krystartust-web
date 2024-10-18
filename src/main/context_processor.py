@@ -12,3 +12,7 @@ def user_groups(request):
                 return {'is_staff': True}
             else:
                 return {'is_client': True}
+        else:
+            return {'is_client': True}
+    else:
+        return {}
