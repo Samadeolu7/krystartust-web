@@ -12,12 +12,18 @@
 <style>
     body {
         background-color: #F5F7FA;
+        height: 100%;
+        display: flex;
+        flex-direction: row;
     }
     .sidebar {
         background: linear-gradient(180deg, #0D1240, #1A1E50);
         color: #FFF;
         padding: 15px;
         height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
         font-size: 14px;
         overflow-y: auto; /* Add scrollbar for overflow */
     }
@@ -31,6 +37,16 @@
     .logo-img {
         max-width: 80%; /* Adjust size based on sidebar width */
         height: auto;
+    }
+    .container-fluid {
+        display: flex;
+        flex: 1;
+        flex-direction: row;
+    }
+    
+    .row {
+        display: flex;
+        flex: 1;
     }
     .sidebar h2 {
         font-size: 20px;
@@ -98,6 +114,12 @@
         border-radius: 8px;
         padding: 20px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .main-content {
+        margin-left: 250px; /* Same width as the sidebar */
+        padding: 20px;
+        flex: 1;
+        overflow-y: auto; /* Enable scrolling if content overflows */
     }
 </style>
 </head>
@@ -218,7 +240,7 @@
             </div>
 
             <!-- Main Content -->
-            <div class="col-md-10 p-4">
+            <div class="col-md-10 p-4 main-content">
                 <!-- Header -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2>Welcome {{ user.username|first_word }} </h2>
