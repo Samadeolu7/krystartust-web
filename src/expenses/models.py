@@ -46,7 +46,7 @@ class ExpensePayment(models.Model):
         payment_date = models.DateField()
         created_at = models.DateTimeField(auto_now_add=True)
         updated_at = models.DateTimeField(auto_now=True)
-        create_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expense_payments', null=True, blank=True)
+        created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expense_payments', null=True, blank=True)
         transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True)
         approved = models.BooleanField(default=False)
     

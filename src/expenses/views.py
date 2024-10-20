@@ -43,7 +43,7 @@ def expense_payment(request):
                 expense =form.save(commit=False)
                 tran = Transaction(description=f'expense for {form.cleaned_data["expense"]}')
                 tran.save(prefix='EXP') 
-                expense.create_by = request.user
+                expense.created_by = request.user
                 expense.transaction = tran
                 expense.save()
                 bank = get_bank_account()

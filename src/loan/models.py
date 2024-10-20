@@ -33,8 +33,8 @@ class Loan(models.Model):
     end_date = models.DateField(db_index=True)
     emi = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=100, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    created_by = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='loans', db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True, null=True, blank=True)
+    created_by = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='loans', db_index=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
     objects = LoanManager()
@@ -101,6 +101,8 @@ class LoanPayment(models.Model):
     payment_date = models.DateField(db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
+    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True)
+    created_by = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='loan_payments', db_index=True, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.pk:

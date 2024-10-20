@@ -2,7 +2,7 @@ from decimal import Decimal
 from django.db import models
 
 from client.models import Client
-from django.contrib.auth.models import User
+from user.models import User
 from income.models import SingletonModel
 
 # Create your models here.
@@ -31,8 +31,8 @@ class SavingsPayment(models.Model):
     payment_date = models.DateField()
     transaction_type = models.CharField(max_length=1, choices=TRANSACTION_TYPE_CHOICES, default=SAVINGS)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    transaction = models.ForeignKey('administration.Transaction', on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    transaction = models.ForeignKey('administration.Transaction', on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.pk:
