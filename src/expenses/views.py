@@ -7,7 +7,7 @@ from .models import Expense, ExpensePayment, ExpenseType
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from administration.decorators import allowed_users
-
+from administration.models import Transaction , Approval
 from bank.utils import create_bank_payment, get_bank_account
 # Create your views here.
 
@@ -33,7 +33,6 @@ def create_expense_type(request):
             form.save()
     return render(request, 'create_expense_type.html', {'form': form})
 
-
 @login_required
 def expense_payment(request):
     form = ExpensePaymentForm()
@@ -41,10 +40,15 @@ def expense_payment(request):
         form = ExpensePaymentForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
-                form.save()
+                expense =form.save(commit=False)
+                tran = Transaction(description=f'expense for {form.cleaned_data["expense"]}')
+                tran.save(prefix='EXP') 
+                expense.create_by = request.user
+                expense.transaction = tran
+                expense.save()
                 bank = get_bank_account()
                 amount = form.cleaned_data['amount'] * -1
-                create_bank_payment(bank,f'expense for {form.cleaned_data["expense"]}', amount, form.cleaned_data['payment_date'])
+                create_bank_payment(bank, f'expense for {form.cleaned_data["expense"]}', amount, form.cleaned_data['payment_date'], tran, request.user)
 
                 verify_trial_balance()
             return redirect('dashboard')

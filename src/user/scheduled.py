@@ -1,5 +1,6 @@
 from datetime import timezone
 
+from administration.models import Transaction
 from user.pdf_gen import generate_payslip
 from .models import User
 from expenses.models import Expense, ExpensePayment
@@ -26,10 +27,11 @@ def record_salary_expense():
         print("Salary expense for this month has already been recorded.")
         return None
     
-    expense_payment = ExpensePayment.objects.create(expense=expense, amount=salary, description="Salary Payment", payment_date=timezone.now())
+    transaction = Transaction(description="Salary Payment")
+    expense_payment = ExpensePayment.objects.create(expense=expense, amount=salary, description="Salary Payment", payment_date=timezone.now(), transaction=transaction)
     expense_payment.save()
     bank = get_bank_account()
-    bank_payment = create_bank_payment(bank, f"Salary Payment for the month of {timezone.now().strftime('%B')}", salary, timezone.now())
+    bank_payment = create_bank_payment(bank, f"Salary Payment for the month of {timezone.now().strftime('%B')}", salary, timezone.now(), transaction, None)
     return expense_payment
 
 def generate_payslip_f():

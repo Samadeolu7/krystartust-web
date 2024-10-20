@@ -1,7 +1,17 @@
-from bank.utils import create_bank_payment, get_cash_in_hand
+from bank.utils import create_bank_payment, get_bank_account, get_cash_in_hand
+from liability.utils import create_union_contribution_income_payment
 from .models import Loan, LoanPayment, LoanRepaymentSchedule
-from income.utils import create_income_payment, get_loan_interest_income
-from income.models import Income
+from income.utils import create_administrative_fee_income_payment, create_income_payment, create_loan_registration_fee_income_payment, create_risk_premium_income_payment, get_loan_interest_income
+from income.models import IncomePayment
+from django.db import transaction
+from main.utils import verify_trial_balance
+from django.utils import timezone
+from django.contrib.contenttypes.models import ContentType
+from datetime import timedelta
+from decimal import Decimal
+
+from administration.models import Transaction, Approval
+
 
 def register_loan(client, amount, interest, loan_type, duration, risk_premium, start_date, end_date, emi, status):
     loan = Loan.objects.create(client=client, amount=amount, interest=interest, loan_type=loan_type, duration=duration, risk_premium=risk_premium, start_date=start_date, end_date=end_date, emi=emi, status=status)
@@ -20,3 +30,116 @@ def create_loan_payment(client, loan,amount,date):
     bank = get_cash_in_hand()
     bank_payment = create_bank_payment(bank, f'Loan payment from {client.name}', amount, date)
     return loan_payment
+
+def send_for_approval(form, user):
+
+    with transaction.atomic():
+        loan = form.save(commit=False)
+        loan.balance = loan.amount * (Decimal(1) + (Decimal(loan.interest)/Decimal(100)))
+        loan.end_date = loan.start_date + timedelta(weeks=loan.duration)
+        loan.emi = loan.balance / loan.duration
+        loan.status = 'Active'
+        tran = Transaction(description=f'Loan disbursement to {loan.client.name}')
+        tran.save(prefix='LOA')
+        loan.transaction = transaction
+        loan.created_by = user
+        loan.save()
+
+        # Create an approval record
+        approval = Approval.objects.create(
+            type='Loan',
+            content_object=loan,
+            content_type=ContentType.objects.get_for_model(Loan),
+            created_by=user,
+            comment = form.cleaned_data.get('description'),
+            object_id=loan.id,
+            user = user,
+        )
+        approval.save()
+
+        registration_fee = form.cleaned_data.get('registration_fee')
+        bank = form.cleaned_data.get('bank')
+        admin_fees = form.cleaned_data.get('admin_fees')
+        start_date = loan.start_date
+        amount = loan.amount
+
+        if admin_fees:
+            tran = Transaction(description=f'Administrative Fee for {loan.client.name}')
+            tran.save(prefix='INC')
+            admin_fee_amount = Decimal(admin_fees) * Decimal(amount) / Decimal(100)
+            create_administrative_fee_income_payment(bank,admin_fee_amount,start_date, f'Administrative Fee for {loan.client.name}', transaction, user)
+
+        if registration_fee:
+            tran = Transaction(description=f'Loan Registration Fee for {loan.client.name}')
+            tran.save(prefix='INC')
+            create_loan_registration_fee_income_payment(registration_fee,start_date, f'Loan Registration Fee for {loan.client.name}', transaction, user)
+
+        tran = Transaction(description=f'Risk Premium for {loan.client.name}')
+        tran.save(prefix='INC')
+        risk_premium_amount = Decimal(loan.risk_premium) * Decimal(amount) / 100
+        create_risk_premium_income_payment(risk_premium_amount, start_date, f'Risk Premium for {loan.client.name}', transaction, user)
+
+        union = form.cleaned_data.get('union_contribution')
+        tran = Transaction(description=f'Union Contribution for {loan.client.name}')
+        tran.save(prefix='LIA')
+        created_by = user
+        create_union_contribution_income_payment(start_date,union,f'Union Contribution for {loan.client.name}', tran, created_by)           
+
+        verify_trial_balance()
+
+        return loan
+
+def approve_loan(approval, user):
+    with transaction.atomic():
+        approval.approved = True
+        approval.approved_by = user
+        approval.approved_at = timezone.now()
+        approval.save()
+
+        loan = approval.content_object
+        loan.approved = True
+        loan.save()
+
+        loan_type = loan.loan_type
+        duration = loan.duration
+        start_date = loan.start_date
+        amount = loan.amount
+        
+        bank = get_bank_account()
+        bank_payment = create_bank_payment(bank, f'Loan disbursement to {loan.client.name}', -amount, start_date,loan.transaction, user)
+
+        time_increment = {
+            'Daily': timedelta(days=1),
+            'Weekly': timedelta(weeks=1),
+            'Monthly': timedelta(weeks=4),
+            
+        }.get(loan_type, timedelta(weeks=1))
+
+        amount_due = loan.balance / duration
+        for i in range(duration):
+            due_date = start_date + (i * time_increment) + timedelta(weeks=2)
+
+            LoanRepaymentSchedule.objects.create(
+                loan=loan,
+                due_date=due_date,
+                amount_due=amount_due,
+            )
+
+        interest_amount = Decimal(loan.interest) * Decimal(amount) / Decimal(100)
+        if loan_type == 'Daily':
+            interest_income = get_loan_interest_income(type='Daily')
+        elif loan_type == 'Weekly':
+            interest_income = get_loan_interest_income(type='Weekly')
+        else:
+            interest_income = get_loan_interest_income(type='Monthly')
+        income_payment = IncomePayment.objects.create(
+            income=interest_income,
+            description=f'Interest income from {loan.client.name}',
+            amount=interest_amount,
+            payment_date=start_date,
+            transaction=loan.transaction,
+            created_by=user,    
+        )
+        income_payment.save()
+
+        verify_trial_balance()

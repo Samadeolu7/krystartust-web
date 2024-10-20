@@ -31,11 +31,11 @@ class SavingsPayment(models.Model):
     payment_date = models.DateField()
     transaction_type = models.CharField(max_length=1, choices=TRANSACTION_TYPE_CHOICES, default=SAVINGS)
     created_at = models.DateTimeField(auto_now_add=True)
-    #created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    transaction = models.ForeignKey('administration.Transaction', on_delete=models.SET_NULL, null=True)
 
     def save(self, *args, **kwargs):
-        if not self.pk:  # If the record is being created 
-            # Update the corresponding Savings balance
+        if not self.pk:
             savings_record = Savings.objects.get(client=self.client)
             if self.transaction_type == self.SAVINGS:
                 savings_record.balance += Decimal(self.amount)

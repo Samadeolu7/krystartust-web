@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from django.shortcuts import redirect, render
 from administration.decorators import allowed_users
 
+from administration.models import Transaction
 from main.utils import verify_trial_balance
 from .forms import LiabilityForm, LiabilityPaymentForm
 from .models import Liability, LiabilityPayment
@@ -34,10 +35,15 @@ def liability_payment(request):
         form = LiabilityPaymentForm(request.POST)
         if form.is_valid():
             with translation.atomic():
-                form.save()
+                liability = form.save(commit=False)
+                transaction = Transaction(description=f'liability payment for {form.cleaned_data["liability"]}')
+                transaction.save(prefix='LIA')
+                liability.created_by = request.user
+                liability.transaction = transaction
                 bank = get_bank_account()
                 amount = form.cleaned_data['amount'] * -1
-                create_bank_payment(bank,f'liability payment for {form.cleaned_data["liability"]}', amount, form.cleaned_data['payment_date'])
+                
+                create_bank_payment(bank,f'liability payment for {form.cleaned_data["liability"]}', amount, form.cleaned_data['payment_date'], transaction, request.user)
                 verify_trial_balance()
             return redirect('dashboard')
     return render(request, 'create_liability_payment.html', {'form': form})

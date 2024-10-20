@@ -3,21 +3,20 @@ from bank.models import BankPayment
 from bank.utils import get_cash_in_hand, create_bank_payment
 from .models import Savings, SavingsPayment, CompulsorySavings
 
-def register_savings(bank,client, amount,date):
+def register_savings(bank,client, amount, date, transaction, user): 
     savings = Savings.objects.create(client=client, balance=0)
     savings.save()
-    savingspayment = SavingsPayment.objects.create(client=client,savings=savings, amount=amount, description=f'Savings for {client.name}', payment_date=date)
+    savingspayment = SavingsPayment.objects.create(client=client,savings=savings, amount=amount, description=f'Savings for {client.name}', payment_date=date, created_by=user, transaction=transaction)
     savingspayment.save()
     bank = get_cash_in_hand()
-    bankpayment = BankPayment.objects.create(bank=bank, amount=amount, description=f'Savings for {client.name}', payment_date=date)
+    bankpayment = BankPayment.objects.create(bank=bank, amount=amount, description=f'Savings for {client.name}', payment_date=date, created_by=user, transaction=transaction)
     bankpayment.save()
     return savings
 
-def create_compulsory_savings(client):
-    compulsory_savings = CompulsorySavings.objects.all().first()
-    if compulsory_savings:
-        register_savings(client=client, amount=compulsory_savings.amount)
-    return compulsory_savings
+def create_compulsory_savings(client,amount,transaction, user):
+
+    register_savings(client=client, amount=amount, date=transaction.payment_date, transaction=transaction, user=user)
+
 
 
 def create_savings_payment(client, amount, payment_date):
@@ -37,4 +36,4 @@ def create_savings_payment(client, amount, payment_date):
         return savings_payment
     except Exception as e:
         logging.error(f"Error creating savings payment for client {client.name}: {e}")
-        raise
+        raise e

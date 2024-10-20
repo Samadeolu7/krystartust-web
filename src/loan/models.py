@@ -1,12 +1,9 @@
-from django.db import models
-from client.models import Client
 from datetime import date
 from django.core.cache import cache
-
-
 from django.db import models
 from django.db.models import Case, When, BooleanField
-from datetime import date
+
+from client.models import Client
 
 
 class LoanManager(models.Manager):
@@ -37,9 +34,11 @@ class Loan(models.Model):
     emi = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=100, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    created_by = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='loans', db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
     objects = LoanManager()
+    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True)
     approved = models.BooleanField(default=False)
 
     def is_approved(self):

@@ -4,12 +4,12 @@ from django.shortcuts import redirect, render
 from django.contrib import messages
 
 from administration.decorators import allowed_users
+from administration.models import Transaction
 from client.models import Client
 from income.models import IncomePayment
-from liability.utils import create_union_contribution_income_payment
 from loan.excel_utils import bulk_create_loans_from_excel, loan_from_excel
+from loan.utils import send_for_approval
 from savings.models import Savings, SavingsPayment
-from bank.models import BankPayment
 from main.models import ClientGroup as Group
 from .models import Loan, LoanPayment, LoanRepaymentSchedule
 from .forms import GuarantorForm, LoanRegistrationForm, LoanPaymentForm, LoanExcelForm, LoanUploadForm
@@ -17,12 +17,10 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 
 from bank.utils import create_bank_payment
-from income.utils import create_risk_premium_income_payment, get_loan_interest_income, create_administrative_fee_income_payment, create_loan_registration_fee_income_payment
 from main.utils import verify_trial_balance
 
 from datetime import date, timedelta
 
-# Create your views here.
 
 @login_required
 def transaction_history(request, client_id):
@@ -130,80 +128,8 @@ def loan_registration(request):
         form = LoanRegistrationForm(request.POST)
         if form.is_valid():
             # Save the loan form data to create a new Loan instance
-
-            with transaction.atomic():
-                loan = form.save(commit=False)
-                loan.balance = loan.amount * (Decimal(1) + (Decimal(loan.interest)/Decimal(100)))
-                loan.end_date = loan.start_date + timedelta(weeks=loan.duration)
-                loan.emi = loan.balance / loan.duration
-                loan.status = 'Active'
-                loan.save()
-
-                # Get the loan details
-                loan_type = loan.loan_type
-                duration = loan.duration
-                start_date = loan.start_date
-                amount = loan.amount
-                registration_fee = form.cleaned_data.get('registration_fee')
-                bank = form.cleaned_data.get('bank')
-                admin_fees = form.cleaned_data.get('admin_fees')
-                if admin_fees:
-                    admin_fee_amount = Decimal(admin_fees) * Decimal(amount) / Decimal(100)
-                    create_administrative_fee_income_payment(admin_fee_amount,start_date, f'Administrative Fee for {loan.client.name}')
-
-                if registration_fee:
-                    create_loan_registration_fee_income_payment(registration_fee,start_date, f'Loan Registration Fee for {loan.client.name}')
-
-                # Determine the increment based on loan type
-                time_increment = {
-                    'Daily': timedelta(days=1),
-                    'Weekly': timedelta(weeks=1),
-                    'Monthly': timedelta(weeks=4),
-                    # Add more loan types as needed
-                }.get(loan_type, timedelta(weeks=1))  # Default to weekly if the loan type is not specifically listed
-
-                # Create repayment schedule based on the loan type and duration
-                amount_due = loan.balance / duration
-                for i in range(duration):
-                    due_date = start_date + (i * time_increment) + timedelta(weeks=2)  # Start 2 weeks after registration # Start 1 week after the start date
-
-                    LoanRepaymentSchedule.objects.create(
-                        loan=loan,
-                        due_date=due_date,
-                        amount_due=amount_due,
-                    )
-
-                # Subtract loan amount from bank balance
-                bank_payment = BankPayment.objects.create(
-                    bank=bank,
-                    description=f'Loan disbursement to {loan.client.name}',
-                    amount=-amount,
-                    payment_date=start_date,
-                )
-                bank_payment.save()
-
-                interest_amount = Decimal(loan.interest) * Decimal(amount) / Decimal(100)
-                if loan_type == 'Daily':
-                    interest_income = get_loan_interest_income(type='Daily')
-                elif loan_type == 'Weekly':
-                    interest_income = get_loan_interest_income(type='Weekly')
-                else:
-                    interest_income = get_loan_interest_income(type='Monthly')
-                income_payment = IncomePayment.objects.create(
-                    income=interest_income,
-                    description=f'Interest income from {loan.client.name}',
-                    amount=interest_amount,
-                    payment_date=start_date,
-                )
-                income_payment.save()
-                risk_premium_amount = Decimal(loan.risk_premium) * Decimal(amount) / 100
-                create_risk_premium_income_payment(risk_premium_amount, start_date, f'Risk Premium for {loan.client.name}')
-
-                union = form.cleaned_data.get('union_contribution')
-                create_union_contribution_income_payment(start_date,union,f'Union Contribution for {loan.client.name}')
-
-                verify_trial_balance()
-
+            user = request.user
+            loan = send_for_approval(form, user)
             messages.success(request, "Loan registered successfully and repayment schedule created.")
             return redirect('guarantor_for_loan', loan_id=loan.id) 
         else:

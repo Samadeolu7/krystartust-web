@@ -1,6 +1,8 @@
+from datetime import datetime
 from django.db import models
 
 from main.models import Year
+from user.models import User
 
 # Create your models here.
 
@@ -20,10 +22,6 @@ class Expense(models.Model):
     expense_type = models.ForeignKey(ExpenseType, on_delete=models.CASCADE, related_name='expenses')
     created_at = models.DateTimeField(auto_now_add=True)
     year = models.IntegerField()
-    approved = models.BooleanField(default=False)
-
-    def is_approved(self):
-        return self.approved
 
     def save(self, *args, **kwargs):
         if not self.year:
@@ -48,14 +46,18 @@ class ExpensePayment(models.Model):
         payment_date = models.DateField()
         created_at = models.DateTimeField(auto_now_add=True)
         updated_at = models.DateTimeField(auto_now=True)
-        # create_by = models.ForeignKey(User, on_delete=models.CASCADE)
+        create_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expense_payments', null=True, blank=True)
+        transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True)
+        approved = models.BooleanField(default=False)
     
         def save(self, *args, **kwargs):
-            if not self.pk:
+            if self.approved:
                 self.balance = self.expense.balance
                 self.expense.balance += self.amount
+                self.update_at = datetime.now()
                 self.expense.save()
             super(ExpensePayment, self).save(*args, **kwargs)
+
             
         def __str__(self) -> str:
             return self.expense.name + ' - ' + str(self.amount) + ' - ' + str(self.expense.balance)

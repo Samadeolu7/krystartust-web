@@ -14,7 +14,7 @@ class Bank(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.year:
-            self.year = Year.current_year() or 0  # Default to 0 if no year is found
+            self.year = Year.current_year() or 0
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -33,14 +33,15 @@ class BankPayment(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     bank_balance = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
-    # created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bank_payments', null=True, blank=True)
     payment_date = models.DateField()
 
     def __str__(self):
         return f'{self.bank.name} - {self.amount}'
     
     def save(self, *args, **kwargs):
-        if not self.pk:  # Check if the instance is being created (not updated)
+        if not self.pk:
             self.bank_balance = self.bank.balance
             self.bank.balance += self.amount
             self.bank.save()
