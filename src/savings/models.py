@@ -44,15 +44,9 @@ class SavingsPayment(models.Model):
                 self.balance = savings_record.balance
                 savings_record.save()
                 super().save(*args, **kwargs)
-            elif self.transaction_type == self.WITHDRAWAL:
-                # Create an approval request for withdrawal
-                approval = Approval.objects.create(
-                    type='Withdrawal',
-                    user=self.created_by,
-                    content_object=self,
-                    comment=f'Approval for withdrawal of {self.amount} by {self.client.name}'
-                )
-                
+            else:
+                if self.amount > savings_record.balance:
+                    raise ValueError('Insufficient balance')
                 super().save(*args, **kwargs)
         else:
             super().save(*args, **kwargs)

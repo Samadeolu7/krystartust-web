@@ -53,14 +53,13 @@ def send_for_approval(form, user):
             print(f'Loan transaction {tran.id} for loan {loan.id} saved successfully.')
 
             approval = Approval.objects.create(
-                type='Loan',
+                type='loan',
                 content_object=loan,
                 content_type=ContentType.objects.get_for_model(Loan),
                 comment = tran.description,
                 object_id=loan.id,
                 user = user,
             )
-            print(f'Approval {approval.id} for loan {loan.id} saved successfully.')
 
             registration_fee = form.cleaned_data.get('registration_fee')
             bank = form.cleaned_data.get('bank')

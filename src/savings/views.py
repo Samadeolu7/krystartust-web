@@ -51,6 +51,8 @@ def register_savings(request):
                 savings = form.save(commit=False)
                 tran = Transaction(description=f'Savings for {savings.client.name}')
                 tran.save(prefix='SVS')
+                savings.transaction = tran
+                savings.save()
                 create_bank_payment(
                     bank=form.cleaned_data['bank'],
                     description=f"Savings Payment by {savings.client.name}",
@@ -102,6 +104,7 @@ def register_payment(request):
     return render(request, 'combined_payment_form.html', {'form': form})
 
 
+
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def record_withdrawal(request):
@@ -111,24 +114,35 @@ def record_withdrawal(request):
             with transaction.atomic():
                 if form.cleaned_data['amount'] > form.cleaned_data['savings'].balance:
                     messages.error(request, 'Insufficient balance')
-                    return redirect('record_withdrawal')
-                withdrawal = form.save()
-
+                    return redirect('savings_withdrawal')
+                
+                withdrawal = form.save(commit=False)
                 tran = Transaction(description=f'Withdrawal for {withdrawal.savings.client.name}')
+                tran.save(prefix='WDL')
+                withdrawal.transaction = tran
+                withdrawal.save()  # Ensure the object is saved before checking its ID
+                if withdrawal.id is None:
+                    print("Withdrawal object was not saved correctly.")
+                    return redirect('savings_withdrawal')
+
+                withdrawal.save()
+                print(f'Withdrawal {withdrawal.id} saved successfully.')
+
                 approval = Approval.objects.create(
-                    type='Withdrawal',
+                    type='withdrawal',
                     content_object=withdrawal,
                     content_type=ContentType.objects.get_for_model(SavingsPayment),
                     user=request.user,
+                    object_id=withdrawal.id
                 )
-                tran.save(prefix='WDL')
-                withdrawal.transaction = tran
+                
                 verify_trial_balance()
 
             return redirect('dashboard')
     else:
         form = WithdrawalForm()
     return render(request, 'withdrawal_form.html', {'form': form})
+
 
 @login_required
 @allowed_users(allowed_roles=['Admin'])

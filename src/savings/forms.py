@@ -29,11 +29,14 @@ class WithdrawalForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WithdrawalForm, self).__init__(*args, **kwargs)
         self.fields['transaction_type'].initial = 'W'
+        self.fields['transaction_type'].widget = forms.HiddenInput()
 
     def save(self, commit=True):
         instance = super(WithdrawalForm, self).save(commit=False)
         instance.client = instance.savings.client
-        instance.balance = instance.savings.balance - instance.amount
+        instance.transaction_type = SavingsPayment.WITHDRAWAL
+        instance.balance = 0
+        instance.approved = False
         if commit:
             instance.save()
         return instance
