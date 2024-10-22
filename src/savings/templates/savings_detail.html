@@ -35,17 +35,17 @@
             <table class="table-report">
                 <thead class="table-dark">
                     <tr>
-                        <th>#</th>
+                        <th>Ref NO</th>
+                        <th>Payment Date</th>
                         <th>Amount</th>
                         <th>Balance</th>
-                        <th>Payment Date</th>
                         <th>Transaction Type</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for payment in savings_payments %}
                     <tr>
-                        <td>{{ forloop.counter }}</td>
+                        <td>{{ payment.transaction.reference_number }}</td>
                         <td>{{ payment.payment_date }}</td>
                         <td>{{ payment.amount|naira }}</td>
                         <td>{{ payment.balance|naira }}</td>
