@@ -8,7 +8,6 @@ def register_savings(bank,client, amount, date, transaction, user):
     savings.save()
     savingspayment = SavingsPayment.objects.create(client=client,savings=savings, amount=amount, description=f'Savings for {client.name}', payment_date=date, created_by=user, transaction=transaction)
     savingspayment.save()
-    bank = get_cash_in_hand()
     bankpayment = BankPayment.objects.create(bank=bank, amount=amount, description=f'Savings for {client.name}', payment_date=date, created_by=user, transaction=transaction)
     bankpayment.save()
     return savings

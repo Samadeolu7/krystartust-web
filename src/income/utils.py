@@ -36,37 +36,34 @@ def create_income_payment(bank,income, description, amount , payment_date,transa
     bank_payment.save()
     return income_payment
 
-def create_id_fee_income_payment(payment_date,transaction=None, user=None):
+def create_id_fee_income_payment(bank,payment_date,transaction=None, user=None):
     income = get_id_fee_income()
     amount = IDFee.objects.all().first().amount
-    bank = get_cash_in_hand()
-    return create_income_payment(bank=bank, income=income, description='ID Fee', amount=amount, payment_date=payment_date,transaction=None, user=None)
 
-def create_registration_fee_income_payment( payment_date,transaction=None, user=None):
+    return create_income_payment(bank=bank, income=income, description='ID Fee', amount=amount, payment_date=payment_date,transaction=transaction, user=user)
+
+def create_registration_fee_income_payment(bank, payment_date,transaction=None, user=None):
     income = get_registration_fee_income()
     amount = RegistrationFee.objects.all().first().amount
-    bank = get_cash_in_hand()
-    return create_income_payment(bank=bank, income=income, description='Registration Fee', amount=amount, payment_date=payment_date,transaction=None, user=None)
+    return create_income_payment(bank=bank, income=income, description='Registration Fee', amount=amount, payment_date=payment_date,transaction=transaction, user=transaction)
 
 def create_loan_interest_income_payment( amount, payment_date, transaction=None, user=None):
     income = get_loan_interest_income()
-    income_payment = IncomePayment.objects.create(income=income, description='Loan Interest', amount=amount, payment_date=payment_date, transaction=None, created_by=None)
+    income_payment = IncomePayment.objects.create(income=income, description='Loan Interest', amount=amount, payment_date=payment_date, transaction=transaction, created_by=user)
     income_payment.save()
     return income_payment
 
-def create_risk_premium_income_payment( amount,payment_date, description, transaction=None, user=None):
+def create_risk_premium_income_payment(bank, amount,payment_date, description, transaction=None, user=None):
     income = get_risk_premium_income()
-    bank = get_cash_in_hand()
-    return create_income_payment(bank=bank, income=income, description=description, amount=amount, payment_date=payment_date, transaction=None, user=None)
+    return create_income_payment(bank=bank, income=income, description=description, amount=amount, payment_date=payment_date, transaction=transaction, user=user)
 
 def get_loan_registration_fee_income():
     YEAR = Year.current_year()
     return Income.objects.get_or_create(name='Loan Registration Fee', description='Loan Registration Fee Income', year=YEAR)[0]
 
-def create_loan_registration_fee_income_payment( amount,payment_date, description, transaction=None, user=None):
+def create_loan_registration_fee_income_payment(bank, amount,payment_date, description, transaction=None, user=None):
     income = get_loan_registration_fee_income()
-    bank = get_cash_in_hand()
-    return create_income_payment(bank=bank, income=income, description=description, amount=amount, payment_date=payment_date,transaction=None, user=None)
+    return create_income_payment(bank=bank, income=income, description=description, amount=amount, payment_date=payment_date,transaction=transaction, user=user)
 
 def get_administrative_fee_income():
     YEAR = Year.current_year()
@@ -74,7 +71,6 @@ def get_administrative_fee_income():
    
 def create_administrative_fee_income_payment( bank, amount, payment_date, description,transaction, user):
     income = get_administrative_fee_income()
-    bank = get_cash_in_hand()
     return create_income_payment(bank=bank, income=income, description=description, amount=amount, payment_date=payment_date,transaction=transaction, user=user)
 
 def get_income_balance(income_id):

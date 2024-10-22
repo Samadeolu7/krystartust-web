@@ -10,6 +10,7 @@ from bank.models import BankPayment
 from savings.models import SavingsPayment, Savings
 from expenses.models import Expense, ExpensePayment
 from income.models import Income, IncomePayment
+from liability.models import Liability, LiabilityPayment
 from django.db.models import Q
 from datetime import timedelta
 import csv
@@ -20,7 +21,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # find all transactions that happened in the past 3 days
-        start_date = timezone.now() - timedelta(days=3)
+        start_date = timezone.now() - timedelta(days=5)
         end_date = timezone.now()
         transactions = []
         transactions.append(['Transaction Date', 'Transaction Type', 'Description', 'Amount', 'Bank'])
@@ -37,15 +38,20 @@ class Command(BaseCommand):
         for payment in savings_payments:
             transactions.append([payment.payment_date, 'Savings Payment', payment.description, payment.amount, payment.bank])
         # get all expenses
-        expenses = ExpensePayment.objects.filter(expense_date__range=[start_date, end_date])
+        expenses = ExpensePayment.objects.filter(payment_date__range=[start_date, end_date])
         for expense in expenses:
             transactions.append([expense.payment_date, 'Expense', expense.description, expense.amount, expense.payment_date])
         # get all incomes
-        incomes = IncomePayment.objects.filter(income_date__range=[start_date, end_date])
+        incomes = IncomePayment.objects.filter(payment_date__range=[start_date, end_date])
         for income in incomes:
             transactions.append([income.payment_date, 'Income', income.description, income.amount, income.payment_date])
+        # get all liabilities
+        liabilities = LiabilityPayment.objects.filter(payment_date__range=[start_date, end_date])
+        for liability in liabilities:
+            transactions.append([liability.payment_date, 'Liability Payment', liability.description, liability.amount, liability.payment_date])
+
         # sort transactions by date
-        transactions[1:] = sorted(transactions[1:], key=lambda x: x[0])
+        transactions[1:] = sorted(transactions[1:], key=lambda x: (x[0], x[3]))
         # write to CSV
         with open('transactions.csv', 'w') as f:
             writer = csv.writer(f)

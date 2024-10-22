@@ -72,18 +72,18 @@ def send_for_approval(form, user):
         if registration_fee:
             tran = Transaction(description=f'Loan Registration Fee for {loan.client.name}')
             tran.save(prefix='INC')
-            create_loan_registration_fee_income_payment(registration_fee,start_date, f'Loan Registration Fee for {loan.client.name}', transaction, user)
+            create_loan_registration_fee_income_payment(bank,registration_fee,start_date, f'Loan Registration Fee for {loan.client.name}', transaction, user)
 
         tran = Transaction(description=f'Risk Premium for {loan.client.name}')
         tran.save(prefix='INC')
         risk_premium_amount = Decimal(loan.risk_premium) * Decimal(amount) / 100
-        create_risk_premium_income_payment(risk_premium_amount, start_date, f'Risk Premium for {loan.client.name}', transaction, user)
+        create_risk_premium_income_payment(bank,risk_premium_amount, start_date, f'Risk Premium for {loan.client.name}', transaction, user)
 
         union = form.cleaned_data.get('union_contribution')
         tran = Transaction(description=f'Union Contribution for {loan.client.name}')
         tran.save(prefix='LIA')
         created_by = user
-        create_union_contribution_income_payment(start_date,union,f'Union Contribution for {loan.client.name}', tran, created_by)           
+        create_union_contribution_income_payment(bank,start_date,union,f'Union Contribution for {loan.client.name}', tran, created_by)           
 
         verify_trial_balance()
 
