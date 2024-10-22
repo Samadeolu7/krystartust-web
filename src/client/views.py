@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils.timezone import now
+from administration.models import Transaction
 from bank.utils import get_cash_in_hand
 from client.excel_utils import create_clients_from_excel
 from client.models import Client
@@ -29,12 +30,13 @@ def create_client(request):
             messages.success(request, 'Client created successfully.')
             bank = form.cleaned_data['bank']
             date = form.cleaned_data['date']
-            register_savings(bank,client=form.instance, amount=form.cleaned_data["compulsory_savings"],date=date ) 
+            tran = Transaction(description=f'Client Registration for {client.name}')
+            register_savings(bank,client=form.instance, amount=form.cleaned_data["compulsory_savings"],date=date,transaction=tran,user=request.user)
             income = get_registration_fee_income()
             id_fee = get_id_fee_income()
             bank = form.cleaned_data['bank']
-            create_income_payment(bank, income=income, description='Registration Fee', amount=form.cleaned_data['registration_fee'], payment_date=date)
-            create_income_payment(bank, income=id_fee, description='ID Fee', amount=form.cleaned_data['id_fee'], payment_date=date)
+            create_income_payment(bank, income=income, description='Registration Fee', amount=form.cleaned_data['registration_fee'], payment_date=date, transaction=tran, user=request.user)
+            create_income_payment(bank, income=id_fee, description='ID Fee', amount=form.cleaned_data['id_fee'], payment_date=date, transaction=tran, user=request.user)
             
             
             return redirect('list_clients')  # Redirect to a client list or relevant page

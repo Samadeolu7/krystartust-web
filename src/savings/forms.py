@@ -19,7 +19,7 @@ class SavingsExcelForm(forms.Form):
 class WithdrawalForm(forms.ModelForm):
     class Meta:
         model = SavingsPayment
-        fields = ['savings', 'balance', 'amount', 'payment_date', 'transaction_type', 'description', 'bank']
+        fields = ['savings', 'amount', 'payment_date', 'transaction_type', 'description', 'bank']
 
     def __init__(self, *args, **kwargs):
         super(WithdrawalForm, self).__init__(*args, **kwargs)
@@ -58,15 +58,6 @@ class SavingsForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
-
-# class SavingsPayment(models.Model):
-#     client = models.ForeignKey(Client, on_delete=models.CASCADE)
-#     savings = models.ForeignKey(Savings, on_delete=models.CASCADE)
-#     balance = models.DecimalField(max_digits=10, decimal_places=2)
-#     amount = models.DecimalField(max_digits=10, decimal_places=2)
-#     payment_date = models.DateField()
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     #created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
 class CombinedPaymentForm(forms.ModelForm):
     payment_date = forms.DateField(
@@ -126,7 +117,7 @@ class CombinedPaymentForm(forms.ModelForm):
 
         # Handle savings payment
         if self.cleaned_data['payment_date']:
-            tran = Transaction(f'Savings payment from {loan_payment_instance.loan.client.name}')
+            tran = Transaction(description=f'Savings payment from {loan_payment_instance.loan.client.name}')
             tran.save(prefix='SAV')
             savings_payment_instance.transaction = tran
             savings_payment_instance.client = self.cleaned_data['client']

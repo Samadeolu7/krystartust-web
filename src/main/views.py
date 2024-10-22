@@ -173,18 +173,12 @@ def group_create(request):
         form = GroupForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('group_view')
+            return redirect('all_groups_report')
     else:
         form = GroupForm()
         
     
     return render(request, 'group_form.html', {'form': form})
-
-@login_required
-@allowed_users(allowed_roles=['Admin', 'Manager'])
-def group_view(request):
-    groups = Group.objects.all()
-    return render(request, 'group_view.html', {'groups': groups})
 
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
