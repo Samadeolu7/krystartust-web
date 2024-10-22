@@ -60,11 +60,15 @@ def loan_payment(request):
                 # Save the payment after modifying the balance and schedule
                 # include client in the payment
                 loan_payment.client = loan.client
+                tran = Transaction.objects.create(f'Loan payment from {loan.client.name}')
+                tran.save(prefix='LP')
+                loan_payment.transaction = tran
+                loan_payment.created_by = request.user
                 loan_payment.save()
 
                 # Update the bank balance
                 bank = form.cleaned_data.get('bank')
-                create_bank_payment(bank, f'Loan payment from {loan.client.name}',loan_payment.amount, loan_payment.payment_date)
+                create_bank_payment(bank, f'Loan payment from {loan.client.name}',loan_payment.amount, loan_payment.payment_date, loan_payment, request.user)
 
                 verify_trial_balance()
                 

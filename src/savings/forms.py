@@ -1,3 +1,4 @@
+from administration.models import Transaction
 from bank.models import Bank
 from loan.models import Loan, LoanPayment
 from .models import SavingsPayment, CompulsorySavings, Savings
@@ -109,22 +110,31 @@ class CombinedPaymentForm(forms.ModelForm):
 
         # Handle loan payment
         if self.cleaned_data['payment_date']:
+            tran = Transaction(f'Loan payment from {loan_payment_instance.loan.client.name}')
+            tran.save(prefix='LOA')
+            loan_payment_instance.transaction = tran
             loan_payment_instance.payment_date = self.cleaned_data['payment_date']
             loan_payment_instance.client = loan_payment_instance.loan.client
             loan_payment_instance.amount = loan_payment_instance.loan.emi
             loan_payment_instance.payment_schedule.is_paid = True
             loan_payment_instance.payment_schedule.payment_date = loan_payment_instance.payment_date
+            loan_payment_instance.payment_schedule.save()
+            if self.user:
+                loan_payment_instance.created_by = self.user
             if commit:
                 loan_payment_instance.save()
 
         # Handle savings payment
         if self.cleaned_data['payment_date']:
+            tran = Transaction(f'Savings payment from {loan_payment_instance.loan.client.name}')
+            tran.save(prefix='SAV')
+            savings_payment_instance.transaction = tran
             savings_payment_instance.client = self.cleaned_data['client']
             savings_payment_instance.amount = self.cleaned_data['amount']-loan_payment_instance.amount
             savings_payment_instance.payment_date = self.cleaned_data['payment_date']
             savings_payment_instance.client = loan_payment_instance.savings.client
-            # if self.user:
-            #     savings_payment_instance.created_by = self.user
+            if self.user:
+                savings_payment_instance.created_by = self.user
             savings_payment_instance.transaction_type = SavingsPayment.SAVINGS
             if commit:
                 savings_payment_instance.save()

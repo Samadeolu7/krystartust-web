@@ -41,7 +41,7 @@ def send_for_approval(form, user):
         loan.status = 'Active'
         tran = Transaction(description=f'Loan disbursement to {loan.client.name}')
         tran.save(prefix='LOA')
-        loan.transaction = transaction
+        loan.transaction = tran
         loan.created_by = user
         loan.save()
 
