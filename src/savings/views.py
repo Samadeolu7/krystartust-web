@@ -5,11 +5,12 @@ from django.shortcuts import render, redirect
 from django.shortcuts import render
 
 from administration.decorators import allowed_users
+from administration.models import Transaction
 from main.utils import verify_trial_balance
 from .models import Savings, SavingsPayment
 from .forms import SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm, CombinedPaymentForm
 from .excel_utils import savings_from_excel
-from bank.utils import create_bank_payment, get_cash_in_hand
+from bank.utils import create_bank_payment
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.contrib import messages
@@ -98,7 +99,13 @@ def record_withdrawal(request):
     if request.method == 'POST':
         form = WithdrawalForm(request.POST)
         if form.is_valid():
-            form.save()
+            with transaction.atomic():
+                withdrawal = form.save(commit=False)
+                tran = Transaction(description=f'Withdrawal for {withdrawal.savings.client.name}')
+                tran.save(prefix='WDL')
+                withdrawal.transaction = tran
+                withdrawal.client = withdrawal.savings.client
+                verify_trial_balance()
 
             return redirect('dashboard')
     else:

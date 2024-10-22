@@ -18,7 +18,7 @@ class SavingsExcelForm(forms.Form):
 class WithdrawalForm(forms.ModelForm):
     class Meta:
         model = SavingsPayment
-        fields = ['client', 'savings', 'balance', 'amount', 'payment_date', 'transaction_type']
+        fields = ['savings', 'balance', 'amount', 'payment_date', 'transaction_type', 'description', 'bank']
 
     def __init__(self, *args, **kwargs):
         super(WithdrawalForm, self).__init__(*args, **kwargs)
