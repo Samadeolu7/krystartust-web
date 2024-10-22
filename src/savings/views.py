@@ -122,11 +122,9 @@ def record_withdrawal(request):
                 withdrawal.transaction = tran
                 withdrawal.save()  # Ensure the object is saved before checking its ID
                 if withdrawal.id is None:
-                    print("Withdrawal object was not saved correctly.")
                     return redirect('savings_withdrawal')
 
                 withdrawal.save()
-                print(f'Withdrawal {withdrawal.id} saved successfully.')
 
                 approval = Approval.objects.create(
                     type='withdrawal',

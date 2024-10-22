@@ -34,9 +34,8 @@ def approvals(request):
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def approve(request, pk):
     approval = Approval.objects.get(pk=pk)
-    print(approval.type)
-    if approval.type == 'Loan':
-        print('Approving loan')
+
+    if approval.type == 'loan':
         approve_loan(approval, request.user)
         return redirect('approvals')
     approval.approved = True

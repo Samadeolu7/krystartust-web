@@ -44,13 +44,11 @@ def send_for_approval(form, user):
             loan.status = 'Active'
             loan.created_by = user
             loan.save()
-            print(f'Loan {loan.id} saved successfully.')
 
             tran = Transaction(description=f'Loan disbursement to {loan.client.name}')
             tran.save(prefix='LOA')
             loan.transaction = tran
             loan.save()
-            print(f'Loan transaction {tran.id} for loan {loan.id} saved successfully.')
 
             approval = Approval.objects.create(
                 type='loan',
@@ -72,40 +70,33 @@ def send_for_approval(form, user):
                 tran.save(prefix='INC')
                 admin_fee_amount = Decimal(admin_fees) * Decimal(amount) / Decimal(100)
                 create_administrative_fee_income_payment(bank, admin_fee_amount, start_date, f'Administrative Fee for {loan.client.name}', tran, user)
-                print(f'Admin fee transaction {tran.id} for loan {loan.id} saved successfully.')
 
             if registration_fee:
                 tran = Transaction(description=f'Loan Registration Fee for {loan.client.name}')
                 tran.save(prefix='INC')
                 create_loan_registration_fee_income_payment(bank, registration_fee, start_date, f'Loan Registration Fee for {loan.client.name}', tran, user)
-                print(f'Registration fee transaction {tran.id} for loan {loan.id} saved successfully.')
 
             tran = Transaction(description=f'Risk Premium for {loan.client.name}')
             tran.save(prefix='INC')
             risk_premium_amount = Decimal(loan.risk_premium) * Decimal(amount) / 100
             create_risk_premium_income_payment(bank, risk_premium_amount, start_date, f'Risk Premium for {loan.client.name}', tran, user)
-            print(f'Risk premium transaction {tran.id} for loan {loan.id} saved successfully.')
 
             union = form.cleaned_data.get('union_contribution')
             tran = Transaction(description=f'Union Contribution for {loan.client.name}')
             tran.save(prefix='LIA')
             created_by = user
             create_union_contribution_income_payment(bank, start_date, union, f'Union Contribution for {loan.client.name}', tran, created_by)
-            print(f'Union contribution transaction {tran.id} for loan {loan.id} saved successfully.')
 
             approval.save()
             verify_trial_balance()
-            print(f'Verified trial balance successfully.')
 
             return approval
     except Exception as e:
-        print(f'Error saving loan: {e}')
         raise
     
 
 def approve_loan(approval, user):
     with transaction.atomic():
-        print(f'Approving loan {approval.id} for {approval.content_object.client.name}')
         approval.approved = True
         approval.approved_by = user
         approval.approved_at = timezone.now()
@@ -156,6 +147,5 @@ def approve_loan(approval, user):
             created_by=user,    
         )
         income_payment.save()
-        print(f'Interest income payment {income_payment.id} for loan {loan.id} saved successfully.')
 
         verify_trial_balance()

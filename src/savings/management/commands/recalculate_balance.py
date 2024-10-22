@@ -11,7 +11,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # find all loans and set the approved to true
-        loans = Loan.objects.all()
+        loans = Loan.objects.filter(approved=False)
         for loan in loans:
             loan.approved = True
             loan.save()
