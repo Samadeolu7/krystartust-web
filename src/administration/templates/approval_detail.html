@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Approval Detail{% endblock %}
+
+{% block content %}
+    <h1>Approval Detail</h1>
+    <table>
+        <tr>
+            <th>Type:</th>
+            <td>{{ approval.get_type_display }}</td>
+        </tr>
+        <tr>
+            <th>User:</th>
+            <td>{{ approval.user.username }}</td>
+        </tr>
+        <tr>
+            <th>Comment:</th>
+            <td>{{ approval.comment }}</td>
+        </tr>
+        <tr>
+            <th>Created At:</th>
+            <td>{{ approval.created_at }}</td>
+        </tr>
+        <tr>
+            <th>Status:</th>
+            <td>
+                {% if approval.approved %}
+                    Approved
+                {% elif approval.rejected %}
+                    Rejected
+                {% else %}
+                    Pending
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+    <a href="{% url 'approval_history' %}">Back to Approval History</a>
+{% endblock %}

@@ -41,36 +41,43 @@ class Approval(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     approved = models.BooleanField(default=False)
     rejected = models.BooleanField(default=False)
+    approved_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='approvals', null=True, blank=True)
+    
 
     def save(self, *args, **kwargs):
-        if self.approved:
-            if self.type == self.Withdrawal:
-                # Set the approved attribute on the related object to True
-                savings_payment = self.content_object
-                savings_payment.approved = True
-                savings = savings_payment.savings
-                savings.balance -= savings_payment.amount
-                savings_payment.balance = savings.balance
-                savings.save()
-                savings_payment.save()
-                create_bank_payment(
-                    bank=savings_payment.bank,
-                    description=f"Withdrawal by {savings.client.name}",
-                    amount=-savings.amount,
-                    payment_date=savings.payment_date,
-                    transaction=savings_payment.transaction,
-                    created_by=savings_payment.created_by
-                )
-            
-            self.content_object.approved = True
-            self.content_object.save()
+        if not self.pk:
+            self.comment = f"{self.user.username} requested approval for {self.type} for {self.content_object}"
             super().save(*args, **kwargs)
         else:
-            # Set the approved attribute on the related object to True
-            
-            super().save(*args, **kwargs)
-            # Delete the related object
-            self.content_object.delete()
+            if self.approved:
+                if self.type == self.Withdrawal:
+                    # Set the approved attribute on the related object to True
+                    savings_payment = self.content_object
+                    savings_payment.approved = True
+                    savings = savings_payment.savings
+                    savings.balance -= savings_payment.amount
+                    savings_payment.balance = savings.balance
+                    savings.save()
+                    savings_payment.save()
+                    create_bank_payment(
+                        bank=savings_payment.bank,
+                        description=f"Withdrawal by {savings.client.name}",
+                        amount=-savings.amount,
+                        payment_date=savings.payment_date,
+                        transaction=savings_payment.transaction,
+                        created_by=savings_payment.created_by
+                    )
+                
+                self.content_object.approved = True
+                self.content_object.save()
+                super().save(*args, **kwargs)
+            elif self.rejected:
+                
+                super().save(*args, **kwargs)
+                # Delete the related object
+                self.content_object.delete()
+            else:
+                super().save(*args, **kwargs)
 
 
 

@@ -131,7 +131,6 @@ def loan_registration(request):
     if request.method == 'POST':
         form = LoanRegistrationForm(request.POST)
         if form.is_valid():
-            # Save the loan form data to create a new Loan instance
             user = request.user
             loan = send_for_approval(form, user)
             messages.success(request, "Loan registered successfully and repayment schedule created.")

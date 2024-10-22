@@ -11,6 +11,7 @@ from django.db.models import Sum, Q
 from django.utils import timezone
 
 from administration.decorators import allowed_users
+from administration.models import Approval
 from bank.models import Bank
 from client.models import Client
 from expenses.models import Expense
@@ -123,12 +124,17 @@ def dashboard(request):
                 clients = Client.objects.filter(group=group)
                 group_clients[user.username.split()[0]] += clients.count()
 
+    
+
     # Determine user role for template context
     user = request.user
     is_admin = user.groups.filter(name='Admin').exists()
     is_manager = user.groups.filter(name='Manager').exists()
     is_employee = user.groups.filter(name='Staff').exists()
-
+    if is_admin:
+        approvals = Approval.objects.filter(approved=False,rejected=False).count()
+    if is_manager:
+        approvals = Approval.objects.filter(approved=False,rejected=False,type='Loan').count()
     context = {
         'user': user,
         'loan_types': loan_types,
@@ -144,6 +150,7 @@ def dashboard(request):
         'is_manager': is_manager,
         'is_employee': is_employee,
         'group_clients': group_clients,
+        'approvals': approvals
     }
 
     return render(request, 'dash.html', context)

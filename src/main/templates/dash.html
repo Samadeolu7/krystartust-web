@@ -26,6 +26,7 @@
         left: 0;
         font-size: 14px;
         overflow-y: auto; /* Add scrollbar for overflow */
+        width: 250px; /* Fixed width for sidebar */
     }
     .logo-container {
         display: flex;
@@ -43,7 +44,6 @@
         flex: 1;
         flex-direction: row;
     }
-    
     .row {
         display: flex;
         flex: 1;
@@ -120,6 +120,35 @@
         padding: 20px;
         flex: 1;
         overflow-y: auto; /* Enable scrolling if content overflows */
+    }
+    @media (max-width: 768px) {
+        body {
+            flex-direction: column;
+        }
+        .sidebar {
+            width: 100%;
+            height: auto;
+            position: relative;
+        }
+        .main-content {
+            margin-left: 0;
+            padding: 10px;
+        }
+        .status-box {
+            font-size: 14px;
+            padding: 10px;
+        }
+        .chart-container {
+            padding: 10px;
+        }
+        .sidebar a {
+            font-size: 12px;
+            padding: 8px;
+        }
+        .sidebar .sub-item a, .sidebar .sub-sub-item a {
+            font-size: 10px;
+            padding: 6px;
+        }
     }
 </style>
 </head>
@@ -271,6 +300,12 @@
                     <div class="col-md-3">
                         <a href="{% url 'loan_defaulters_report' %}">
                         <div class="status-box status-red">Current Defaulters - {{current_defaulters}}</div>
+                        </a>
+                    </div>
+
+                    <div class="col-md-3">
+                        <a href="{% url 'approvals' %}">
+                        <div class="status-box status-red">Pending Approvals - {{approvals}}</div>
                         </a>
                     </div>
                 </div>

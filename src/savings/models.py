@@ -6,7 +6,6 @@ from client.models import Client
 from user.models import User
 from income.models import SingletonModel
 
-# Create your models here.
 
 class Savings(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
@@ -35,7 +34,7 @@ class SavingsPayment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     transaction = models.ForeignKey('administration.Transaction', on_delete=models.SET_NULL, null=True, blank=True)
-    approval = models.ForeignKey('administration.Approval', on_delete=models.SET_NULL, null=True, blank=True)
+    approved = models.BooleanField(default=False, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -51,10 +50,9 @@ class SavingsPayment(models.Model):
                     type='Withdrawal',
                     user=self.created_by,
                     content_object=self,
-                    comment=f'Approval for withdrawal of {self.amount} by {self.client.name}',
-                    status='pending'
+                    comment=f'Approval for withdrawal of {self.amount} by {self.client.name}'
                 )
-                self.approval = approval
+                
                 super().save(*args, **kwargs)
         else:
             super().save(*args, **kwargs)

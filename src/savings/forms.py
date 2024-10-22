@@ -110,7 +110,7 @@ class CombinedPaymentForm(forms.ModelForm):
 
         # Handle loan payment
         if self.cleaned_data['payment_date']:
-            tran = Transaction(f'Loan payment from {loan_payment_instance.loan.client.name}')
+            tran = Transaction(description=f'Loan payment from {loan_payment_instance.loan.client.name}')
             tran.save(prefix='LOA')
             loan_payment_instance.transaction = tran
             loan_payment_instance.payment_date = self.cleaned_data['payment_date']
