@@ -80,8 +80,6 @@ class Approval(models.Model):
                 super().save(*args, **kwargs)
 
 
-
-
 class Transaction(models.Model):
     reference_number = models.CharField(max_length=20, unique=True, editable=False)
     description = models.TextField()

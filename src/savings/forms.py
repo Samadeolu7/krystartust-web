@@ -17,6 +17,11 @@ class SavingsExcelForm(forms.Form):
     )
 
 class WithdrawalForm(forms.ModelForm):
+
+    payment_date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        required=False
+    )
     class Meta:
         model = SavingsPayment
         fields = ['savings', 'amount', 'payment_date', 'transaction_type', 'description', 'bank']
@@ -26,14 +31,13 @@ class WithdrawalForm(forms.ModelForm):
         self.fields['transaction_type'].initial = 'W'
 
     def save(self, commit=True):
-        instance = super(SavingsForm, self).save(commit=False)
-        if self.user:
-            #instance.created_by = self.user
-            instance.balance = instance.savings.balance - instance.amount
-            instance.transaction_type = SavingsPayment.WITHDRAWAL
+        instance = super(WithdrawalForm, self).save(commit=False)
+        instance.client = instance.savings.client
+        instance.balance = instance.savings.balance - instance.amount
         if commit:
             instance.save()
         return instance
+
 
 class SavingsForm(forms.ModelForm):
     bank = forms.ModelChoiceField(queryset=Bank.objects.all(), required=False)

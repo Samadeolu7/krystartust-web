@@ -82,13 +82,17 @@ def register_payment(request):
                     bank=bank,
                     description=form.cleaned_data['description'],
                     amount=loan.amount,
-                    payment_date=form.cleaned_data['payment_date']
+                    payment_date=form.cleaned_data['payment_date'],
+                    transaction=loan.transaction,
+                    created_by=request.user
                 )
                 create_bank_payment(
                     bank=bank,
                     description=f"Savings Payment by {savings.client.name}",
                     amount=savings.amount,
-                    payment_date=form.cleaned_data['payment_date']
+                    payment_date=form.cleaned_data['payment_date'],
+                    transaction=savings.transaction,
+                    created_by=request.user
                 )
                 verify_trial_balance()
             
@@ -105,18 +109,20 @@ def record_withdrawal(request):
         form = WithdrawalForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
-                withdrawal = form.save(commit=False)
+                if form.cleaned_data['amount'] > form.cleaned_data['savings'].balance:
+                    messages.error(request, 'Insufficient balance')
+                    return redirect('record_withdrawal')
+                withdrawal = form.save()
+
                 tran = Transaction(description=f'Withdrawal for {withdrawal.savings.client.name}')
                 approval = Approval.objects.create(
                     type='Withdrawal',
                     content_object=withdrawal,
                     content_type=ContentType.objects.get_for_model(SavingsPayment),
-                    created_by=request.user,
                     user=request.user,
                 )
                 tran.save(prefix='WDL')
                 withdrawal.transaction = tran
-                withdrawal.client = withdrawal.savings.client
                 verify_trial_balance()
 
             return redirect('dashboard')

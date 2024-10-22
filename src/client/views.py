@@ -31,6 +31,7 @@ def create_client(request):
             bank = form.cleaned_data['bank']
             date = form.cleaned_data['date']
             tran = Transaction(description=f'Client Registration for {client.name}')
+            tran.save(prefix='REG')
             register_savings(bank,client=form.instance, amount=form.cleaned_data["compulsory_savings"],date=date,transaction=tran,user=request.user)
             income = get_registration_fee_income()
             id_fee = get_id_fee_income()
