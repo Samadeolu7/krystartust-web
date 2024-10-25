@@ -1,5 +1,7 @@
 from django import forms
 from django.forms import ModelForm
+
+from bank.models import Bank
 from .models import Expense, ExpensePayment, ExpenseType
 
 class ExpenseForm(ModelForm):
@@ -11,7 +13,7 @@ class ExpensePaymentForm(ModelForm):
 
     class Meta:
         model = ExpensePayment
-        fields = ['expense', 'amount','payment_date']
+        fields = ['expense', 'amount','payment_date','description','bank']
         widgets = {
             'payment_date': forms.DateInput(attrs={'type': 'date'}),
         }

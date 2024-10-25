@@ -9,9 +9,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Sum, Q
 from django.utils import timezone
+from django.conf import settings
 
 from administration.decorators import allowed_users
-from administration.models import Approval
+from administration.models import Approval, Notification
 from bank.models import Bank
 from client.models import Client
 from expenses.models import Expense
@@ -135,6 +136,8 @@ def dashboard(request):
         approvals = Approval.objects.filter(approved=False,rejected=False).count()
     if is_manager:
         approvals = Approval.objects.filter(approved=False,rejected=False,type='Loan').count()
+    notifications = Notification.objects.filter(user=request.user, is_read=False)
+    
     context = {
         'user': user,
         'loan_types': loan_types,
@@ -150,14 +153,19 @@ def dashboard(request):
         'is_manager': is_manager,
         'is_employee': is_employee,
         'group_clients': group_clients,
-        'approvals': approvals
+        'approvals': approvals,
+        'notifications': notifications
     }
 
     return render(request, 'dash.html', context)
 
 
 def fake_dashboard(request):
-    return render(request, 'dashboard.html')
+    context = {
+        'static_url': settings.STATIC_URL,
+        'base_url': settings.BASE_URL,
+    }
+    return render(request, 'payslip_template.html',context)
 
 
 @login_required

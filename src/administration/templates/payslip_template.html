@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    {% load custom_filters %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Payslip</title>
+</head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            font-size: 12px; /* Reduced base font size */
+        }
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .header h2 {
+            font-size: 20px; /* Adjusted font size */
+            color: #001f54;
+            white-space: nowrap;
+        }
+        .employee-info {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+        .employee-info div {
+            padding: 8px 8px;
+            border-bottom: 1px solid #dcdcdc;
+            font-weight: bold;
+            font-size: 12px; /* Adjusted font size */
+        }
+        .earnings-deductions {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 0;
+            border: 1px solid #dcdcdc;
+            font-weight: bold;
+        }
+        .earnings-deductions div {
+            padding: 8px;
+            text-align: center;
+            font-size: 12px; /* Adjusted font size */
+            border-right: 1px solid #dcdcdc;
+            border-bottom: 1px solid #dcdcdc;
+        }
+        .earnings-deductions div:nth-child(2n) {
+            text-align: left;
+        }
+        .earnings-deductions div:first-child,
+        .earnings-deductions div:nth-child(3),
+        .earnings-deductions div:nth-child(2),
+        .earnings-deductions div:nth-child(4) {
+            background-color: #001f54;
+            color: white;
+            font-weight: bold;
+        }
+        .earnings-deductions div:last-child {
+            border-right: none;
+        }
+        .totals-row {
+            grid-column: span 4;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            font-weight: bold;
+            background-color: #f8f8f8;
+            font-size: 12px; /* Adjusted font size */
+        }
+        .net-income {
+            margin-top: 20px;
+            text-align: right;
+            font-size: 14px; /* Adjusted font size */
+            font-weight: bold;
+            padding-top: 10px;
+            border-top: 2px solid #dcdcdc;
+        }
+        .card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #dcdcdc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .card .employee-info {
+            flex: 1;
+        }
+        .card .header {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .card .header img {
+            height: 160px; /* Adjust as needed */
+            transform: scale(1.6); 
+        }
+        .card .header h2 {
+            margin-top: 10px;
+            font-size: 20px; /* Adjusted font size */
+        }
+    </style>
+    <body>
+        <!-- Card with employee info and header -->
+        <div class="card">
+            <!-- Employee information section -->
+            <div class="employee-info">
+                <div>EMPLOYEE'S NAME: {{salary.user.username}}</div>
+                <div>EMPLOYEE'S ID: BRS785685435</div>
+                <div>DEPARTMENT: {{salary.position}}</div>
+                <div>BANK NAME: GTBANK</div>
+                <div>ACCOUNT NO.: 1456087679</div>
+            </div>
+            <!-- Header section with logo and title -->
+            <div class="header">
+                <img src="{{ base_url }}{{ static_url }}images/logo.svg" alt="Company Logo">
+                <h2>SALARY PAYSLIP</h2>
+            </div>
+        </div>
+    
+        <!-- Earnings and Deductions section -->
+        <div class="earnings-deductions">
+            <div>EARNINGS</div>
+            <div></div>
+            <div>DEDUCTIONS</div>
+            <div></div>
+    
+            <div>Basic salary 40%</div>
+            <div>{{basic_salary|naira}}</div>
+            <div>Tax</div>
+            <div></div>
+    
+            <div>Housing allce 15%</div>
+            <div>{{salary.house_rent|naira}}</div>
+            <div>NHF</div>
+            <div></div>
+    
+            <div>Transport allce 15%</div>
+            <div>{{salary.transportation|naira}}</div>
+            <div>Pension</div>
+            <div></div>
+    
+            <div>Meals allce 5%</div>
+            <div>{{salary.food|naira}}</div>
+            <div>Absent days</div>
+            <div></div>
+    
+            <div>Utility allce 5%</div>
+            <div>{{salary.utility|naira}}</div>
+            <div>Absent Deductions</div>
+            <div></div>
+    
+            <div>Entertainment allce 5%</div>
+            <div>{{salary.entertainment|naira}}</div>
+            <div>Prorated days</div>
+            <div></div>
+    
+            <div>Leave allce 10%</div>
+            <div>{{salary.leave|naira}}</div>
+            <div>Prorated days deduction</div>
+            <div></div>
+
+            <div></div>
+            <div></div>
+            <div>Attendance deduction</div>
+            <div></div>
+
+            <div></div>
+            <div></div>
+            <div>Private loan</div>
+            <div></div>
+
+            <div></div>
+            <div></div>
+            <div>Other deductions</div>
+            <div></div>
+
+            <div></div>
+            <div></div>
+            <div>Bank charges</div>
+            <div></div>
+    
+            <div class="totals-row">
+                <span>TOTAL EARNINGS</span>
+                {% with basic_salary|add:salary.house_rent|add:salary.transportation|add:salary.food|add:salary.entertainment|add:salary.leave|add:salary.utility as total_earnings %}
+                    <span>{{ total_earnings|naira }}</span>
+                    <span>TOTAL DEDUCTIONS</span>
+                    <span>{{ salary.tax|add:salary.nhf|add:salary.pension|add:salary.prorated_days_deduction|add:salary.attendance_deduction|add:salary.private_loan|add:salary.other_deductions|add:salary.bank_charges|naira }}</span>
+                
+                
+                <!-- Net Income section -->
+                <div class="net-income">
+                    NET INCOME: {{ total_earnings|subtract:salary.tax|subtract:salary.nhf|subtract:salary.prorated_days_deduction|subtract:salary.attendance_deduction|subtract:salary.private_loan|subtract:salary.other_deductions|subtract:salary.bank_charges|naira }}
+                </div>
+                {% endwith %}
+            </div>
+        </div>
+    </body>
+</html>

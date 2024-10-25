@@ -22,6 +22,7 @@ class WithdrawalForm(forms.ModelForm):
         widget=forms.DateInput(attrs={'type': 'date'}),
         required=False
     )
+    bank = forms.ModelChoiceField(queryset=Bank.objects.all(), required=False)
     class Meta:
         model = SavingsPayment
         fields = ['savings', 'amount', 'payment_date', 'transaction_type', 'description', 'bank']

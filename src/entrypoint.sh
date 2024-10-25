@@ -11,6 +11,14 @@ python manage.py migrate
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
+# Start Celery worker in the background
+echo "Starting Celery worker..."
+celery -A phoenix worker --loglevel=info &
+
+# Start Celery Beat (scheduler) in the background
+echo "Starting Celery Beat..."
+celery -A phoenix beat --loglevel=info &
+
 # Start Gunicorn
 echo "Starting Gunicorn..."
 exec gunicorn phoenix.wsgi:application --bind 0.0.0.0:8000 --timeout 120

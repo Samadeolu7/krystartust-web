@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import salary, approvals, approve, disapprove, approval_history, approval_detail
+from .views import salary, approvals, approve, disapprove, approval_history, approval_detail, download_payslip
 
 urlpatterns = [
     path('salary/', salary, name='salary'),
@@ -9,4 +9,5 @@ urlpatterns = [
     path('disapprove/<int:pk>/', disapprove, name='disapprove'),
     path('approval-history/', approval_history, name='approval_history'),
     path('approval-detail/<int:pk>/', approval_detail, name='approval_detail'),
+    path('download-payslip/<int:notification_id>/', download_payslip, name='download_payslip'),
 ]

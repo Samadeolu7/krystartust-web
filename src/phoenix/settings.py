@@ -184,6 +184,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
+BASE_URL ='https://krystartrust.ng'
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 # Define STATIC_ROOT
@@ -205,3 +206,28 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
+import ssl
+
+# Celery Configuration Options
+CELERY_BROKER_URL = env('REDIS_URL')
+CELERY_RESULT_BACKEND = env('REDIS_URL')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Africa/Lagos'
+CELERY_ENABLE_UTC = False  # Use False if you want to work with local time, or True to stick with UTC internally
+
+
+# SSL Configuration for Redis
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'visibility_timeout': 3600,  # 1 hour
+    'ssl': {
+        'ssl_cert_reqs': ssl.CERT_NONE  # Change to ssl.CERT_REQUIRED or ssl.CERT_OPTIONAL if you have the required certificates
+    }
+}
+
+CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = {
+    'ssl': {
+        'ssl_cert_reqs': ssl.CERT_NONE  # Change to ssl.CERT_REQUIRED or ssl.CERT_OPTIONAL if you have the required certificates
+    }
+}

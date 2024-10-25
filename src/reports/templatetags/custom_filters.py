@@ -2,7 +2,7 @@
 
 from django import template
 from django.utils.safestring import SafeString
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 register = template.Library()
 
@@ -38,6 +38,7 @@ def naira(value):
     except (ValueError, TypeError):
         return value
 
+
 @register.filter
 def subtract(value, arg):
     try:
@@ -52,7 +53,7 @@ def subtract(value, arg):
         arg = Decimal(arg)
         
         return value - arg
-    except (ValueError, TypeError, Decimal.InvalidOperation):
+    except (ValueError, TypeError, InvalidOperation):
         return ''
 
 @register.simple_tag

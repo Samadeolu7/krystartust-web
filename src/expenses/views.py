@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 from django.shortcuts import redirect, render
+from django.contrib.contenttypes.models import ContentType
+from django.contrib import messages
 
 from main.utils import verify_trial_balance
 from .forms import ExpenseForm, ExpensePaymentForm, ExpenseTypeForm
@@ -45,10 +47,17 @@ def expense_payment(request):
                 tran.save(prefix='EXP') 
                 expense.created_by = request.user
                 expense.transaction = tran
+                expense.balance = expense.expense.balance
                 expense.save()
-                bank = get_bank_account()
-                amount = form.cleaned_data['amount'] * -1
-                create_bank_payment(bank, f'expense for {form.cleaned_data["expense"]}', amount, form.cleaned_data['payment_date'], tran, request.user)
+
+                approval = Approval.objects.create(
+                    type=Approval.Expenses,
+                    content_object=expense,
+                    content_type=ContentType.objects.get_for_model(Expense),
+                    user=request.user,
+                    object_id=expense.id
+                )
+                messages.success(request, 'Expense Request sent for approval')
 
                 verify_trial_balance()
             return redirect('dashboard')

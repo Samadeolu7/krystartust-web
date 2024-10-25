@@ -22,8 +22,8 @@ RUN pip install -r requirements.txt
 # Copy project
 COPY . /app/
 
-# Expose port 8000
-EXPOSE 8000
+# Expose ports for Django and Celery
+EXPOSE 8000 6379
 
 # Add entrypoint script
 COPY entrypoint.sh /app/entrypoint.sh

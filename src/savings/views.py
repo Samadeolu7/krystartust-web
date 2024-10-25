@@ -127,7 +127,7 @@ def record_withdrawal(request):
                 withdrawal.save()
 
                 approval = Approval.objects.create(
-                    type='withdrawal',
+                    type=Approval.Withdrawal,
                     content_object=withdrawal,
                     content_type=ContentType.objects.get_for_model(SavingsPayment),
                     user=request.user,

@@ -10,6 +10,8 @@ import uuid
 
 class Salary(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='salaries')
+    bank_name = models.CharField(max_length=100,blank=True, null=True)
+    account_number = models.CharField(max_length=100, blank=True, null=True)
     department = models.CharField(max_length=100)
     position = models.CharField(max_length=100)
     transportation = models.DecimalField(max_digits=10, decimal_places=2)
@@ -17,20 +19,33 @@ class Salary(models.Model):
     house_rent = models.DecimalField(max_digits=10, decimal_places=2)
     utility = models.DecimalField(max_digits=10, decimal_places=2)
     entertainment = models.DecimalField(max_digits=10, decimal_places=2)
-    leave = models.DecimalField(max_digits=10, decimal_places=2)    
+    leave = models.DecimalField(max_digits=10, decimal_places=2)
+    tax = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    other_deductions = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    nhf = models.DecimalField(max_digits=10, decimal_places=2, default=0) 
+    absent_days = models.IntegerField(default=0)
+    prorated_days = models.IntegerField(default=0)
+    attendance_deduction = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    absent_deductions = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    prorated_days_deduction = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    private_loan = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    bank_charges = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    pension = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
-        return self.user.name
+        return self.user.username
 
 
 class Approval(models.Model):
     Expenses = 'expenses'
     Loan = 'loan'
     Withdrawal = 'withdrawal'
+    Salary = 'salary'
     TYPES = (
         ('Expenses', Expenses),
         ('Loan', Loan),
-        ('Withdrawal', Withdrawal)
+        ('Withdrawal', Withdrawal),
+        ('Salary', Salary)
     )
     type = models.CharField(max_length=100, choices=TYPES)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -97,3 +112,14 @@ class Transaction(models.Model):
         current_year = now.year
         unique_part = str(uuid.uuid4())[:5].upper()
         return f"{prefix}-{unique_part}{current_month:02d}{current_year}"
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+    payslip_url = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"Notification for {self.user.username}"
