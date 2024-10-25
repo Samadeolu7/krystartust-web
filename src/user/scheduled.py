@@ -62,8 +62,8 @@ def schedule_task():
     if not schedule_task:
         # Create the schedule if it doesn't exist
         crontab_schedule, _ = CrontabSchedule.objects.get_or_create(
-            minute='30',
-            hour='8',
+            minute='00',
+            hour='9',
             day_of_month='25',
             month_of_year='*',
             day_of_week='*'
