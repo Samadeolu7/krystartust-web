@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_celery_beat',
+    'django_celery_results',
     'main',
     'client',
     'user',
@@ -217,6 +218,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Lagos'
 CELERY_ENABLE_UTC = False  # Use False if you want to work with local time, or True to stick with UTC internally
 
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 # SSL Configuration for Redis
 CELERY_BROKER_TRANSPORT_OPTIONS = {

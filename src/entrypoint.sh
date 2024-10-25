@@ -17,7 +17,7 @@ celery -A phoenix worker --loglevel=info &
 
 # Start Celery Beat (scheduler) in the background
 echo "Starting Celery Beat..."
-celery -A phoenix beat --loglevel=info &
+celery -A phoenix beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler &
 
 # Start Gunicorn
 echo "Starting Gunicorn..."

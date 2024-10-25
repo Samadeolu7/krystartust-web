@@ -20,7 +20,7 @@ def get_users_salary(user):
     
 def record_salary_expense(user):
     salary = get_users_salary(user)
-    description = f'Salary Payment for    {user.username}'
+    description = f'Salary Payment for   5   {user.username}'
     expense = Expense.objects.get(name="Payroll Related Expenses")
     last_payment = ExpensePayment.objects.filter(
         expense=expense,
@@ -49,29 +49,36 @@ def record_salary_expense(user):
     )
     return expense_payment
 
+import logging
 
-def schedule():
-    users = User.objects.all()
-    for user in users:
-        record_salary_expense(user)
-    return True
+logger = logging.getLogger(__name__)
 
 @shared_task
+def schedule():
+    logger.info("Starting schedule task")
+    users = User.objects.all()
+    for user in users:
+        logger.info(f"Processing user: {user.username}")
+        record_salary_expense(user)
+    logger.info("Finished schedule task")
+    return True
+
+
 def schedule_task():
     schedule_task = PeriodicTask.objects.filter(name='schedule_task').first()
     if not schedule_task:
         # Create the schedule if it doesn't exist
         crontab_schedule, _ = CrontabSchedule.objects.get_or_create(
-            minute='00',
-            hour='9',
-            day_of_month='25',
+            minute='59',
+            hour='23',
+            day_of_month='26',
             month_of_year='*',
             day_of_week='*'
         )
         PeriodicTask.objects.create(
             crontab=crontab_schedule,
             name='schedule_task',
-            task='user.scheduled.schedule'
+            task='user.tasks.schedule_salary_expense'
         )
     else:
         # Ensure it's enabled
