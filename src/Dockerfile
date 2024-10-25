@@ -8,6 +8,14 @@ ENV PYTHONUNBUFFERED=1
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
+    libgdk-pixbuf2.0-0 \
+    libgdk-pixbuf2.0-dev \
+    libpango1.0-0 \
+    libcairo2 \
+    libcairo2-dev \
+    libgirepository1.0-dev \
+    gir1.2-pango-1.0 \
+    gir1.2-gtk-3.0 \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
