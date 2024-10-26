@@ -3,6 +3,7 @@ from bank.models import Bank
 from loan.models import Loan, LoanPayment
 from .models import SavingsPayment, CompulsorySavings, Savings
 from loan.models import LoanRepaymentSchedule as PaymentSchedule
+from django_select2.forms import Select2Widget
 
 from django import forms
 
@@ -18,14 +19,14 @@ class SavingsExcelForm(forms.Form):
 
 class WithdrawalForm(forms.ModelForm):
 
-    payment_date = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date'}),
-        required=False
-    )
     bank = forms.ModelChoiceField(queryset=Bank.objects.all(), required=False)
     class Meta:
         model = SavingsPayment
         fields = ['savings', 'amount', 'payment_date', 'transaction_type', 'description', 'bank']
+        widgets = {
+            'payment_date': forms.DateInput(attrs={'type': 'date'}),
+            'savings': Select2Widget,
+        }
 
     def __init__(self, *args, **kwargs):
         super(WithdrawalForm, self).__init__(*args, **kwargs)
@@ -50,28 +51,17 @@ class SavingsForm(forms.ModelForm):
         fields = ['savings', 'amount', 'payment_date']
         widgets = {
             'payment_date': forms.DateInput(attrs={'type': 'date'}),
+            'savings': Select2Widget,
         }
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
+
         super(SavingsForm, self).__init__(*args, **kwargs)
 
-    def save(self, commit=True):
-        instance = super(SavingsForm, self).save(commit=False)
-        instance.client = instance.savings.client
-        if self.user:
-            #instance.created_by = self.user
-            instance.balance = instance.savings.balance + instance.amount
-            instance.transaction_type = SavingsPayment.SAVINGS
-        if commit:
-            instance.save()
-        return instance
 
 class CombinedPaymentForm(forms.ModelForm):
-    payment_date = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date'}),
-        required=False
-    )
+
     bank = forms.ModelChoiceField(queryset=Bank.objects.all(), required=False)
     payment_schedule = forms.ModelChoiceField(queryset=PaymentSchedule.objects.none(), required=False)
     amount = forms.DecimalField(required=False)
@@ -84,6 +74,10 @@ class CombinedPaymentForm(forms.ModelForm):
     class Meta:
         model = LoanPayment
         fields = ['client', 'payment_schedule', 'payment_date']
+        widgets = {
+            'payment_date': forms.DateInput(attrs={'type': 'date'}),
+            'client': Select2Widget,
+        }
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)

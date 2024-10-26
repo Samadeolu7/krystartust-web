@@ -29,8 +29,14 @@ environ.Env.read_env(r'D:\Users\User\Desktop\krystartust web\.env')
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY')
 
+production = env('PRODUCTION', default=False)
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if production:
+    DEBUG = False
+else:
+    DEBUG = True
+
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'krystartust-web.onrender.com','krystartrust.ng']
 
@@ -46,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_celery_beat',
     'django_celery_results',
+    'django_select2',
     'main',
     'client',
     'user',
@@ -90,24 +97,6 @@ TEMPLATES = [
     },
 ]
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'file': {
-#             'level': 'DEBUG',
-#             'class': 'logging.FileHandler',
-#             'filename': 'debug.log',
-#         },
-#     },
-#     'loggers': {
-#         'django': {
-#             'handlers': ['file'],
-#             'level': 'DEBUG',
-#             'propagate': True,
-#         },
-#     },
-# }
 
 WSGI_APPLICATION = 'phoenix.wsgi.application'
 
@@ -115,7 +104,7 @@ WSGI_APPLICATION = 'phoenix.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-production = env('PRODUCTION', default=False)
+
 
 if production:
     DATABASES = {
@@ -192,7 +181,7 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Optional: Configure static files storage with WhiteNoise for better performance
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
