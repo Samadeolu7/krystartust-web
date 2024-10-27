@@ -2,10 +2,10 @@
 
 {% load custom_filters %}
 
-{% block title %}Payment Form{% endblock %}
+{% block title %}Combined Payment{% endblock %}
 
         {% block content %}
-        <h1 class="text-center mb-4">Payment Form</h1>
+        <h1 class="text-center mb-4">Combined Payment</h1>
         {% if messages %}
             <div>
                 {% for message in messages %}
@@ -21,7 +21,6 @@
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
             $('#id_client').change(function() {
