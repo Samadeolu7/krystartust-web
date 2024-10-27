@@ -12,12 +12,12 @@ echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
 # Start Celery worker in the background
-echo "Starting Celery worker..."
-celery -A phoenix worker --loglevel=info -P solo &
+# echo "Starting Celery worker..."
+# celery -A phoenix worker --loglevel=info -P solo &
 
-# Start Celery Beat (scheduler) in the background
-echo "Starting Celery Beat..."
-celery -A phoenix beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler &
+# # Start Celery Beat (scheduler) in the background
+# echo "Starting Celery Beat..."
+# celery -A phoenix beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler &
 
 # Start Gunicorn
 echo "Starting Gunicorn..."
