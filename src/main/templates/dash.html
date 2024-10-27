@@ -184,6 +184,8 @@
                         <li class="sub-item"><a href="{% url 'group_create' %}">Create Group</a></li>
                         {% endif %}
                         <li class="sub-item"><a href="{% url 'loan_registration' %}">Create Loan</a></li>
+                        <li class="sub-item"><a href="{% url 'record_client_contribution' %}">Create Daily Contribution</a></li>
+                        <li class="sub-item"><a href="{% url 'setup_monthly_contributions' %}">Activate Monthly Contribution</a></li>
                         
                     </ul>
                     {% if is_admin %}
@@ -222,6 +224,7 @@
                         <li class="sub-item"><a href="{% url 'register_payment' %}">Reciept Combined</a></li>
                         <li class="sub-item"><a href="{% url 'savings_withdrawal' %}">Savings withdrawal</a></li>
                         <li class="sub-item"><a href="{% url 'loan_payment' %}">Reciept Loan</a></li>
+                        <li class="sub-item"><a href="{% url 'toggle_daily_contribution' %}">Reciept Daily Transaction </a></li>
                         {% if is_admin %}
                         <li class="sub-item"><a href="{% url 'journal_entry' %}">Ledger Transactions</a></li>
                         {% endif %}

@@ -16,7 +16,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     
-
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -173,100 +172,105 @@
             <img src="{% static 'images/logo.svg' %}" alt="Krystar Trust Logo" class="logo-img">
         </a>
         <a href="{% url 'dashboard' %}" class="navbar-brand text-white">Dashboard</a>
-        <div class="navbar-nav">
-            {% if is_admin %}
-            <div class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Human Resources</a>
-                <div class="dropdown-menu">
-                    <a href="{% url 'create_users' %}" class="dropdown-item">Create Employee</a>
-                    <a href="{% url 'user_list' %}" class="dropdown-item">Employee List</a>
-                    <a href="#" class="dropdown-item">Salary Management</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="navbar-nav">
+                {% if is_admin %}
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Human Resources</a>
+                    <div class="dropdown-menu">
+                        <a href="{% url 'create_users' %}" class="dropdown-item">Create Employee</a>
+                        <a href="{% url 'user_list' %}" class="dropdown-item">Employee List</a>
+                        <a href="#" class="dropdown-item">Salary Management</a>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Customer Master</a>
+                    <div class="dropdown-menu">
+                        <a href="{% url 'create_client' %}" class="dropdown-item">Create Customer</a>
+                        {% if is_admin or is_manager %}
+                        <a href="{% url 'group_create' %}" class="dropdown-item">Create Group</a>
+                        {% endif %}
+                        <a href="{% url 'loan_registration' %}" class="dropdown-item">Create Loan</a>
+                    </div>
+                </div>
+                {% if is_admin %}
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Finance</a>
+                    <div class="dropdown-menu">
+                        <a href="{% url 'create_liability' %}" class="dropdown-item">Create Payables</a>
+                        <a href="{% url 'liability_list' %}" class="dropdown-item">Payables Report</a>
+                        <a href="{% url 'liability_payment' %}" class="dropdown-item">Payables Payment</a>
+                    </div>
+                </div>
+                {% endif %}
+                {% if is_admin or is_manager %}
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Bank</a>
+                    <div class="dropdown-menu">
+                        {% if is_admin %}
+                        <a href="{% url 'create_bank' %}" class="dropdown-item">Create Bank</a>
+                        {% endif %}
+                        <a href="{% url 'bank_list' %}" class="dropdown-item">Bank Report</a>
+                        <a href="{% url 'cash_transfer' %}" class="dropdown-item">Cash Transfer</a>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Transactions</a>
+                    <div class="dropdown-menu">
+                        <a href="{% url 'savings_registration' %}" class="dropdown-item">Reciept Savings</a>
+                        <a href="{% url 'register_payment' %}" class="dropdown-item">Reciept Combined</a>
+                        <a href="{% url 'savings_withdrawal' %}" class="dropdown-item">Savings Withdrawal</a>
+                        <a href="{% url 'loan_registration' %}" class="dropdown-item">Reciept Loan</a>
+                        {% if is_admin %}
+                        <a href="{% url 'journal_entry' %}" class="dropdown-item">Ledger Transactions</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Petty Cash</a>
+                    <div class="dropdown-menu">
+                        {% if is_admin %}
+                        <a href="{% url 'create_expense_type' %}" class="dropdown-item">Create Expense Category</a>
+                        <a href="{% url 'create_expense' %}" class="dropdown-item">Create Expense</a>
+                        {% endif %}
+                        <a href="{% url 'expense_payment' %}" class="dropdown-item">Petty Cash Request</a>
+                        <a href="{% url 'expense_list' %}" class="dropdown-item">Expense Report</a>
+                    </div>
+                </div>
+                {% if is_admin or is_manager %}
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Reports</a>
+                    <div class="dropdown-menu">
+                        {% if is_admin %}
+                        <a href="{% url 'income_list' %}" class="dropdown-item">Income Report</a>
+                        {% endif %}
+                        <a href="{% url 'list_clients' %}" class="dropdown-item">Debtors Reports</a>
+                        <a href="{% url 'all_groups_report' %}" class="dropdown-item">Group Report</a>
+                        <a href="{% url 'daily_transactions_report' %}" class="dropdown-item">Remittance Reports</a>
+                        {% if is_admin %}
+                        <a href="{% url 'profit_and_loss_report' %}" class="dropdown-item">P & L Report</a>
+                        <a href="{% url 'trial_balance' %}" class="dropdown-item">Trial Balance</a>
+                        {% endif %}
+                        <a href="{% url 'loan_defaulters_report' %}" class="dropdown-item">Defaulters Report</a>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Admin</a>
+                    <div class="dropdown-menu">
+                        <a href="{% url 'change_password' user.id %}" class="dropdown-item">Change Password</a>
+                    </div>
                 </div>
             </div>
-            {% endif %}
-            <div class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Customer Master</a>
-                <div class="dropdown-menu">
-                    <a href="{% url 'create_client' %}" class="dropdown-item">Create Customer</a>
-                    {% if is_admin or is_manager %}
-                    <a href="{% url 'group_create' %}" class="dropdown-item">Create Group</a>
-                    {% endif %}
-                    <a href="{% url 'loan_registration' %}" class="dropdown-item">Create Loan</a>
-                </div>
-            </div>
-            {% if is_admin %}
-            <div class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Finance</a>
-                <div class="dropdown-menu">
-                    <a href="{% url 'create_liability' %}" class="dropdown-item">Create Payables</a>
-                    <a href="{% url 'liability_list' %}" class="dropdown-item">Payables Report</a>
-                    <a href="{% url 'liability_payment' %}" class="dropdown-item">Payables Payment</a>
-                </div>
-            </div>
-            {% endif %}
-            {% if is_admin or is_manager %}
-            <div class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Bank</a>
-                <div class="dropdown-menu">
-                    {% if is_admin %}
-                    <a href="{% url 'create_bank' %}" class="dropdown-item">Create Bank</a>
-                    {% endif %}
-                    <a href="{% url 'bank_list' %}" class="dropdown-item">Bank Report</a>
-                    <a href="{% url 'cash_transfer' %}" class="dropdown-item">Cash Transfer</a>
-                </div>
-            </div>
-            {% endif %}
-            <div class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Transactions</a>
-                <div class="dropdown-menu">
-                    <a href="{% url 'savings_registration' %}" class="dropdown-item">Reciept Savings</a>
-                    <a href="{% url 'register_payment' %}" class="dropdown-item">Reciept Combined</a>
-                    <a href="{% url 'savings_withdrawal' %}" class="dropdown-item">Savings Withdrawal</a>
-                    <a href="{% url 'loan_registration' %}" class="dropdown-item">Reciept Loan</a>
-                    {% if is_admin %}
-                    <a href="{% url 'journal_entry' %}" class="dropdown-item">Ledger Transactions</a>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Petty Cash</a>
-                <div class="dropdown-menu">
-                    {% if is_admin %}
-                    <a href="{% url 'create_expense_type' %}" class="dropdown-item">Create Expense Category</a>
-                    <a href="{% url 'create_expense' %}" class="dropdown-item">Create Expense</a>
-                    {% endif %}
-                    <a href="{% url 'expense_payment' %}" class="dropdown-item">Petty Cash Request</a>
-                    <a href="{% url 'expense_list' %}" class="dropdown-item">Expense Report</a>
-                </div>
-            </div>
-            {% if is_admin or is_manager %}
-            <div class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Reports</a>
-                <div class="dropdown-menu">
-                    {% if is_admin %}
-                    <a href="{% url 'income_list' %}" class="dropdown-item">Income Report</a>
-                    {% endif %}
-                    <a href="{% url 'list_clients' %}" class="dropdown-item">Debtors Reports</a>
-                    <a href="{% url 'all_groups_report' %}" class="dropdown-item">Group Report</a>
-                    <a href="{% url 'daily_transactions_report' %}" class="dropdown-item">Remittance Reports</a>
-                    {% if is_admin %}
-                    <a href="{% url 'profit_and_loss_report' %}" class="dropdown-item">P & L Report</a>
-                    <a href="{% url 'trial_balance' %}" class="dropdown-item">Trial Balance</a>
-                    {% endif %}
-                    <a href="{% url 'loan_defaulters_report' %}" class="dropdown-item">Defaulters Report</a>
-                </div>
-            </div>
-            {% endif %}
-            <div class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Admin</a>
-                <div class="dropdown-menu">
-                    <a href="{% url 'change_password' user.id %}" class="dropdown-item">Change Password</a>
-                </div>
-            </div>
+            <form class="form-inline ml-auto">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search">
+            </form>
         </div>
-        <form class="form-inline ml-auto">
-            <input class="form-control mr-sm-2" type="search" placeholder="Search">
-        </form>
     </nav>
 
     <div class="main-content">
@@ -274,7 +278,6 @@
         {% endblock %}
     </div>
 
-    
     <script src="{% static 'django_select2/django_select2.js' %}"></script>
 
 </body>

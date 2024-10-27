@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 
 # Create your views here.
 from django.shortcuts import render
@@ -7,8 +7,8 @@ from django.shortcuts import render
 from administration.decorators import allowed_users
 from administration.models import Approval, Transaction
 from main.utils import verify_trial_balance
-from .models import Savings, SavingsPayment
-from .forms import SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm, CombinedPaymentForm
+from .models import DailyContribution, Savings, SavingsPayment
+from .forms import SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm, CombinedPaymentForm, ToggleDailyContributionForm, SetupMonthlyContributionsForm, ClientContributionForm
 from .excel_utils import savings_from_excel
 from bank.utils import create_bank_payment
 from django.contrib.auth.decorators import login_required
@@ -161,3 +161,41 @@ def upload_savings(request):
     else:
         form = SavingsExcelForm()
     return render(request, 'upload_savings.html', {'form': form})
+
+
+@login_required
+def setup_monthly_contributions_view(request):
+    if request.method == 'POST':
+        form = SetupMonthlyContributionsForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                form.setup_monthly_contributions(request.user)
+                verify_trial_balance()
+            return redirect('dashboard')
+    else:
+        form = SetupMonthlyContributionsForm()
+    return render(request, 'setup_monthly_contributions.html', {'form': form})
+
+@login_required
+def toggle_daily_contribution_view(request):
+    if request.method == 'POST':
+        form = ToggleDailyContributionForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                form.save(request.user)
+                verify_trial_balance()
+            return redirect('dashboard')
+    else:
+        form = ToggleDailyContributionForm()
+    return render(request, 'toggle_daily_contribution.html', {'form': form})
+
+@login_required
+def record_client_contribution(request):
+    if request.method == 'POST':
+        form = ClientContributionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = ClientContributionForm()
+    return render(request, 'record_client_contribution.html', {'form': form})

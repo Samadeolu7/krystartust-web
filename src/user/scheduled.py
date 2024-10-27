@@ -20,7 +20,7 @@ def get_users_salary(user):
     
 def record_salary_expense(user):
     salary = get_users_salary(user)
-    description = f'Salary Payment for   5   {user.username}'
+    description = f'Salary Payment for {user.username}'
     expense = Expense.objects.get(name="Payroll Related Expenses")
     last_payment = ExpensePayment.objects.filter(
         expense=expense,

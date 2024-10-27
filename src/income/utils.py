@@ -73,6 +73,10 @@ def create_administrative_fee_income_payment( bank, amount, payment_date, descri
     income = get_administrative_fee_income()
     return create_income_payment(bank=bank, income=income, description=description, amount=amount, payment_date=payment_date,transaction=transaction, user=user)
 
+def get_dc_income():
+    YEAR = Year.current_year()
+    return Income.objects.get_or_create(name='Daily Contribution', description='Daily Contribution Income', year=YEAR)[0]
+
 def get_income_balance(income_id):
     income = Income.objects.get(id=income_id)
     income_payments = IncomePayment.objects.filter(income=income)

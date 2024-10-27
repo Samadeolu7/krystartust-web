@@ -1,7 +1,11 @@
+from datetime import date, timedelta
+from decimal import Decimal
 import logging
+from administration.models import Transaction
 from bank.models import BankPayment
-from bank.utils import get_cash_in_hand, create_bank_payment
-from .models import Savings, SavingsPayment
+from bank.utils import get_cash_in_hand, create_bank_payment, get_cash_in_hand_dc
+from income.utils import create_income_payment, get_dc_income
+from .models import DailyContribution, Savings, SavingsPayment
 
 def register_savings(bank,client, amount, date, transaction, user): 
     savings = Savings.objects.create(client=client, balance=0)
@@ -35,3 +39,67 @@ def create_savings_payment(client, amount, payment_date, transaction, user):
     except Exception as e:
         logging.error(f"Error creating savings payment for client {client.name}: {e}")
         raise e
+    
+def create_dc_payment(daily_contribution, user):
+    """
+    Create a SavingsPayment record based on a DailyContribution entry.
+    """
+    if daily_contribution.payment_made:
+        savings_record = Savings.objects.get(
+            client=daily_contribution.client_contribution.client, 
+            type=Savings.DC
+        )
+        transaction = Transaction(description=f'Daily contribution for {daily_contribution.date} from {daily_contribution.client_contribution.client.name}')
+        transaction.save(prefix='DC')
+        SavingsPayment.objects.create(
+            client=daily_contribution.client_contribution.client,
+            savings=savings_record,
+            balance=savings_record.balance + Decimal(daily_contribution.client_contribution.amount),
+            description=f"Daily contribution for {daily_contribution.date}",
+            amount=daily_contribution.client_contribution.amount,
+            payment_date=daily_contribution.date,
+            transaction_type=SavingsPayment.DC,
+            approved=True,
+            transaction=transaction,
+            created_by=user
+        )
+        bank = get_cash_in_hand_dc()
+        create_bank_payment(
+            bank=bank,
+            description=f"Daily contribution for {daily_contribution.date}, {daily_contribution.client_contribution.client.name}",
+            amount=daily_contribution.client_contribution.amount,
+            payment_date=daily_contribution.date,
+            transaction=transaction,
+            created_by=user
+        )
+
+def setup_monthly_contributions(client_contribution, month, year,user):
+    """
+    Create daily contributions for every weekday in a given month for a client.
+    """
+    first_day = date(year, month, 1)
+    last_day = (first_day.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+
+    current_date = first_day
+    DailyContribution.objects.get_or_create(
+                client_contribution=client_contribution,
+                date=current_date,
+                payment_made=True
+            )
+    income = get_dc_income()
+    bank = get_cash_in_hand_dc()
+    amount = client_contribution.amount
+    transaction = Transaction(description=f'Daily Contribution for {client_contribution.client.name}')
+    transaction.save(prefix='DC')
+    create_income_payment(bank=bank, income=income, description='Daily Contribution', amount=amount, payment_date=current_date,transaction=transaction,user=user)
+    current_date += timedelta(days=1)
+    contributions = []
+    while current_date <= last_day:
+        if current_date.weekday() < 5:  # Monday to Friday
+            contributions.append(DailyContribution(
+                client_contribution=client_contribution,
+                date=current_date,
+                payment_made=False
+            ))
+        current_date += timedelta(days=1)
+    DailyContribution.objects.bulk_create(contributions)

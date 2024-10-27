@@ -1,7 +1,8 @@
 from administration.models import Transaction
 from bank.models import Bank
 from loan.models import Loan, LoanPayment
-from .models import SavingsPayment, CompulsorySavings, Savings
+from savings.utils import create_dc_payment, setup_monthly_contributions
+from .models import SavingsPayment, CompulsorySavings, Savings, DailyContribution, ClientContribution
 from loan.models import LoanRepaymentSchedule as PaymentSchedule
 from django_select2.forms import Select2Widget
 
@@ -133,3 +134,51 @@ class CombinedPaymentForm(forms.ModelForm):
                 savings_payment_instance.save()
 
         return loan_payment_instance, savings_payment_instance
+    
+class ClientContributionForm(forms.ModelForm):
+    class Meta:
+        model = ClientContribution
+        fields = ['client', 'amount']
+        widgets = {
+            'client': Select2Widget,
+        }
+    
+    def save(self, commit=True):
+        instance = super(ClientContributionForm, self).save(commit=False)
+        # Create a Savings record for the client
+        savings = Savings.objects.create(
+            client=instance.client,
+            balance=0,
+            type=Savings.DC
+        )
+        savings.save()
+
+class SetupMonthlyContributionsForm(forms.Form):
+    client_contribution = forms.ModelChoiceField(queryset=ClientContribution.objects.all())
+    month = forms.IntegerField(min_value=1, max_value=12)
+    year = forms.IntegerField(min_value=1900, max_value=2100)
+
+    def setup_monthly_contributions(self, user):
+        setup_monthly_contributions(self.cleaned_data['client_contribution'], self.cleaned_data['month'], self.cleaned_data['year'], user)
+        return True
+
+class ToggleDailyContributionForm(forms.ModelForm):
+    class Meta:
+        model = DailyContribution
+        fields = ['client_contribution', 'date', 'payment_made']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'client_contribution': Select2Widget,
+            'payment_made': forms.CheckboxInput(),
+        }
+
+    def save(self, user, commit=True):
+        instance = super().save(commit=False)
+        if instance.payment_made:
+            # Create a SavingsPayment record
+            create_dc_payment(instance, user)
+
+
+        if commit:
+            instance.save()
+        return instance

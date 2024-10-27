@@ -8,7 +8,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         self.stdout.write("Generating payslip PDFs...")
         try:
-            result = schedule_task()
+            result = schedule()
             if result:
                 self.stdout.write(self.style.SUCCESS("Payslip PDFs generated successfully."))
             else:

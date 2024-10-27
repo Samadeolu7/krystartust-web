@@ -9,6 +9,10 @@ def get_cash_in_hand():
     bank,created = Bank.objects.get_or_create(name='Cash in Hand')
     return bank
 
+def get_cash_in_hand_dc():
+    bank,created = Bank.objects.get_or_create(name='Cash in Hand (DC)')
+    return bank
+
 def get_bank_account():
     bank,created = Bank.objects.get_or_create(name='MoniePoint')
     return bank
