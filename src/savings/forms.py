@@ -126,7 +126,7 @@ class CombinedPaymentForm(forms.ModelForm):
             savings_payment_instance.client = self.cleaned_data['client']
             savings_payment_instance.amount = self.cleaned_data['amount']-loan_payment_instance.amount
             savings_payment_instance.payment_date = self.cleaned_data['payment_date']
-            savings_payment_instance.client = loan_payment_instance.savings.client
+            savings_payment_instance.savings = self.instance.savings
             if self.user:
                 savings_payment_instance.created_by = self.user
             savings_payment_instance.transaction_type = SavingsPayment.SAVINGS
