@@ -39,7 +39,13 @@ def send_for_approval(form, user):
         with transaction.atomic():
             loan = form.save(commit=False)
             loan.balance = loan.amount * (Decimal(1) + (Decimal(loan.interest)/Decimal(100)))
-            loan.end_date = loan.start_date + timedelta(weeks=loan.duration)
+            loan_type = loan.loan_type
+            if loan_type == 'Daily':
+                loan.end_date = loan.start_date + timedelta(days=loan.duration)
+            elif loan_type == 'Weekly':
+                loan.end_date = loan.start_date + timedelta(weeks=loan.duration)
+            else:
+                loan.end_date = loan.start_date + timedelta(weeks=loan.duration*4)
             loan.emi = loan.balance / loan.duration
             loan.status = 'Active'
             loan.created_by = user
@@ -121,9 +127,16 @@ def approve_loan(approval, user):
             
         }.get(loan_type, timedelta(weeks=1))
 
+        if time_increment == timedelta(weeks=4):
+            start_date = start_date + timedelta(weeks=5)
+        if time_increment == timedelta(weeks=1):
+            start_date = start_date + timedelta(weeks=2)
+        if time_increment == timedelta(days=1):
+            start_date = start_date + timedelta(days=1)
+
         amount_due = loan.balance / duration
         for i in range(duration):
-            due_date = start_date + (i * time_increment) + timedelta(weeks=2)
+            due_date = start_date + (i * time_increment)
 
             LoanRepaymentSchedule.objects.create(
                 loan=loan,
