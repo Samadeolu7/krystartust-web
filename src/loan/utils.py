@@ -155,7 +155,7 @@ def approve_loan(approval, user):
             income=interest_income,
             description=f'Interest income from {loan.client.name}',
             amount=interest_amount,
-            payment_date=start_date,
+            payment_date=start_date-timedelta(weeks=2),
             transaction=loan.transaction,
             created_by=user,    
         )

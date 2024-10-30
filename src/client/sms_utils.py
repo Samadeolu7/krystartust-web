@@ -1,32 +1,27 @@
-import requests
-import os
-from pathlib import Path
-import environ
+import africastalking
 
-# # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# TODO: Initialize Africa's Talking
 
-env = environ.Env()
-environ.Env.read_env(r'D:\Users\User\Desktop\krystartust web\.env')
+africastalking.initialize(
+    username='sandbox',
+    api_key=''
+)
 
-api_key = env('SMS_API_KEY')
+sms = africastalking.SMS
 
+class send_sms():
 
-def send_bulk_sms( sender, recipients, message):
-    url = 'https://app.smartsmssolutions.com/io/api/client/v1/sms/'
-    payload = {
-        'token': api_key,
-        'sender': sender,
-        'to': ','.join(recipients),  # List of phone numbers separated by commas
-        'message': message,
-        'type': 0  # 0 for standard, 1 for voice, etc.
-    }
-    response = requests.post(url, data=payload)
-    if response.status_code == 200:
-        print("Messages sent successfully!")
-        print(response.json())
-    else:
-        print(f"Failed to send SMS. Status code: {response.status_code}")
-        print(response.json())
-
-# Example usage
+    def __init__(self):
+        self.sms = africastalking.SMS
+    def sending(self):
+            # Set the numbers in international format
+            recipients = ["+2348020920855"]
+            # Set your message
+            message = "Hey AT Ninja!";
+            # Set your shortCode or senderId
+            sender = "Test123"
+            try:
+                response = self.sms.send(message, recipients, sender)
+                print (response)
+            except Exception as e:
+                print (f'Houston, we have a problem: {e}')

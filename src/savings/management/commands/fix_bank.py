@@ -19,10 +19,13 @@ class Command(BaseCommand):
     help = 'Find all loans of type monthly and add 3 weeks to the due dates of their repayment schedules'
 
     def handle(self, *args, **kwargs):
-        loan = Loan.objects.filter(loan_type='Monthly')
-        for l in loan:
-            for s in l.repayment_schedule.all():
-                s.due_date = s.due_date + timezone.timedelta(weeks=2)
-                s.save()
+        # find all income from loan interest and reduce payment datein the last 2 weeks by 2 weeks 
+        today = timezone.now()
+        two_weeks_ago = today - timezone.timedelta(weeks=2)
+        income = IncomePayment.objects.filter(income__name='Weekly Loan Interest', payment_date__gte=two_weeks_ago)
+        for i in income:
+            i.payment_date = i.payment_date - timezone.timedelta(weeks=4)
+            i.save()
+            self.stdout.write(self.style.SUCCESS(f'Updated {i}'))
 
-        self.stdout.write(self.style.SUCCESS('Successfully updated due dates of monthly loans repayment schedules'))
+        self.stdout.write(self.style.SUCCESS('Successfully updated loan interest payments'))

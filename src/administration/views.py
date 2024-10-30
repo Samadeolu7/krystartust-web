@@ -29,7 +29,7 @@ def approvals(request):
     #check if user is admin
     if request.user.is_staff:
         approvals = Approval.objects.filter(approved=False,type='loan')
-    approvals = Approval.objects.filter(approved=False)
+    approvals = Approval.objects.filter(approved=False, rejected=False)
     
     return render(request, 'approvals.html', {'approvals': approvals})
 
@@ -44,12 +44,11 @@ def approve(request, pk):
         approve_loan(approval, request.user)
         return redirect('approvals')
     elif approval.type == Approval.Expenses:
-        print("Approving expense")
         approve_expense(approval, request.user)
 
         return redirect('approvals')
     elif approval.type == Approval.Salary:
-        print("Approving salary")
+
         approve_expense(approval, request.user)
         print("Generating payslip")
         generate_payslip(approval.user)
