@@ -45,6 +45,8 @@ def dashboard(request):
     today = timezone.now().date()
     start_of_week = today - timedelta(days=today.weekday())
     end_of_week = start_of_week + timedelta(days=5)  # Includes up to Friday
+    start_of_month = today.replace(day=1)
+    end_of_month = today.replace(day=28) + timedelta(days=4)  # this will never fail
 
     # Retrieve or cache total loan data
     total_loan_data = cache.get('total_loan_data')
@@ -81,8 +83,8 @@ def dashboard(request):
 
     # Calculate expected and actual cash inflows for the current week
     loan_repayments = LoanRepayment.objects.filter(
-        Q(due_date__range=[start_of_week, end_of_week]) | 
-        Q(payment_date__range=[start_of_week, end_of_week])
+        Q(due_date__range=[start_of_month, end_of_month]) | 
+        Q(payment_date__range=[start_of_month, end_of_month])
     ).values('amount_due', 'due_date', 'payment_date')
 
     expected_cash_in = sum(
@@ -93,11 +95,24 @@ def dashboard(request):
         repayment['amount_due'] for repayment in loan_repayments 
         if repayment['payment_date'] and start_of_week <= repayment['payment_date'] <= end_of_week
     )
+    daily_expected_cash_in = sum(
+        repayment['amount_due'] for repayment in loan_repayments 
+        if repayment['due_date'] and today == repayment['due_date']
+    )
+    daily_actual_cash_in = sum(
+        repayment['amount_due'] for repayment in loan_repayments 
+        if repayment['payment_date'] and today == repayment['payment_date']
+    )
+    end_of_month = today.replace(day=28) + timedelta(days=4)  # this will never fail
+    monthly_expected_cash_in = sum(
+        repayment['amount_due'] for repayment in loan_repayments 
+        if repayment['due_date'] and start_of_month <= repayment['due_date'] <= end_of_month
+    )
+    monthly_actual_cash_in = sum(
+        repayment['amount_due'] for repayment in loan_repayments 
+        if repayment['payment_date'] and start_of_month <= repayment['payment_date'] <= end_of_month
+    )
 
-    # Calculate yearly inflows by week for visualization
-    start_of_month = today.replace(day=1)
-    next_month = today.replace(day=28) + timedelta(days=4)  # this will never fail
-    end_of_month = next_month - timedelta(days=next_month.day)
 
     # Initialize lists to hold daily amounts for the current month
     days_in_month = (end_of_month - start_of_month).days + 1
@@ -147,8 +162,12 @@ def dashboard(request):
         'due_dates': due_dates,
         'payment_dates': payment_dates,
         'current_defaulters': current_defaulters,
-        'expected_cash_in': expected_cash_in,
-        'actual_cash_in': actual_cash_in,
+        'expected_cash_in_weekly': expected_cash_in,
+        'actual_cash_in_weekly': actual_cash_in,
+        'expected_cash_in_daily': daily_expected_cash_in,
+        'actual_cash_in_daily': daily_actual_cash_in,
+        'expected_cash_in_monthly': monthly_expected_cash_in,
+        'actual_cash_in_monthly': monthly_actual_cash_in,
         'is_admin': is_admin,
         'is_manager': is_manager,
         'is_employee': is_employee,
