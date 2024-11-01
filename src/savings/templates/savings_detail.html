@@ -37,22 +37,31 @@
                     <tr>
                         <th>Ref NO</th>
                         <th>Payment Date</th>
+                        <th>Transaction Type</th>
                         <th>Amount</th>
                         <th>Balance</th>
-                        <th>Transaction Type</th>
+
                     </tr>
                 </thead>
                 <tbody>
+                    {% with 0 as running_balance %}
                     {% for payment in savings_payments %}
                     <tr>
                         <td>{{ payment.transaction.reference_number }}</td>
-                        <td>{{ payment.payment_date }}</td>
-                        <td>{{ payment.amount|naira }}</td>
-                        <td>{{ payment.balance|naira }}</td>
-
+                        <td>{{ payment.payment_date }}</td>                     
                         <td>{{ payment.get_transaction_type_display }}</td>
-                    </tr>
-                    {% endfor %}
+                        <td>{{ payment.amount|naira }}</td>
+                        <td>{{ running_balance|naira }}</td>
+                            {% update_variable running_balance|add:payment.amount as running_balance %}
+                        </tr>
+                        
+                        {% endfor %}
+                        {% endwith %}
+                        <td> 0 </td>
+                        <td> - </td>
+                        <td> Current Balance </td>
+                        <td> - </td>
+                        <td> {{ savings.balance|naira }} </td>
                 </tbody>
             </table>
         {% else %}

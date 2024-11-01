@@ -31,17 +31,26 @@ class Command(BaseCommand):
             if balance < saving.balance:
                 print(f'{saving.client} has a negative balance of {saving.balance - balance} on {payment.payment_date}')
                 faulty_savings.append(saving)
+                #write all patyyments to a csv file for further analysis
+                with open('savings_payments.csv', 'w') as file:
+                    for payment in payments:
+                        file.write(f'{saving.client},{payment.payment_date},{payment.amount}\n')
+                    file.write(f'{saving.client},balance,{balance}\n')
+                    file.write(f'{saving.client},savings balance,{saving.balance}\n')
+                    file.write('\n')
+
             elif balance == saving.balance:
                 print(f'{saving.client} has a zero balance on {payment.payment_date}')
             else:
                 print(f'{saving.client} has a positive balance of {saving.balance - balance} on {payment.payment_date}')
                 faulty_savings.append(saving)
-
-        # write the faulty savings to a file
-        with open('faulty_savings.txt', 'w') as file:
-            for saving in faulty_savings:
-                file.write(f'{saving.client} has a faulty savings account\n')
-        print('Faulty savings written to faulty_savings.txt')
+                #write all patyyments to a csv file for further analysis
+                with open('savings_payments.csv', 'w') as file:
+                    for payment in payments:
+                        file.write(f'{saving.client},{payment.payment_date},{payment.amount}\n')
+                    file.write(f'{saving.client},balance,{balance}\n')
+                    file.write(f'{saving.client},savings balance,{saving.balance}\n')
+                    file.write('\n')
         print('Done')
 
 

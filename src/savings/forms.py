@@ -40,6 +40,7 @@ class WithdrawalForm(forms.ModelForm):
         instance.client = instance.savings.client
         instance.transaction_type = SavingsPayment.WITHDRAWAL
         instance.balance = 0
+        instance.amount = -instance.amount
         instance.approved = False
         if commit:
             instance.save()
