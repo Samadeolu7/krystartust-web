@@ -1,5 +1,5 @@
 import calendar
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -314,15 +314,39 @@ def client_loans_payments_excel(request, client_id):
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def weekly_cash_flow_report(request):
+    # Get the current date
+    today = datetime.now()
     
-    # Get the current year and month
-    current_year = datetime.now().year
-    current_month = datetime.now().month
-    seven_weeks = {week:0 for week in range(1, 8)}
-    # Get the current week
-    current_week = datetime.now().isocalendar()[1]
-    # Get the cash flow for the current week
-    incomes = IncomePayment.objects.filter(payment_date__year=current_year, payment_date__week=current_week)
-    expenses = ExpensePayment.objects.filter(payment_date__year=current_year, payment_date__week=current_week)
-    loan_payments = LoanPayment.objects.filter(payment_date__year=current_year, payment_date__week=current_week)
-    savings_payments = SavingsPayment.objects.filter(payment_date__year=current_year, payment_date__week=current_week)
+    # Initialize dictionaries to store weekly totals
+    weekly_incomes = {week: 0 for week in range(1, 6)}
+    weekly_expenses = {week: 0 for week in range(1, 6)}
+    weekly_loan_payments = {week: 0 for week in range(1, 6)}
+    weekly_savings_payments = {week: 0 for week in range(1, 6)}
+    accumulated_savings = {week: 0 for week in range(1, 6)}
+
+    # Iterate over the past 5 weeks
+    five_weeks_ago = today - timedelta(weeks=5)
+    total = SavingsPayment.objects.filter(payment_date__lt=five_weeks_ago).aggregate(total=Sum('amount'))['total'] or 0
+    for week in range(5):
+        start_date = five_weeks_ago + timedelta(weeks=week)
+        end_date = five_weeks_ago + timedelta(weeks=week+1)
+        
+        weekly_savings_payments[week+1] = SavingsPayment.objects.filter(
+            payment_date__gte=start_date, payment_date__lt=end_date
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        # Accumulate savings payments
+        if week == 0:
+            accumulated_savings[week+1] = weekly_savings_payments[week+1] + total
+        else:
+            accumulated_savings[week+1] = accumulated_savings[week] + weekly_savings_payments[week+1]
+
+    context = {
+        'weekly_incomes': weekly_incomes,
+        'weekly_expenses': weekly_expenses,
+        'weekly_loan_payments': weekly_loan_payments,
+        'weekly_savings_payments': weekly_savings_payments,
+        'accumulated_savings': accumulated_savings,
+    }
+
+    return render(request, 'weekly_cash_flow_report.html', context)

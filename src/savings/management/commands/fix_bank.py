@@ -16,16 +16,33 @@ from income.utils import create_loan_registration_fee_income_payment
 from income.models import RegistrationFee
 
 class Command(BaseCommand):
-    help = 'Find all loans of type monthly and add 3 weeks to the due dates of their repayment schedules'
+    help = 'Compare the savings payments of each client to their savings balance'
 
     def handle(self, *args, **kwargs):
-        # find all income from loan interest and reduce payment datein the last 2 weeks by 2 weeks 
-        today = timezone.now()
-        two_weeks_ago = today - timezone.timedelta(weeks=2)
-        income = IncomePayment.objects.filter(income__name='Weekly Loan Interest', payment_date__gte=two_weeks_ago)
-        for i in income:
-            i.payment_date = i.payment_date - timezone.timedelta(weeks=4)
-            i.save()
-            self.stdout.write(self.style.SUCCESS(f'Updated {i}'))
+        # Get all the savings
+        savings = Savings.objects.all().order_by('id')
+        faulty_savings = []
+        for saving in savings:
+            # Get all the savings payments
+            payments = SavingsPayment.objects.filter(savings=saving).order_by('payment_date')
+            balance = 0
+            for payment in payments:
+                balance += payment.amount
+            if balance < saving.balance:
+                print(f'{saving.client} has a negative balance of {saving.balance - balance} on {payment.payment_date}')
+                faulty_savings.append(saving)
+            elif balance == saving.balance:
+                print(f'{saving.client} has a zero balance on {payment.payment_date}')
+            else:
+                print(f'{saving.client} has a positive balance of {saving.balance - balance} on {payment.payment_date}')
+                faulty_savings.append(saving)
 
-        self.stdout.write(self.style.SUCCESS('Successfully updated loan interest payments'))
+        # write the faulty savings to a file
+        with open('faulty_savings.txt', 'w') as file:
+            for saving in faulty_savings:
+                file.write(f'{saving.client} has a faulty savings account\n')
+        print('Faulty savings written to faulty_savings.txt')
+        print('Done')
+
+
+            

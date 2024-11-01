@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% load custom_filters %}
+
+{% block title %}Weekly Cash Flow Report{% endblock %}
+
+{% block content %}
+    <h1 class="text-center mb-4">Weekly Cash Flow Report</h1>
+    <!-- Combined Weekly Savings and Accumulated Savings Table -->
+    <h2>Weekly Savings and Accumulated Savings</h2>
+    <table class="table-report">
+        <thead class="table-dark">
+            <tr>
+                <th>Week</th>
+                {% for week in weekly_savings_payments.keys %}
+                <th>Week {{ week }} Savings</th>
+                <th></th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="table-info">
+                <td style="padding: 30px; font-size: 18px;" >Total</td>
+                {% for week in weekly_savings_payments.keys %}
+                <td style="padding: 15px; font-size: 18px;">{{ weekly_savings_payments|get_item:week|default:"0"|naira }}</td>
+                <td style="padding: 15px; font-size: 18px;">{{ accumulated_savings|get_item:week|default:"0"|naira }}</td>
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

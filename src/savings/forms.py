@@ -1,3 +1,4 @@
+from typing import Any
 from administration.models import Transaction
 from bank.models import Bank
 from loan.models import Loan, LoanPayment
@@ -59,6 +60,15 @@ class SavingsForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
 
         super(SavingsForm, self).__init__(*args, **kwargs)
+
+    def save(self, commit: bool = True) -> Any:
+        instance = super(SavingsForm, self).save(commit=False)
+        instance.client = instance.savings.client
+        instance.transaction_type = SavingsPayment.SAVINGS
+        instance.balance = instance.savings.balance + instance.amount
+        if commit:
+            instance.save()
+        return super().save(commit)
 
 
 class CombinedPaymentForm(forms.ModelForm):

@@ -32,10 +32,10 @@ SECRET_KEY = env('SECRET_KEY')
 production = env('PRODUCTION', default=False)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if production:
-    DEBUG = False
-else:
-    DEBUG = True
+# if production:
+#     DEBUG = False
+# else:
+DEBUG = True
 
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'krystartust-web.onrender.com','krystartrust.ng']

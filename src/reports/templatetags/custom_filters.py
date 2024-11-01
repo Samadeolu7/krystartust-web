@@ -62,5 +62,14 @@ def update_variable(value):
 
 
 @register.filter
+def sum_values(values):
+    return sum(values)
+
+
+@register.filter
+def list_dict_values(diction):
+    return list(diction)
+
+@register.filter
 def first_word(value):
     return value.split()[0] if value else ''
