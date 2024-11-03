@@ -153,6 +153,8 @@ def dashboard(request):
     is_employee = user.groups.filter(name='Staff').exists()
     if is_admin:
         approvals = Approval.objects.filter(approved=False,rejected=False).count()
+        journal_entry_approvals = JournalEntry.objects.filter(approved=False,rejected=False).count()
+        approvals += journal_entry_approvals
     if is_manager:
         approvals = Approval.objects.filter(approved=False,rejected=False,type='Loan').count()
     notifications = Notification.objects.filter(user=request.user, is_read=False)
