@@ -24,8 +24,8 @@ class Liability(models.Model):
             self.year = Year.current_year() or 0
         super().save(*args, **kwargs)
 
-    def record_payment(self, amount,description, payment_date):
-        payment = LiabilityPayment(liability=self, amount=amount,description=description, payment_date=payment_date)
+    def record_payment(self, amount,description, payment_date,transaction):
+        payment = LiabilityPayment(liability=self, amount=amount,description=description, payment_date=payment_date,transaction=transaction)
         payment.save()
     
 

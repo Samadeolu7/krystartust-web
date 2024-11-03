@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Report Summary by Date{% endblock %}
+
+{% block content %}
+    <h1 class="text-center mb-4">Report Summary by Date</h1>
+
+    <form method="post" class="mb-4">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" name="end_date" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Generate Report</button>
+    </form>
+
+    {% if clients_bus %}
+        <h2>Business Loan Group</h2>
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Clients</th>
+                    <th>Loans Disbursed</th>
+                    <th>Savings Payments</th>
+                    <th>Withdrawals</th>
+                    <th>Savings Balance</th>
+                    <th>Loan Repayments</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ clients_bus.count }} ({{ clients_f_bus.count }})</td>
+                    <td>{{ loans_bus|naira }}</td>
+                    <td>{{ savings_payment_bus|default:"0"|floatformat:2|naira }}</td>
+                    <td>{{ withdrawals_bus|default:"0"|floatformat:2|naira }}</td>
+                    <td>{{ savings_balance_bus|default:"0"|floatformat:2|naira }}</td>
+                    <td>{{ loan_payments_bus|default:"0"|floatformat:2|naira }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if clients %}
+        <h2>Individual</h2>
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Clients</th>
+                    <th>Loans Disbursed</th>
+                    <th>Savings Payments</th>
+                    <th>Withdrawals</th>
+                    <th>Savings Balance</th>
+                    <th>Loan Repayments</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ clients.count }} ({{ clients_f.count }})</td>
+                    <td>{{ loans|naira }}</td>
+                    <td>{{ savings_payment|default:"0"|floatformat:2|naira }}</td>
+                    <td>{{ withdrawals|default:"0"|floatformat:2|naira }}</td>
+                    <td>{{ savings_balance|default:"0"|floatformat:2|naira }}</td>
+                    <td>{{ loan_payments|default:"0"|floatformat:2|naira }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% endif %}
+
+    <h2>Cash Summary</h2>
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Cash in Hand</th>
+                <th>Cash at Bank</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ cash_in_hand|default:"0"|floatformat:2 }}</td>
+                <td>{{ cash_at_bank|default:"0"|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock %}

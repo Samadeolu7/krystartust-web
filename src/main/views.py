@@ -2,7 +2,7 @@ import json
 from datetime import timedelta
 from subprocess import Popen
 
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
@@ -12,20 +12,24 @@ from django.utils import timezone
 from django.conf import settings
 
 from administration.decorators import allowed_users
-from administration.models import Approval, Notification
+from administration.models import Approval, Notification, Transaction
 from bank.models import Bank
 from client.models import Client
 from expenses.models import Expense
 from income.models import Income
 from liability.models import Liability
 from loan.models import Loan, LoanPayment, LoanRepaymentSchedule as LoanRepayment
+from main.utils import verify_trial_balance
 from savings.models import Savings, SavingsPayment
 from user.models import User
 
-from .models import ClientGroup as Group
+from .models import ClientGroup as Group, JournalEntry
 from .forms import GroupForm, JVForm
 from django.core.cache import cache
 from django.db.models.functions import ExtractWeek
+
+from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 
 
 
@@ -273,29 +277,79 @@ def journal_entry(request):
             description = form.cleaned_data['description']
             credit_account_type = form.cleaned_data['jv_credit']
             debit_account_type = form.cleaned_data['jv_debit']
+            created_by = request.user
+            
             if credit_account == debit_account:
                 return redirect('journal_entry')
             
-            if credit_account_type == 'Income' and debit_account_type == 'Liability' or credit_account_type == 'Liability' and debit_account_type == 'Income':
-                credit_account.record_payment(-amount,description,payment_date)
-                debit_account.record_payment(amount,description,payment_date)
-                return redirect('dashboard')
+            journal_entry = JournalEntry.objects.create(
+                credit_account=ContentType.objects.get_for_model(credit_account),
+                credit_id=credit_account.id,
+                credit_amount=amount,
+                debit_account=ContentType.objects.get_for_model(debit_account),
+                debit_id=debit_account.id,
+                debit_amount=amount,
+                comment=description,
+                payment_date=payment_date,
+                approved=False,
+                created_by=created_by
+            )
             
-            elif credit_account_type == 'Income' or credit_account_type == 'Liability':
-                credit_account.record_payment(-amount,description,payment_date)
-                debit_account.record_payment(-amount,description,payment_date)
-                return redirect('dashboard')
-
-            elif debit_account_type == 'Income' or debit_account_type == 'Liability':
-                
-                credit_account.record_payment(amount,description,payment_date)
-                debit_account.record_payment(amount,description,payment_date)
-                return redirect('dashboard')
-            else:
-                credit_account.record_payment(-amount,description,payment_date)
-                debit_account.record_payment(amount,description,payment_date)
-
-            return redirect('dashboard')    
+            return redirect('dashboard')
     
     form = JVForm()
     return render(request, 'journal_entry.html', {'form': form})
+
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+def approve_journal_entry(request, pk):
+    journal_entry = get_object_or_404(JournalEntry, id=pk)
+    if not journal_entry.approved:
+        journal_entry.approved = True
+        journal_entry.save()
+        
+        credit_account = journal_entry.credit_object
+        debit_account = journal_entry.debit_object
+        amount = journal_entry.credit_amount
+        description = journal_entry.comment
+        payment_date = journal_entry.payment_date
+        
+        credit_account_type = journal_entry.credit_account
+        debit_account_type = journal_entry.debit_account  
+
+        tran = Transaction(description=description)
+        tran.save(prefix='JV')
+
+        with transaction.atomic():
+        
+            if credit_account_type == Income and debit_account_type == Liability or credit_account_type == Liability and debit_account_type == Income:
+                
+                credit_account.record_payment(-amount, description, payment_date, tran)
+                debit_account.record_payment(amount, description, payment_date, tran)
+            
+            elif credit_account_type == Income or credit_account_type == Liability:
+                credit_account.record_payment(-amount, description, payment_date, tran)
+                debit_account.record_payment(-amount, description, payment_date, tran)
+            
+            elif debit_account_type == Income or debit_account_type == Liability:
+                credit_account.record_payment(amount, description, payment_date, tran)
+                debit_account.record_payment(amount, description, payment_date, tran)
+            
+            else:
+                credit_account.record_payment(-amount, description, payment_date, tran)
+                debit_account.record_payment(amount, description, payment_date, tran)
+
+            verify_trial_balance()
+
+    
+    return redirect('dashboard')
+
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+def disapprove_journal_entry(request, entry_id):
+    journal_entry = get_object_or_404(JournalEntry, id=entry_id)
+    if not journal_entry.approved:
+        journal_entry.rejected = True
+        journal_entry.save()
+    
+    return redirect('dashboard')

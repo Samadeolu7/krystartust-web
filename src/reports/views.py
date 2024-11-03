@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 from administration.decorators import allowed_users
-from bank.models import Bank
+from bank.models import Bank, BankPayment
 from client.models import Client
 from expenses.models import Expense, ExpensePayment
 from income.models import Income, IncomePayment
@@ -15,6 +15,7 @@ from reports.excel_utils import client_list_to_excel, client_loans_payments_to_e
 from savings.models import Savings, SavingsPayment
 from main.models import ClientGroup as Group
 from django.contrib.auth.decorators import login_required
+from django.utils.timezone import make_aware
 
 from django.db.models import Sum
 # Create your views here.
@@ -350,3 +351,83 @@ def weekly_cash_flow_report(request):
     }
 
     return render(request, 'weekly_cash_flow_report.html', context)
+
+@login_required
+def report_summary_by_date(request):
+    if request.method == 'POST':
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        start_date = make_aware(datetime.strptime(start_date, '%Y-%m-%d'))
+        end_date = make_aware(datetime.strptime(end_date, '%Y-%m-%d'))
+        #business loan group
+        business = 'Business Loan'
+        group_bus = Group.objects.get(name=business)
+        clients_bus = Client.objects.filter(group=group_bus)
+        clients_bus_f = Client.objects.filter(group=group_bus, created_at__range=[start_date, end_date])
+        loans_bus_f = Loan.objects.filter(
+            client__in=clients_bus
+            )
+        loans_bus = loans_bus_f.filter(start_date__range=[start_date, end_date])
+        savings_payment_bus = SavingsPayment.objects.filter(
+            client__in=clients_bus, transaction_type = 'S', payment_date__range=[start_date, end_date]
+            ).aggregate(total=Sum('amount'))['total'] or 0
+        withdrawals_bus = SavingsPayment.objects.filter(
+            client__in=clients_bus, transaction_type = 'W', payment_date__range=[start_date, end_date]
+            ).aggregate(total=Sum('amount'))['total'] or 0
+        savings_balance_bus = SavingsPayment.objects.filter(
+            client__in=clients_bus, payment_date__lte=end_date
+            ).aggregate(total=Sum('amount'))['total'] or 0
+        loan_payments_bus = LoanPayment.objects.filter(
+            loan__in=loans_bus, payment_date__range=[start_date, end_date]
+            ).aggregate(total=Sum('amount'))['total'] or 0
+        loans_bus = loans_bus.aggregate(total=Sum('amount'))['total'] or 0
+        #daily_contribution_bus = SavingsPayment.objects.filter(client__in=clients_bus, transaction_type = 'C', payment_date__range=[start_date, end_date])
+        
+        #every other group
+        groups = Group.objects.exclude(name=business)
+        clients = Client.objects.filter(group__in=groups)
+        clients_f = Client.objects.filter(group__in=groups, created_at__range=[start_date, end_date])
+        loans_f = Loan.objects.filter(
+            client__in=clients
+            )
+        loans = loans_f.filter(start_date__range=[start_date, end_date])
+        savings_payment = SavingsPayment.objects.filter(
+            client__in=clients, transaction_type = 'S', payment_date__range=[start_date, end_date]
+            ).aggregate(total=Sum('amount'))['total'] or 0
+        withdrawals = SavingsPayment.objects.filter(
+            client__in=clients, transaction_type = 'W', payment_date__range=[start_date, end_date]
+            ).aggregate(total=Sum('amount'))['total'] or 0
+        savings_balance = SavingsPayment.objects.filter(
+            client__in=clients, payment_date__lte=end_date
+            ).aggregate(total=Sum('amount'))['total'] or 0
+        loan_payments = LoanPayment.objects.filter(
+            payment_date__range=[start_date, end_date]
+            ).aggregate(total=Sum('amount'))['total'] or 0
+        loans = loans.aggregate(total=Sum('amount'))['total'] or 0
+        #daily_contribution = SavingsPayment.objects.filter(client__in=clients, transaction_type = 'C', payment_date__range=[start_date, end_date])
+        bank = Bank.objects.filter(name='MoniePoint').first()
+        cash = Bank.objects.filter(name='Cash in Hand').first()
+        cash_in_hand = BankPayment.objects.filter(bank=cash, payment_date__lte=end_date).aggregate(total=Sum('amount'))['total'] or 0
+        cash_at_bank = BankPayment.objects.filter(bank=bank, payment_date__lte=end_date).aggregate(total=Sum('amount'))['total'] or 0
+        context = {
+            'clients_bus': clients_bus,
+            'clients_bus_f': clients_bus_f,
+            'loans_bus': loans_bus,
+            'savings_payment_bus': savings_payment_bus,
+            'withdrawals_bus': withdrawals_bus,
+            'savings_balance_bus': savings_balance_bus,
+            'loan_payments_bus': loan_payments_bus,
+            'clients': clients,
+            'clients_f': clients_f,
+            'loans': loans,
+            'savings_payment': savings_payment,
+            'withdrawals': withdrawals,
+            'savings_balance': savings_balance,
+            'loan_payments': loan_payments,
+            'cash_in_hand': cash_in_hand,
+            'cash_at_bank': cash_at_bank,
+        }
+        
+    else:
+        return render(request, 'report_summary_by_date.html')
+    return render(request, 'report_summary_by_date.html', context)

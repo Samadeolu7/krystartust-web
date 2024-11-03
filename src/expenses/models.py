@@ -32,8 +32,9 @@ class Expense(models.Model):
     def __str__(self) -> str:
         return self.name + ' - ' + str(self.balance) + ' - ' + self.expense_type.name
     
-    def record_payment(self, amount,description, payment_date):
-        payment = ExpensePayment(expense=self, amount=amount,description=description, payment_date=payment_date)
+    def record_payment(self, amount,description, payment_date,transaction):
+        payment = ExpensePayment(
+            expense=self, amount=amount,description=description, payment_date=payment_date, approved=True,transaction=transaction, balance=self.balance + amount)
         payment.save()
 
     
@@ -53,6 +54,13 @@ class ExpensePayment(models.Model):
         approved = models.BooleanField(default=False)
     
         def save(self, *args, **kwargs):
+            
+            with transaction.atomic():
+                if not self.pk:
+                    self.expense_balance = self.expense.balance + self.amount
+                    self.expense.balance = self.expense_balance
+                    self.expense.save()
+            
             super(ExpensePayment, self).save(*args, **kwargs)
 
             

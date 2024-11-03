@@ -17,45 +17,25 @@ import csv
 import os
 
 class Command(BaseCommand):
-    help = 'Find entries within the specified dates and write to CSV'
+    help = 'Find all loans where the loan start date is less than four weeks from the first repayment date'
 
     def handle(self, *args, **kwargs):
-        # find all transactions that happened in the past 3 days
-        start_date = timezone.now() - timedelta(days=5)
-        end_date = timezone.now()
-        transactions = []
-        transactions.append(['Transaction Date', 'Transaction Type', 'Description', 'Amount', 'Bank'])
-        # get all loan payments
-        loan_payments = LoanPayment.objects.filter(payment_date__range=[start_date, end_date])
-        for payment in loan_payments:
-            transactions.append([payment.payment_date, 'Loan Payment', payment.client, payment.amount, payment.payment_date])
-        # get all bank payments
-        bank_payments = BankPayment.objects.filter(payment_date__range=[start_date, end_date])
-        for payment in bank_payments:
-            transactions.append([payment.payment_date, 'Bank Payment', payment.description, payment.amount, payment.bank])
-        # get all savings payments
-        savings_payments = SavingsPayment.objects.filter(payment_date__range=[start_date, end_date])
-        for payment in savings_payments:
-            transactions.append([payment.payment_date, 'Savings Payment', payment.description, payment.amount, payment.bank])
-        # get all expenses
-        expenses = ExpensePayment.objects.filter(payment_date__range=[start_date, end_date])
-        for expense in expenses:
-            transactions.append([expense.payment_date, 'Expense', expense.description, expense.amount, expense.payment_date])
-        # get all incomes
-        incomes = IncomePayment.objects.filter(payment_date__range=[start_date, end_date])
-        for income in incomes:
-            transactions.append([income.payment_date, 'Income', income.description, income.amount, income.payment_date])
-        # get all liabilities
-        liabilities = LiabilityPayment.objects.filter(payment_date__range=[start_date, end_date])
-        for liability in liabilities:
-            transactions.append([liability.payment_date, 'Liability Payment', liability.description, liability.amount, liability.payment_date])
-
-        # sort transactions by date
-        transactions[1:] = sorted(transactions[1:], key=lambda x: (x[0], x[3]))
-        # write to CSV
-        with open('transactions.csv', 'w') as f:
-            writer = csv.writer(f)
-            writer.writerows(transactions)
+        # find all loans where the loan start date is less than two weeks from the first repayment date
+        loans = Loan.objects.filter(loan_type='Monthly').all()
+        loans_lst = []
+        for loan in loans:
+            if loan.start_date + timedelta(weeks=4) -timedelta(days=1) >= loan.repayment_schedule.first().due_date:
+                self.stdout.write(self.style.SUCCESS(f'Loan {loan.id} has a start date less than four weeks from the first repayment date'))
+                # reduce the start date by 2 weeks
+                loan.start_date = loan.start_date - timedelta(days=14)
+                loan.save()
+                loans_lst.append(loan)
+        # write the loans to a csv file
+        with open('loans.csv', mode='w') as file:
+            writer = csv.writer(file)
+            writer.writerow(['Loan ID', 'Client ID', 'Start Date', 'First Repayment Date'])
+            for loan in loans_lst:
+                writer.writerow([loan.id, loan.client.id, loan.start_date, loan.repayment_schedule.first().due_date])
 
         # success message
         self.stdout.write(self.style.SUCCESS('Transactions written to transactions.csv'))

@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 
 from administration.decorators import allowed_users
 from expenses.utils import approve_expense
+from main.models import JournalEntry
 from user.pdf_gen import generate_payslip
 from .models import Approval, Notification
 from loan.utils import approve_loan
@@ -29,9 +30,10 @@ def approvals(request):
     #check if user is admin
     if request.user.is_staff:
         approvals = Approval.objects.filter(approved=False,type='loan')
+        return render(request, 'approvals.html', {'approvals': approvals})
     approvals = Approval.objects.filter(approved=False, rejected=False)
-    
-    return render(request, 'approvals.html', {'approvals': approvals})
+    journals = JournalEntry.objects.filter(approved=False, rejected=False)
+    return render(request, 'approvals.html', {'approvals': approvals, 'journals': journals})
 
 
 @login_required

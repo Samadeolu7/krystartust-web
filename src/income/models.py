@@ -15,8 +15,8 @@ class Income(models.Model):
     class Meta:
         ordering = ['created_at']
 
-    def record_payment(self, amount,description, payment_date):
-        payment = IncomePayment(income=self, amount=amount,description=description, payment_date=payment_date)
+    def record_payment(self, amount,description, payment_date,transaction):
+        payment = IncomePayment(income=self, amount=amount,description=description, payment_date=payment_date,transaction=transaction)
         payment.save()
 
 class IncomePayment(models.Model):

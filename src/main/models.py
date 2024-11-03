@@ -1,4 +1,7 @@
 from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+
 
 from client.models import Client
 from user.models import User    
@@ -27,3 +30,20 @@ class Year(models.Model):
             return last_year_instance.year
         else:
             return 2024
+        
+
+class JournalEntry(models.Model):
+    credit_account = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='credit_entries')
+    credit_id = models.PositiveIntegerField()
+    credit_object = GenericForeignKey('credit_account', 'credit_id')
+    credit_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    debit_account = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='debit_entries')
+    debit_id = models.PositiveIntegerField()
+    debit_object = GenericForeignKey('debit_account', 'debit_id')
+    debit_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    comment = models.TextField()
+    payment_date = models.DateField()
+    approved = models.BooleanField(default=False)
+    rejected = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='journal_entries')
