@@ -8,12 +8,14 @@ from bank.utils import get_cash_in_hand
 from client.excel_utils import create_clients_from_excel
 from client.models import Client
 from loan.models import Loan, LoanPayment
+from main.utils import verify_trial_balance
 from savings.models import Savings, SavingsPayment
 from savings.utils import register_savings
 from income.utils import create_income_payment, get_id_fee_income, get_registration_fee_income
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import ClientExcelForm, ClientForm
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 
 from administration.decorators import admin_required, allowed_users
 # Create your views here.
@@ -24,21 +26,24 @@ def create_client(request):
     if request.method == 'POST':
         form = ClientForm(request.POST)
         if form.is_valid():
-            client = form.save(commit=False)
-            client.created_at = now().date()
-            form.save()
-            messages.success(request, 'Client created successfully.')
-            bank = form.cleaned_data['bank']
-            date = form.cleaned_data['date']
-            tran = Transaction(description=f'Client Registration for {client.name}')
-            tran.save(prefix='REG')
-            register_savings(bank,client=form.instance, amount=form.cleaned_data["compulsory_savings"],date=date,transaction=tran,user=request.user)
-            income = get_registration_fee_income()
-            id_fee = get_id_fee_income()
-            bank = form.cleaned_data['bank']
-            create_income_payment(bank, income=income, description='Registration Fee', amount=form.cleaned_data['registration_fee'], payment_date=date, transaction=tran, user=request.user)
-            create_income_payment(bank, income=id_fee, description='ID Fee', amount=form.cleaned_data['id_fee'], payment_date=date, transaction=tran, user=request.user)
-            
+            with transaction.atomic():
+                client = form.save(commit=False)
+                client.created_at = now().date()
+                form.save()
+                messages.success(request, 'Client created successfully.')
+                bank = form.cleaned_data['bank']
+                date = form.cleaned_data['date']
+                tran = Transaction(description=f'Client Registration for {client.name}')
+                tran.save(prefix='REG')
+                register_savings(bank,client=form.instance, amount=form.cleaned_data["compulsory_savings"],date=date,transaction=tran,user=request.user)
+                income = get_registration_fee_income()
+                id_fee = get_id_fee_income()
+                bank = form.cleaned_data['bank']
+                create_income_payment(bank, income=income, description='Registration Fee', amount=form.cleaned_data['registration_fee'], payment_date=date, transaction=tran, user=request.user)
+                create_income_payment(bank, income=id_fee, description='ID Fee', amount=form.cleaned_data['id_fee'], payment_date=date, transaction=tran, user=request.user)
+
+                verify_trial_balance()
+                
             
             return redirect('list_clients')  # Redirect to a client list or relevant page
         else:
