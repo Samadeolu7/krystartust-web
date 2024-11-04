@@ -3,10 +3,11 @@ kind: Service
 metadata:
   name: django-service
 spec:
+  type: NodePort
   selector:
     app: django
   ports:
     - protocol: TCP
       port: 80
       targetPort: 8000
-  type: LoadBalancer
+      nodePort: 30007  # Or any other available port between 30000-32767
