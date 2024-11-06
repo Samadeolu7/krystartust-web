@@ -434,7 +434,7 @@
         var weeklyInflowChart = new Chart(ctx2, {
             type: 'line',
             data: {
-                labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                labels: [ 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
                 datasets: [{
                     label: 'Weekly Inflow',
                     data: weeklyInflows,
@@ -480,25 +480,16 @@
         });
 
         // Loan Repayment Schedule Chart
-        $(document).ready(function() {
-            // Calculate the start and end dates of the current month
-            var today = new Date();
-            var startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-            var endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            var daysInMonth = endOfMonth.getDate();
-    
-            // Generate labels for each day of the current month
-            var labels = Array.from({length: daysInMonth}, (_, i) => `Day ${i + 1}`);
-    
-            // Example data for dueDates and paymentDates
-            var dueDates = Array.from({length: daysInMonth}, () => Math.floor(Math.random() * 100));
-            var paymentDates = Array.from({length: daysInMonth}, () => Math.floor(Math.random() * 100));
-    
+        document.addEventListener('DOMContentLoaded', function() {
+            var daysInMonth = {{ due_dates|length }};
+            var dueDates = {{ due_dates|safe }};
+            var paymentDates = {{ payment_dates|safe }};
+
             var ctx4 = document.getElementById('repaymentChart').getContext('2d');
             var repaymentChart = new Chart(ctx4, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: Array.from({length: daysInMonth}, (_, i) => `Day ${i + 1}`),
                     datasets: [
                         {
                             label: 'Due Dates',
@@ -506,7 +497,7 @@
                             backgroundColor: 'rgba(255, 99, 132, 0.2)',
                             borderColor: 'rgba(255, 99, 132, 1)',
                             borderWidth: 1,
-                            fill: false,
+                            fill: false
                         },
                         {
                             label: 'Payment Dates',
@@ -514,18 +505,14 @@
                             backgroundColor: 'rgba(54, 162, 235, 0.2)',
                             borderColor: 'rgba(54, 162, 235, 1)',
                             borderWidth: 1,
-                            fill: false,
+                            fill: false
                         }
                     ]
                 },
                 options: {
                     scales: {
-                        x: {
-                            beginAtZero: true
-                        },
-                        y: {
-                            beginAtZero: true
-                        }
+                        x: { beginAtZero: true },
+                        y: { beginAtZero: true }
                     }
                 }
             });

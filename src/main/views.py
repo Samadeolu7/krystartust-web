@@ -127,10 +127,11 @@ def dashboard(request):
     for repayment in loan_repayments:
         if repayment['due_date'] and start_of_month <= repayment['due_date'] <= end_of_month:
             due_day = (repayment['due_date'] - start_of_month).days
-            due_dates[due_day] += repayment['amount_due']
+            due_dates[due_day] += float(repayment['amount_due'])
         if repayment['payment_date'] and start_of_month <= repayment['payment_date'] <= end_of_month:
             payment_day = (repayment['payment_date'] - start_of_month).days
-            payment_dates[payment_day] += repayment['amount_due']
+            payment_dates[payment_day] += float(repayment['amount_due'])
+
 
     current_defaulters = Loan.objects.with_is_defaulted().filter(is_defaulted=True).count()
 
