@@ -27,6 +27,7 @@ from .models import ClientGroup as Group, JournalEntry
 from .forms import GroupForm, JVForm
 from django.core.cache import cache
 from django.db.models.functions import ExtractWeek
+from django.contrib import messages
 
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
@@ -306,24 +307,24 @@ def journal_entry(request):
 @allowed_users(allowed_roles=['Admin'])
 def approve_journal_entry(request, pk):
     journal_entry = get_object_or_404(JournalEntry, id=pk)
-    if not journal_entry.approved:
-        journal_entry.approved = True
-        journal_entry.save()
-        
-        credit_account = journal_entry.credit_object
-        debit_account = journal_entry.debit_object
-        amount = journal_entry.credit_amount
-        description = journal_entry.comment
-        payment_date = journal_entry.payment_date
-        
-        credit_account_type = journal_entry.credit_account
-        debit_account_type = journal_entry.debit_account  
+    
 
-        tran = Transaction(description=description)
-        tran.save(prefix='JV')
+    with transaction.atomic():
+        if not journal_entry.approved:
+            journal_entry.approved = True
+            journal_entry.save()
+            
+            credit_account = journal_entry.credit_object
+            debit_account = journal_entry.debit_object
+            amount = journal_entry.credit_amount
+            description = journal_entry.comment
+            payment_date = journal_entry.payment_date
+            
+            credit_account_type = journal_entry.credit_account
+            debit_account_type = journal_entry.debit_account  
 
-        with transaction.atomic():
-        
+            tran = Transaction(description=description)
+            tran.save(prefix='JV')
             if credit_account_type == Income and debit_account_type == Liability or credit_account_type == Liability and debit_account_type == Income:
                 
                 credit_account.record_payment(-amount, description, payment_date, tran)
@@ -342,6 +343,9 @@ def approve_journal_entry(request, pk):
                 debit_account.record_payment(amount, description, payment_date, tran)
 
             verify_trial_balance()
+        else:
+            messages.error(request, 'Journal Entry has already been approved')
+            return redirect('dashboard')
 
     
     return redirect('dashboard')
