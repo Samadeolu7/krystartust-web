@@ -27,8 +27,7 @@ def salary(request):
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def approvals(request):
-    #check if user is admin
-    if request.user.is_staff:
+    if 'Admin' not in request.user.groups.values_list('name', flat=True):
         approvals = Approval.objects.filter(approved=False,type='loan')
         return render(request, 'approvals.html', {'approvals': approvals})
     approvals = Approval.objects.filter(approved=False, rejected=False)
@@ -40,7 +39,6 @@ def approvals(request):
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def approve(request, pk):
     approval = Approval.objects.get(pk=pk)
-    print(approval.type)
 
     if approval.type == Approval.Loan:
         approve_loan(approval, request.user)

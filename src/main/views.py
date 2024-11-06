@@ -309,7 +309,6 @@ def journal_entry(request):
 def approve_journal_entry(request, pk):
     journal_entry = get_object_or_404(JournalEntry, id=pk)
     
-
     with transaction.atomic():
         if not journal_entry.approved:
             journal_entry.approved = True
@@ -321,21 +320,21 @@ def approve_journal_entry(request, pk):
             description = journal_entry.comment
             payment_date = journal_entry.payment_date
             
-            credit_account_type = journal_entry.credit_account
-            debit_account_type = journal_entry.debit_account  
+            credit_account_type = journal_entry.credit_account.model
+            debit_account_type = journal_entry.debit_account.model
 
             tran = Transaction(description=description)
             tran.save(prefix='JV')
-            if credit_account_type == Income and debit_account_type == Liability or credit_account_type == Liability and debit_account_type == Income:
-                
+
+            if (credit_account_type == 'income' and debit_account_type == 'liability') or (credit_account_type == 'liability' and debit_account_type == 'income'):
                 credit_account.record_payment(-amount, description, payment_date, tran)
                 debit_account.record_payment(amount, description, payment_date, tran)
             
-            elif credit_account_type == Income or credit_account_type == Liability:
+            elif credit_account_type in ['income', 'liability']:
                 credit_account.record_payment(-amount, description, payment_date, tran)
                 debit_account.record_payment(-amount, description, payment_date, tran)
             
-            elif debit_account_type == Income or debit_account_type == Liability:
+            elif debit_account_type in ['income', 'liability']:
                 credit_account.record_payment(amount, description, payment_date, tran)
                 debit_account.record_payment(amount, description, payment_date, tran)
             
@@ -348,7 +347,6 @@ def approve_journal_entry(request, pk):
             messages.error(request, 'Journal Entry has already been approved')
             return redirect('dashboard')
 
-    
     return redirect('dashboard')
 
 @login_required
