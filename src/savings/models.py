@@ -22,7 +22,10 @@ class Savings(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.client.name + ' - ' + str(self.balance)
+        if self.type == self.NORMAL:
+            return self.client.name + ' - ' + str(self.balance)
+        else:
+            return self.client.name + ' - ' + str(self.balance) + ' -DC'
 
     class Meta:
         unique_together = ('client', 'type')

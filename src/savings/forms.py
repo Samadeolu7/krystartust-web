@@ -193,7 +193,6 @@ class ToggleDailyContributionForm(forms.ModelForm):
             # Create a SavingsPayment record
             create_dc_payment(instance, user)
 
-
         if commit:
             instance.save()
         return instance
