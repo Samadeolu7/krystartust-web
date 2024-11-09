@@ -1,5 +1,5 @@
 import json
-from datetime import timedelta
+from datetime import datetime, timedelta
 from subprocess import Popen
 
 from django.shortcuts import get_object_or_404, redirect, render
@@ -358,3 +358,17 @@ def disapprove_journal_entry(request, entry_id):
         journal_entry.save()
     
     return redirect('dashboard')
+
+def test_html(request):
+    # Example condition - you can replace this with your actual condition logic
+    today = datetime.now()
+    days_in_month = 30  # or use calendar.monthrange to get the exact number of days for a specific month/year
+    
+    # Dictionary to hold date and its condition (True if tick should be displayed)
+    ticks = {}
+    for i in range(days_in_month):
+        date = today.replace(day=i + 1)  # Get each day of the month
+        # Replace the condition below with your own logic
+        ticks[date] = (date.day % 2 == 0)  # Example: tick every even day
+
+    return render(request, 'test.html', {'ticks': ticks})

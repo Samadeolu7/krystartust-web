@@ -1,7 +1,6 @@
 from decimal import Decimal
 from django.db import models
 
-from administration.models import Approval
 from client.models import Client
 from user.models import User
 from income.models import SingletonModel
@@ -84,6 +83,7 @@ class DailyContribution(models.Model):
     client_contribution = models.ForeignKey('ClientContribution', on_delete=models.CASCADE)
     date = models.DateField()
     payment_made = models.BooleanField(default=False)
+    payment = models.ForeignKey(SavingsPayment, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # Toggle payment status only

@@ -1,4 +1,5 @@
 from .views import register_savings, record_withdrawal, compulsory_savings, setup_monthly_contributions_view, toggle_daily_contribution_view, upload_savings, savings_detail, register_payment, record_client_contribution
+from .views import daily_contribution_report
 from django.urls import path
 
 urlpatterns = [
@@ -11,4 +12,5 @@ urlpatterns = [
     path('setup-monthly-contributions/', setup_monthly_contributions_view, name='setup_monthly_contributions'),
     path('toggle-daily-contribution/', toggle_daily_contribution_view, name='toggle_daily_contribution'),
     path('record-client-contribution/', record_client_contribution, name='record_client_contribution'),
+    path('daily-contribution-report/', daily_contribution_report, name='daily_contribution_report'),
 ]

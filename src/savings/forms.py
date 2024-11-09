@@ -19,6 +19,10 @@ class SavingsExcelForm(forms.Form):
         label='Excel File'
     )
 
+
+class DCForm(forms.Form):
+    queryset = ClientContribution.objects.all()
+    client = forms.ModelChoiceField(queryset=queryset, label="Select Client")
 class WithdrawalForm(forms.ModelForm):
 
     bank = forms.ModelChoiceField(queryset=Bank.objects.all(), required=False)

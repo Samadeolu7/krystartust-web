@@ -51,7 +51,7 @@ def create_dc_payment(daily_contribution, user):
         )
         transaction = Transaction(description=f'Daily contribution for {daily_contribution.date} from {daily_contribution.client_contribution.client.name}')
         transaction.save(prefix='DC')
-        SavingsPayment.objects.create(
+        savings_payment = SavingsPayment.objects.create(
             client=daily_contribution.client_contribution.client,
             savings=savings_record,
             balance=savings_record.balance + Decimal(daily_contribution.client_contribution.amount),
@@ -63,6 +63,8 @@ def create_dc_payment(daily_contribution, user):
             transaction=transaction,
             created_by=user
         )
+        daily_contribution.payment = savings_payment
+        daily_contribution.save()
         bank = get_cash_in_hand_dc()
         create_bank_payment(
             bank=bank,

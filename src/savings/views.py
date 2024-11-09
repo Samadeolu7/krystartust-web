@@ -1,3 +1,4 @@
+import datetime
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
@@ -7,8 +8,8 @@ from django.shortcuts import render
 from administration.decorators import allowed_users
 from administration.models import Approval, Transaction
 from main.utils import verify_trial_balance
-from .models import DailyContribution, Savings, SavingsPayment
-from .forms import SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm, CombinedPaymentForm, ToggleDailyContributionForm, SetupMonthlyContributionsForm, ClientContributionForm
+from .models import ClientContribution, DailyContribution, Savings, SavingsPayment
+from .forms import DCForm, SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm, CombinedPaymentForm, ToggleDailyContributionForm, SetupMonthlyContributionsForm, ClientContributionForm
 from .excel_utils import savings_from_excel
 from bank.utils import create_bank_payment
 from django.contrib.auth.decorators import login_required
@@ -199,3 +200,78 @@ def record_client_contribution(request):
     else:
         form = ClientContributionForm()
     return render(request, 'record_client_contribution.html', {'form': form})
+
+
+def calculate_monthly_totals(client_contribution):
+    savings = Savings.objects.filter(client=client_contribution.client, type=Savings.DC).first()
+    savings_payments = SavingsPayment.objects.filter(savings=savings, transaction_type=SavingsPayment.DC)
+    withdrawals = SavingsPayment.objects.filter(savings=savings, transaction_type=SavingsPayment.WITHDRAWAL)
+
+    monthly_totals = {}
+    brought_forward = 0
+
+    for payment in savings_payments:
+        month = payment.payment_date.strftime('%Y-%m')
+        if month not in monthly_totals:
+            monthly_totals[month] = {'savings': 0, 'withdrawals': 0, 'brought_forward': brought_forward}
+        monthly_totals[month]['savings'] += payment.amount
+
+    for withdrawal in withdrawals:
+        month = withdrawal.payment_date.strftime('%Y-%m')
+        if month not in monthly_totals:
+            monthly_totals[month] = {'savings': 0, 'withdrawals': 0, 'brought_forward': brought_forward}
+        monthly_totals[month]['withdrawals'] += withdrawal.amount
+
+    # Calculate brought forward for each month
+    for month in sorted(monthly_totals.keys()):
+        monthly_totals[month]['brought_forward'] = brought_forward
+        brought_forward += monthly_totals[month]['savings'] - monthly_totals[month]['withdrawals']
+
+    return monthly_totals
+
+def daily_contribution_report(request):
+    form = DCForm()
+    events = []
+    monthly_totals = {}
+
+    if request.method == 'POST':
+        form = DCForm(request.POST)
+        if form.is_valid():
+            dc_client = form.cleaned_data['client']
+            client_contribution = ClientContribution.objects.get(id=dc_client.id)
+            daily_contributions = DailyContribution.objects.filter(client_contribution=client_contribution)
+            for contribution in daily_contributions:
+                if contribution.payment_made:
+                    events.append({
+                        'title': '✓ ' + str(contribution.client_contribution.amount),
+                        'start': contribution.date.isoformat(),
+                        'classNames': 'tick'
+                    })
+                elif contribution.date < datetime.date.today():
+                    events.append({
+                        'title': '✗ ' + str(contribution.client_contribution.amount),
+                        'start': contribution.date.isoformat(),
+                        'classNames': 'cross'
+                    })
+                else:
+                    events.append({
+                        'title': str(contribution.client_contribution.amount),
+                        'start': contribution.date.isoformat(),
+                        'classNames': 'pending'
+                    })
+            monthly_totals = calculate_monthly_totals(dc_client)
+            context = {
+                'form': form,
+                'events': events,
+                'monthly_totals': monthly_totals
+            }
+            return render(request, 'test.html', context)
+    else:
+        form = DCForm()
+    context = {
+        'form': form,
+        'events': events,
+        'monthly_totals': monthly_totals
+    }
+    return render(request, 'test.html', context)
+    

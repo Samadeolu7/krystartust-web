@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Calendar with Ticks{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.4/index.global.min.css" rel="stylesheet">
+
+<style>
+    /* Resize the calendar */
+    #calendar {
+        max-width: 700px; /* Make it smaller to fit well on the page */
+        margin: 0 auto;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional shadow to blend with design */
+    }
+    .fc-toolbar {
+        background: linear-gradient(180deg, #0D1240, #1A1E50);
+        color: white;
+        padding: 10px;
+        font-size: 0.9em;
+        border-radius: 8px 8px 0 0;
+    }
+    .fc-toolbar-title {
+        font-size: 1.1em;
+        color: white;
+    }
+    .fc-button {
+        background-color: #1A1E50;
+        color: white;
+        border: none;
+        transition: background-color 0.3s;
+    }
+    .fc-button:hover {
+        background-color: #2A2E70;
+    }
+    .fc-daygrid-event {
+        background-color: #1A1E50;
+        color: white;
+        border: none;
+    }
+    .fc-event.tick {
+        color: green;
+        font-size: 0.9em;
+        font-weight: bold;
+    }
+</style>
+<div>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+</div>
+
+<div id="calendar"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.4/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.4/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.4/index.global.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            editable: true,
+            selectable: true,
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,dayGridWeek,dayGridDay'
+            },
+            events: {{ events|safe }},
+            eventContent: function(arg) {
+                let content = document.createElement('span');
+                content.innerHTML = arg.event.extendedProps.tick ? '<i class="fas fa-check-circle tick"></i> ' : '';
+                content.innerHTML += arg.event.title;
+                return { domNodes: [content] };
+            },
+            dateClick: function(info) {
+                alert('Clicked on: ' + info.dateStr);
+            }
+        });
+        calendar.render();
+    });
+</script>
+{% if monthly_totals %}
+    <h2>Monthly Totals</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Savings</th>
+                <th>Withdrawals</th>
+                <th>Brought Forward</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for month, totals in monthly_totals.items %}
+                <tr>
+                    <td>{{ month }}</td>
+                    <td>{{ totals.savings }}</td>
+                    <td>{{ totals.withdrawals }}</td>
+                    <td>{{ totals.brought_forward }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+{% endblock %}
