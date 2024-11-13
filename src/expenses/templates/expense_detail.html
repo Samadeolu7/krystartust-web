@@ -30,8 +30,8 @@
                         <tr>
                             <th>#</th>
                             <th>Date</th>
-                            <th>Description</th>
                             <th>Ref No</th>
+                            <th>Description</th>
                             <th>Amount</th>
                             <th>Balance</th>
                             
@@ -47,8 +47,8 @@
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ payment.payment_date }}</td>
-                            <td>{{ payment.description }}</td>
                             <td>{{ payment.transaction.reference_number }}</td>
+                            <td>{{ payment.description }}</td>
                             <td>{{ payment.amount }}</td>
                             <td>{{ payment.expense_balance }}</td>                
                         </tr>

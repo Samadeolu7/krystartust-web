@@ -378,7 +378,7 @@ def report_summary_by_date(request):
             client__in=clients_bus, payment_date__lte=end_date
             ).aggregate(total=Sum('amount'))['total'] or 0
         loan_payments_bus = LoanPayment.objects.filter(
-            loan__in=loans_bus, payment_date__range=[start_date, end_date]
+            loan__in=loans_bus_f, payment_date__range=[start_date, end_date]
             ).aggregate(total=Sum('amount'))['total'] or 0
         loans_bus = loans_bus.aggregate(total=Sum('amount'))['total'] or 0
         #daily_contribution_bus = SavingsPayment.objects.filter(client__in=clients_bus, transaction_type = 'C', payment_date__range=[start_date, end_date])

@@ -35,8 +35,9 @@
             <table class="table-report">
                 <thead class="table-dark">
                     <tr>
-                        <th>Ref NO</th>
+
                         <th>Payment Date</th>
+                        <th>Ref NO</th>
                         <th>Transaction Type</th>
                         <th>Amount</th>
                         <th>Balance</th>
@@ -47,8 +48,9 @@
                     {% with 0 as running_balance %}
                     {% for payment in savings_payments %}
                     <tr>
-                        <td>{{ payment.transaction.reference_number }}</td>
-                        <td>{{ payment.payment_date }}</td>                     
+                        
+                        <td>{{ payment.payment_date }}</td>    
+                        <td>{{ payment.transaction.reference_number }}</td>                 
                         <td>{{ payment.get_transaction_type_display }}</td>
                         <td>{{ payment.amount|naira }}</td>
                         <td>{{ running_balance|naira }}</td>
