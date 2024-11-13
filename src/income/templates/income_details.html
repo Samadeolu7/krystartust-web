@@ -29,6 +29,7 @@
                             <th>#</th>
                             <th>Date</th>
                             <th>Description</th>
+                            <th>Ref No</th>
                             <th>Amount</th>
                             <th>Balance</th>
                             
@@ -42,6 +43,7 @@
                             <td>{{ forloop.counter }}</td>
                             <td>{{ payment.payment_date }}</td>
                             <td>{{ payment.description }}</td>
+                            <td>{{ payment.transaction.reference_number }}</td>
                             <td>{{ payment.amount|naira }}</td>
                             <td>{{ running_balance|naira }}</td>
                             {% update_variable running_balance|add:payment.amount as running_balance %}
