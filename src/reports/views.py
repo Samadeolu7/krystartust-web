@@ -438,26 +438,29 @@ def report_summary_by_date(request):
 @login_required
 def daily_report(request):
     if request.method == 'POST':
-        date = request.POST.get('date')
-        schedule = LoanRepaymentSchedule.objects.filter(due_date=date).aggregate(total=Sum('amount_due'))['total'] or 0
-        loan_payments = LoanPayment.objects.filter(payment_date=date).aggregate(total=Sum('amount'))['total'] or 0
-        savings_payments = SavingsPayment.objects.filter(payment_date=date, transaction_type='S').aggregate(total=Sum('amount'))['total'] or 0
-        savings_payments_dc = SavingsPayment.objects.filter(payment_date=date, transaction_type='C').aggregate(total=Sum('amount'))['total'] or 0
-        withdrawals = SavingsPayment.objects.filter(payment_date=date, transaction_type='W').aggregate(total=Sum('amount'))['total'] or 0
-        clients = Client.objects.filter(created_at__date=date).count()
-        loan = Loan.objects.filter(created_at__date=date)
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        
+        schedule = LoanRepaymentSchedule.objects.filter(due_date__range=[start_date, end_date]).aggregate(total=Sum('amount_due'))['total'] or 0
+        loan_payments = LoanPayment.objects.filter(payment_date__range=[start_date, end_date]).aggregate(total=Sum('amount'))['total'] or 0
+        savings_payments = SavingsPayment.objects.filter(payment_date__range=[start_date, end_date], transaction_type='S').aggregate(total=Sum('amount'))['total'] or 0
+        savings_payments_dc = SavingsPayment.objects.filter(payment_date__range=[start_date, end_date], transaction_type='C').aggregate(total=Sum('amount'))['total'] or 0
+        withdrawals = SavingsPayment.objects.filter(payment_date__range=[start_date, end_date], transaction_type='W').aggregate(total=Sum('amount'))['total'] or 0
+        clients = Client.objects.filter(created_at__date__range=[start_date, end_date]).count()
+        loan = Loan.objects.filter(created_at__date__range=[start_date, end_date])
         loan_count = loan.count()
         loan_amount = loan.aggregate(total=Sum('amount'))['total'] or 0
         risk_preminim = get_risk_premium_income()
-        risk_premium = IncomePayment.objects.filter(income=risk_preminim, payment_date=date).aggregate(total=Sum('amount'))['total'] or 0
+        risk_premium = IncomePayment.objects.filter(income=risk_preminim, payment_date__range=[start_date, end_date]).aggregate(total=Sum('amount'))['total'] or 0
         id = get_id_fee_income()
-        id_fee = IncomePayment.objects.filter(income=id, payment_date=date).aggregate(total=Sum('amount'))['total'] or 0
+        id_fee = IncomePayment.objects.filter(income=id, payment_date__range=[start_date, end_date]).aggregate(total=Sum('amount'))['total'] or 0
         admin = get_administrative_fee_income()
-        admin_fee = IncomePayment.objects.filter(income=admin, payment_date=date).aggregate(total=Sum('amount'))['total'] or 0
+        admin_fee = IncomePayment.objects.filter(income=admin, payment_date__range=[start_date, end_date]).aggregate(total=Sum('amount'))['total'] or 0
         sms = get_sms_fee_income()
-        sms_fee = IncomePayment.objects.filter(income=sms, payment_date=date).aggregate(total=Sum('amount'))['total'] or 0
+        sms_fee = IncomePayment.objects.filter(income=sms, payment_date__range=[start_date, end_date]).aggregate(total=Sum('amount'))['total'] or 0
         union = get_union_contribution_income()
-        union_pulse = LiabilityPayment.objects.filter(liability=union, payment_date=date).aggregate(total=Sum('amount'))['total'] or 0
+        union_pulse = LiabilityPayment.objects.filter(liability=union, payment_date__range=[start_date, end_date]).aggregate(total=Sum('amount'))['total'] or 0
+        
         context = {
             'schedule': schedule,
             'loan_payments': loan_payments,
@@ -475,4 +478,5 @@ def daily_report(request):
         }
     else:
         return render(request, 'daily_report.html')
+    
     return render(request, 'daily_report.html', context)

@@ -73,17 +73,17 @@ def send_for_approval(form, user):
             amount = loan.amount
 
             if admin_fees:
-                
+                print
                 admin_fee_amount = Decimal(admin_fees) * Decimal(amount) / Decimal(100)
                 create_administrative_fee_income_payment(bank, admin_fee_amount, start_date, f'Administrative Fee for {loan.client.name}', tran, user)
 
             if registration_fee:
-                
+                print(tran)
                 create_loan_registration_fee_income_payment(bank, registration_fee, start_date, f'Loan Registration Fee for {loan.client.name}', tran, user)
 
             if sms_fees:
-                
-                create_sms_fee_income_payment(bank, sms_fees, f'SMS Fee for {loan.client.name}', tran, user)
+                print(tran)
+                create_sms_fee_income_payment(bank, sms_fees,start_date, f'SMS Fee for {loan.client.name}', tran, user)
             
             risk_premium_amount = Decimal(loan.risk_premium) * Decimal(amount) / 100
             create_risk_premium_income_payment(bank, risk_premium_amount, start_date, f'Risk Premium for {loan.client.name}', tran, user)
