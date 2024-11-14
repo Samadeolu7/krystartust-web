@@ -56,6 +56,10 @@ class LoanRegistrationForm(forms.ModelForm):
         label='Interest',
         required=False
     )
+    sms_fees = forms.DecimalField(
+        label='SMS Fees',
+        required=False
+    )
     bank = forms.ModelChoiceField(queryset=Bank.objects.all())
     start_date = forms.DateField(
         label='Start Date',

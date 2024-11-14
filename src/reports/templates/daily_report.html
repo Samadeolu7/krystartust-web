@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Report Summary by Date{% endblock %}
+
+{% block content %}
+    <h1 class="text-center mb-4">Report Summary by Date</h1>
+
+    <form method="post" class="mb-4">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" class="form-control" required>
+        </div>
+       
+        <button type="submit" class="btn btn-primary mt-3">Generate Report</button>
+    </form>
+
+    {% if clients %}
+
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Repayment Expected</th>
+                    <th>Repayment Recieved</th>
+                    <th>Clients gained</th>
+                    <th>Loan Disbursed</th>
+                    <th>Savings Recieved</th>
+                    <th>Daily Contrib </th>
+                    <th>Withdrawals</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ schedule|naira }}</td>
+                    <td>{{ loan_payments|naira }}</td>
+                    <td>{{ clients }}</td>
+                    <td>{{ loan|default:"0"|floatformat:2|naira }}</td>
+                    <td>{{ savings_payment|default:"0"|floatformat:2|naira }}</td>
+                    <td>{{ savings_payment_dc|default:"0"|floatformat:2|naira }}</td>
+                    <td>{{ withdrawals|default:"0"|floatformat:2|naira }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if clients %}
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Risk Premium</th>
+                    <th>ID Fee</th>
+                    <th>Admin Fee</th>
+                    <th>SMS Fee</th>
+                    <th>Union Pulse</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ risk_premium|default:"0"|floatformat:2|naira }} </td>
+                    <td>{{ id_fee|default:"0"|floatformat:2|naira }}</td>
+                    <td>{{ admin_fee|default:"0"|floatformat:2|naira }}</td>
+                    <td>{{ sms_fee|default:"0"|floatformat:2|naira }}</td>
+                    <td>{{ union_pulse|default:"0"|floatformat:2|naira }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% endif %}
+
+
+{% endblock %}

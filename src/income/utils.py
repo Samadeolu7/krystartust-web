@@ -65,6 +65,14 @@ def create_loan_registration_fee_income_payment(bank, amount,payment_date, descr
     income = get_loan_registration_fee_income()
     return create_income_payment(bank=bank, income=income, description=description, amount=amount, payment_date=payment_date,transaction=transaction, user=user)
 
+def get_sms_fee_income():
+    YEAR = Year.current_year()
+    return Income.objects.get_or_create(name='SMS Fee', description='SMS Fee Income', year=YEAR)[0]
+
+def create_sms_fee_income_payment(bank, amount, payment_date, description, transaction=None, user=None):
+    income = get_sms_fee_income()
+    return create_income_payment(bank=bank, income=income, description=description, amount=amount, payment_date=payment_date,transaction=transaction, user=user)
+
 def get_administrative_fee_income():
     YEAR = Year.current_year()
     return Income.objects.get_or_create(name='Administrative Fee', description='Administrative Fee Income', year=YEAR)[0]

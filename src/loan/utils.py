@@ -1,7 +1,7 @@
 from bank.utils import create_bank_payment, get_bank_account, get_cash_in_hand
 from liability.utils import create_union_contribution_income_payment
 from .models import Loan, LoanPayment, LoanRepaymentSchedule
-from income.utils import create_administrative_fee_income_payment, create_income_payment, create_loan_registration_fee_income_payment, create_risk_premium_income_payment, get_loan_interest_income
+from income.utils import create_administrative_fee_income_payment, create_income_payment, create_loan_registration_fee_income_payment, create_risk_premium_income_payment, create_sms_fee_income_payment, get_loan_interest_income
 from income.models import IncomePayment
 from django.db import transaction
 from main.utils import verify_trial_balance
@@ -68,28 +68,28 @@ def send_for_approval(form, user):
             registration_fee = form.cleaned_data.get('registration_fee')
             bank = form.cleaned_data.get('bank')
             admin_fees = form.cleaned_data.get('admin_fees')
+            sms_fees = form.cleaned_data.get('sms_fees')
             start_date = loan.start_date
             amount = loan.amount
 
             if admin_fees:
-                tran = Transaction(description=f'Administrative Fee for {loan.client.name}')
-                tran.save(prefix='INC')
+                
                 admin_fee_amount = Decimal(admin_fees) * Decimal(amount) / Decimal(100)
                 create_administrative_fee_income_payment(bank, admin_fee_amount, start_date, f'Administrative Fee for {loan.client.name}', tran, user)
 
             if registration_fee:
-                tran = Transaction(description=f'Loan Registration Fee for {loan.client.name}')
-                tran.save(prefix='INC')
+                
                 create_loan_registration_fee_income_payment(bank, registration_fee, start_date, f'Loan Registration Fee for {loan.client.name}', tran, user)
 
-            tran = Transaction(description=f'Risk Premium for {loan.client.name}')
-            tran.save(prefix='INC')
+            if sms_fees:
+                
+                create_sms_fee_income_payment(bank, sms_fees, f'SMS Fee for {loan.client.name}', tran, user)
+            
             risk_premium_amount = Decimal(loan.risk_premium) * Decimal(amount) / 100
             create_risk_premium_income_payment(bank, risk_premium_amount, start_date, f'Risk Premium for {loan.client.name}', tran, user)
 
             union = form.cleaned_data.get('union_contribution')
-            tran = Transaction(description=f'Union Contribution for {loan.client.name}')
-            tran.save(prefix='LIA')
+            
             created_by = user
             create_union_contribution_income_payment(bank, start_date, union, f'Union Contribution for {loan.client.name}', tran, created_by)
 

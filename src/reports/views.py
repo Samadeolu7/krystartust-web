@@ -9,7 +9,9 @@ from bank.models import Bank, BankPayment
 from client.models import Client
 from expenses.models import Expense, ExpensePayment
 from income.models import Income, IncomePayment
-from liability.models import Liability
+from income.utils import get_administrative_fee_income, get_id_fee_income, get_risk_premium_income, get_sms_fee_income
+from liability.models import Liability, LiabilityPayment
+from liability.utils import get_union_contribution_income
 from loan.models import Loan, LoanPayment, LoanRepaymentSchedule
 from reports.excel_utils import client_list_to_excel, client_loans_payments_to_excel, client_savings_payments_to_excel, defaulter_report_to_excel
 from savings.models import Savings, SavingsPayment
@@ -431,3 +433,46 @@ def report_summary_by_date(request):
     else:
         return render(request, 'report_summary_by_date.html')
     return render(request, 'report_summary_by_date.html', context)
+
+
+@login_required
+def daily_report(request):
+    if request.method == 'POST':
+        date = request.POST.get('date')
+        schedule = LoanRepaymentSchedule.objects.filter(due_date=date).aggregate(total=Sum('amount_due'))['total'] or 0
+        loan_payments = LoanPayment.objects.filter(payment_date=date).aggregate(total=Sum('amount'))['total'] or 0
+        savings_payments = SavingsPayment.objects.filter(payment_date=date, transaction_type='S').aggregate(total=Sum('amount'))['total'] or 0
+        savings_payments_dc = SavingsPayment.objects.filter(payment_date=date, transaction_type='C').aggregate(total=Sum('amount'))['total'] or 0
+        withdrawals = SavingsPayment.objects.filter(payment_date=date, transaction_type='W').aggregate(total=Sum('amount'))['total'] or 0
+        clients = Client.objects.filter(created_at__date=date).count()
+        loan = Loan.objects.filter(created_at__date=date)
+        loan_count = loan.count()
+        loan_amount = loan.aggregate(total=Sum('amount'))['total'] or 0
+        risk_preminim = get_risk_premium_income()
+        risk_premium = IncomePayment.objects.filter(income=risk_preminim, payment_date=date).aggregate(total=Sum('amount'))['total'] or 0
+        id = get_id_fee_income()
+        id_fee = IncomePayment.objects.filter(income=id, payment_date=date).aggregate(total=Sum('amount'))['total'] or 0
+        admin = get_administrative_fee_income()
+        admin_fee = IncomePayment.objects.filter(income=admin, payment_date=date).aggregate(total=Sum('amount'))['total'] or 0
+        sms = get_sms_fee_income()
+        sms_fee = IncomePayment.objects.filter(income=sms, payment_date=date).aggregate(total=Sum('amount'))['total'] or 0
+        union = get_union_contribution_income()
+        union_pulse = LiabilityPayment.objects.filter(liability=union, payment_date=date).aggregate(total=Sum('amount'))['total'] or 0
+        context = {
+            'schedule': schedule,
+            'loan_payments': loan_payments,
+            'savings_payments': savings_payments,
+            'savings_payments_dc': savings_payments_dc,
+            'withdrawals': withdrawals,
+            'clients': clients,
+            'loan_count': loan_count,
+            'loan_amount': loan_amount,
+            'union_pulse': union_pulse,
+            'risk_premium': risk_premium,
+            'id_fee': id_fee,
+            'admin_fee': admin_fee,
+            'sms_fee': sms_fee,
+        }
+    else:
+        return render(request, 'daily_report.html')
+    return render(request, 'daily_report.html', context)
