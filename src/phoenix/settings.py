@@ -21,17 +21,6 @@ env = Env()
 env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
-# Debugging prints
-print("Environment Variables:")
-print(f"SECRET_KEY: {env('SECRET_KEY')}")
-print(f"PRODUCTION: {env('PRODUCTION')}")
-print(f"DB_NAME: {env('DB_NAME')}")
-print(f"DB_USER: {env('DB_USER')}")
-print(f"DB_PASSWORD: {env('DB_PASSWORD')}")
-print(f"DB_HOST: {env('DB_HOST')}")
-print(f"DB_PORT: {env('DB_PORT')}")
-print(f"DB_SSLMODE: {env('DB_SSLMODE')}")
-print(f"DB_SSLROOTCERT: {env('DB_SSLROOTCERT')}")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -40,7 +29,6 @@ print(f"DB_SSLROOTCERT: {env('DB_SSLROOTCERT')}")
 SECRET_KEY = env('SECRET_KEY')
 
 production = env('PRODUCTION', default=False)
-print(f"Production Mode: {production}")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = not production
@@ -131,7 +119,6 @@ else:
         }
     }
 
-print(f"Database Configuration: {DATABASES}")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
