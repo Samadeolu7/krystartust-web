@@ -267,7 +267,6 @@ def get_accounts(request):
 
     html = render_to_string('account_options.html', {'accounts': accounts})
     return JsonResponse(html, safe=False)
-
 @login_required
 @allowed_users(allowed_roles=['Admin'])
 def journal_entry(request):
@@ -279,13 +278,13 @@ def journal_entry(request):
             amount = form.cleaned_data['amount']
             payment_date = form.cleaned_data['payment_date']
             description = form.cleaned_data['description']
-            credit_account_type = form.cleaned_data['jv_credit']
-            debit_account_type = form.cleaned_data['jv_debit']
             created_by = request.user
-            
+
             if credit_account == debit_account:
+                messages.error(request, "Credit and debit accounts cannot be the same.")
                 return redirect('journal_entry')
             
+            # Classify the account types and make entries accordingly
             journal_entry = JournalEntry.objects.create(
                 credit_account=ContentType.objects.get_for_model(credit_account),
                 credit_id=credit_account.id,
@@ -304,43 +303,57 @@ def journal_entry(request):
     form = JVForm()
     return render(request, 'journal_entry.html', {'form': form})
 
+
 @login_required
 @allowed_users(allowed_roles=['Admin'])
 def approve_journal_entry(request, pk):
     journal_entry = get_object_or_404(JournalEntry, id=pk)
-    
+
+    # Define classifications
+    debit_side = ['bank', 'assets', 'expense']
+    credit_side = ['savings', 'income', 'liability']
+
     with transaction.atomic():
         if not journal_entry.approved:
             journal_entry.approved = True
             journal_entry.save()
-            
+
             credit_account = journal_entry.credit_object
             debit_account = journal_entry.debit_object
             amount = journal_entry.credit_amount
             description = journal_entry.comment
             payment_date = journal_entry.payment_date
-            
+
             credit_account_type = journal_entry.credit_account.model
             debit_account_type = journal_entry.debit_account.model
 
             tran = Transaction(description=description)
             tran.save(prefix='JV')
 
-            if (credit_account_type == 'income' and debit_account_type == 'liability') or (credit_account_type == 'liability' and debit_account_type == 'income'):
-                credit_account.record_payment(-amount, description, payment_date, tran)
-                debit_account.record_payment(amount, description, payment_date, tran)
-            
-            elif credit_account_type in ['income', 'liability']:
-                credit_account.record_payment(-amount, description, payment_date, tran)
-                debit_account.record_payment(-amount, description, payment_date, tran)
-            
-            elif debit_account_type in ['income', 'liability']:
+            # Determine the direction of funds
+            if credit_account_type in credit_side and debit_account_type in debit_side:
+                # Standard credit and debit
                 credit_account.record_payment(amount, description, payment_date, tran)
                 debit_account.record_payment(amount, description, payment_date, tran)
-            
-            else:
+
+            elif credit_account_type in debit_side and debit_account_type in credit_side:
+                # Reverse credit and debit (unusual, but possible)
+                credit_account.record_payment(-amount, description, payment_date, tran)
+                debit_account.record_payment(-amount, description, payment_date, tran)
+
+            elif credit_account_type in credit_side and debit_account_type in credit_side:
+                # Credit on both sides (e.g., shifting liabilities)
+                credit_account.record_payment(amount, description, payment_date, tran)
+                debit_account.record_payment(-amount, description, payment_date, tran)
+
+            elif credit_account_type in debit_side and debit_account_type in debit_side:
+                # Debit on both sides (e.g., transferring assets)
                 credit_account.record_payment(-amount, description, payment_date, tran)
                 debit_account.record_payment(amount, description, payment_date, tran)
+
+            else:
+                messages.error(request, "Invalid account type combination.")
+                return redirect('dashboard')
 
             verify_trial_balance()
         else:
@@ -348,6 +361,7 @@ def approve_journal_entry(request, pk):
             return redirect('dashboard')
 
     return redirect('dashboard')
+
 
 @login_required
 @allowed_users(allowed_roles=['Admin'])

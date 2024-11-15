@@ -12,16 +12,26 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
-from dotenv import load_dotenv
-load_dotenv()
+from environ import Env
 
-# # Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = os.getenv
+env = Env()
+env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
-# environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+# Debugging prints
+print("Environment Variables:")
+print(f"SECRET_KEY: {env('SECRET_KEY')}")
+print(f"PRODUCTION: {env('PRODUCTION')}")
+print(f"DB_NAME: {env('DB_NAME')}")
+print(f"DB_USER: {env('DB_USER')}")
+print(f"DB_PASSWORD: {env('DB_PASSWORD')}")
+print(f"DB_HOST: {env('DB_HOST')}")
+print(f"DB_PORT: {env('DB_PORT')}")
+print(f"DB_SSLMODE: {env('DB_SSLMODE')}")
+print(f"DB_SSLROOTCERT: {env('DB_SSLROOTCERT')}")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -30,16 +40,12 @@ env = os.getenv
 SECRET_KEY = env('SECRET_KEY')
 
 production = env('PRODUCTION', default=False)
+print(f"Production Mode: {production}")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# if production:
-#     DEBUG = False
-# else:
-DEBUG = True
+DEBUG = not production
 
-
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'krystartust-web.onrender.com','krystartrust.ng']
-
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'krystartust-web.onrender.com', 'krystartrust.ng']
 
 # Application definition
 
@@ -97,14 +103,10 @@ TEMPLATES = [
     },
 ]
 
-
 WSGI_APPLICATION = 'phoenix.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-
 
 if production:
     DATABASES = {
@@ -121,7 +123,6 @@ if production:
             },
         }
     }
-
 else:
     DATABASES = {
         'default': {
@@ -130,6 +131,7 @@ else:
         }
     }
 
+print(f"Database Configuration: {DATABASES}")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -149,14 +151,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# settings.py
-
 AUTH_USER_MODEL = 'user.User'
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'  # Redirect to dashboard after login
 LOGOUT_REDIRECT_URL = 'login'     # Redirect to login after logout
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -169,14 +168,12 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-BASE_URL ='https://krystartrust.ng'
+BASE_URL = 'https://krystartrust.ng'
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
-# Define STATIC_ROOT
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Optional: Configure static files storage with WhiteNoise for better performance
