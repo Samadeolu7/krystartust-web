@@ -52,10 +52,10 @@ class WithdrawalForm(forms.ModelForm):
 
 
 class SavingsForm(forms.ModelForm):
-    bank = forms.ModelChoiceField(queryset=Bank.objects.all(), required=False)
+    
     class Meta:
         model = SavingsPayment
-        fields = ['savings', 'amount', 'payment_date']
+        fields = ['savings', 'amount', 'payment_date', 'bank']
         widgets = {
             'payment_date': forms.DateInput(attrs={'type': 'date'}),
             'savings': Select2Widget,

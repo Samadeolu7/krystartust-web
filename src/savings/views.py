@@ -8,6 +8,7 @@ from django.shortcuts import render
 from administration.decorators import allowed_users
 from administration.models import Approval, Transaction
 from main.utils import verify_trial_balance
+from savings.utils import make_withdrawal
 from .models import ClientContribution, DailyContribution, Savings, SavingsPayment
 from .forms import DCForm, SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm, CombinedPaymentForm, ToggleDailyContributionForm, SetupMonthlyContributionsForm, ClientContributionForm
 from .excel_utils import savings_from_excel
@@ -43,35 +44,6 @@ def savings_detail(request, client_id):
     }
     return render(request, 'savings_detail.html', context)
 
-@login_required
-def register_savings(request):
-    if request.method == 'POST':
-        form = SavingsForm(request.POST)
-        if form.is_valid():
-            with transaction.atomic():
-                savings = form.save(commit=False)
-                tran = Transaction(description=f'Savings for {savings.client.name}')
-                tran.save(prefix='SVS')
-                savings.transaction = tran
-                savings.save()
-                create_bank_payment(
-                    bank=form.cleaned_data['bank'],
-                    description=f"Savings Payment by {savings.client.name}",
-                    amount=form.cleaned_data['amount'],
-                    payment_date=form.cleaned_data['payment_date'],
-                    transaction=tran,
-                    created_by=request.user
-                )
-                verify_trial_balance()
-            messages.success(request, 'Savings registered successfully')    
-            
-            return redirect('dashboard')
-        else:
-            messages.error(request, f'An error occurred while registering savings {form.errors}')
-
-    else:
-        form = SavingsForm()
-    return render(request, 'savings_form.html', {'form': form})
 
 @login_required
 def register_payment(request):
@@ -104,6 +76,38 @@ def register_payment(request):
         form = CombinedPaymentForm()
     return render(request, 'combined_payment_form.html', {'form': form})
 
+@login_required
+def register_savings(request):
+    if request.method == 'POST':
+        form = SavingsForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                if form.cleaned_data['amount'] < 0:
+                    make_withdrawal(form, request.user)
+                    return redirect('dashboard')
+                savings = form.save(commit=False)
+                tran = Transaction(description=f'Savings for {savings.client.name}')
+                tran.save(prefix='SVS')
+                savings.transaction = tran
+                savings.save()
+                create_bank_payment(
+                    bank=form.cleaned_data['bank'],
+                    description=f"Savings Payment by {savings.client.name}",
+                    amount=form.cleaned_data['amount'],
+                    payment_date=form.cleaned_data['payment_date'],
+                    transaction=tran,
+                    created_by=request.user
+                )
+                verify_trial_balance()
+            messages.success(request, 'Savings registered successfully')    
+            
+            return redirect('dashboard')
+        else:
+            messages.error(request, f'An error occurred while registering savings {form.errors}')
+
+    else:
+        form = SavingsForm()
+    return render(request, 'savings_form.html', {'form': form})
 
 
 @login_required
@@ -117,24 +121,7 @@ def record_withdrawal(request):
                     messages.error(request, 'Insufficient balance')
                     return redirect('savings_withdrawal')
                 
-                withdrawal = form.save(commit=False)
-                tran = Transaction(description=f'Withdrawal for {withdrawal.savings.client.name}')
-                tran.save(prefix='WDL')
-                withdrawal.transaction = tran
-                withdrawal.save()  # Ensure the object is saved before checking its ID
-                if withdrawal.id is None:
-                    return redirect('savings_withdrawal')
-
-                withdrawal.save()
-
-                approval = Approval.objects.create(
-                    type=Approval.Withdrawal,
-                    content_object=withdrawal,
-                    content_type=ContentType.objects.get_for_model(SavingsPayment),
-                    user=request.user,
-                    object_id=withdrawal.id
-                )
-                
+                make_withdrawal(form, request.user)
                 verify_trial_balance()
 
             return redirect('dashboard')

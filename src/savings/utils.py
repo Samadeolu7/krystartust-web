@@ -1,11 +1,14 @@
 from datetime import date, timedelta
 from decimal import Decimal
 import logging
-from administration.models import Transaction
+
+from administration.models import Approval, Transaction
 from bank.models import BankPayment
 from bank.utils import get_cash_in_hand, create_bank_payment, get_cash_in_hand_dc
 from income.utils import create_income_payment, get_dc_income
 from .models import DailyContribution, Savings, SavingsPayment
+
+from django.contrib.contenttypes.models import ContentType
 
 def register_savings(bank,client, amount, date, transaction, user): 
     savings = Savings.objects.create(client=client, balance=0)
@@ -105,3 +108,20 @@ def setup_monthly_contributions(client_contribution, month, year,user):
             ))
         current_date += timedelta(days=1)
     DailyContribution.objects.bulk_create(contributions)
+
+def make_withdrawal(form, user):
+    withdrawal = form.save(commit=False)
+    tran = Transaction(description=f'Withdrawal for {withdrawal.savings.client.name}')
+    tran.save(prefix='WDL')
+    withdrawal.transaction = tran
+
+    withdrawal.save()
+
+    approval = Approval.objects.create(
+        type=Approval.Withdrawal,
+        content_object=withdrawal,
+        content_type=ContentType.objects.get_for_model(SavingsPayment),
+        user=user,
+        object_id=withdrawal.id
+    )
+                

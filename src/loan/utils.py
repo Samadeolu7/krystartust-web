@@ -1,4 +1,6 @@
+from bank.models import BankPayment
 from bank.utils import create_bank_payment, get_bank_account, get_cash_in_hand
+from liability.models import LiabilityPayment
 from liability.utils import create_union_contribution_income_payment
 from .models import Loan, LoanPayment, LoanRepaymentSchedule
 from income.utils import create_administrative_fee_income_payment, create_income_payment, create_loan_registration_fee_income_payment, create_risk_premium_income_payment, create_sms_fee_income_payment, get_loan_interest_income
@@ -161,4 +163,30 @@ def approve_loan(approval, user):
         )
         income_payment.save()
 
+        verify_trial_balance()
+
+def disapprove_loan(approval, user):
+    with transaction.atomic():
+        
+        loan = approval.content_object
+        loan.status = 'Rejected'
+        tran = loan.transaction
+        
+        income_payments = IncomePayment.objects.filter(transaction=tran)
+        for income_payment in income_payments:
+            income_payment.delete()
+
+        bank_payments = BankPayment.objects.filter(transaction=tran)
+        for bank_payment in bank_payments:
+            bank_payment.delete()
+
+        liability_payments = LiabilityPayment.objects.filter(transaction=tran)
+        for liability_payment in liability_payments:
+            liability_payment.delete()
+
+        loan.delete()
+        approval.rejected = True
+        approval.approved_by = user
+        approval.approved_at = timezone.now()
+        approval.save()
         verify_trial_balance()

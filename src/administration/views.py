@@ -8,7 +8,7 @@ from expenses.utils import approve_expense
 from main.models import JournalEntry
 from user.pdf_gen import generate_payslip
 from .models import Approval, Notification
-from loan.utils import approve_loan
+from loan.utils import approve_loan, disapprove_loan
 from .forms import SalaryForm
 
 # Create your views here.
@@ -62,6 +62,9 @@ def approve(request, pk):
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def disapprove(request, pk):
+    if approval.type == Approval.Loan:
+        disapprove_loan(approval, request.user)
+        return redirect('approvals')
     approval = Approval.objects.get(pk=pk)
     approval.rejected = True
     approval.approved_by = request.user

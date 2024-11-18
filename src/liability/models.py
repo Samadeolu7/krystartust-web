@@ -53,6 +53,12 @@ class LiabilityPayment(models.Model):
 
         super(LiabilityPayment, self).save(*args, **kwargs)
 
+    def delete(self, *args, **kwargs):
+        balance = self.liability.balance
+        self.liability.balance = balance - self.amount
+        self.liability.save()
+        super(LiabilityPayment, self).delete(*args, **kwargs)
+
     def get_absolute_url(self):
         return reverse('liability:liability_record_detail', kwargs={'pk': self.pk})
     

@@ -46,6 +46,11 @@ class BankPayment(models.Model):
             self.bank.balance += self.amount
             self.bank.save()
         super(BankPayment, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self.bank.balance -= self.amount
+        self.bank.save()
+        super(BankPayment, self).delete(*args, **kwargs)
     
     class Meta:
         ordering = ['payment_date', 'created_at']

@@ -38,6 +38,12 @@ class IncomePayment(models.Model):
             self.income.balance = self.income_balance
             self.income.save()
         super(IncomePayment, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self.income_balance = self.income.balance - self.amount
+        self.income.balance = self.income_balance
+        self.income.save()
+        super(IncomePayment, self).delete(*args, **kwargs)
     
     class Meta:
         ordering = ['created_at']

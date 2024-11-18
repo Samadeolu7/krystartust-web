@@ -114,12 +114,20 @@ class LoanPayment(models.Model):
             balance = self.loan.balance
             if balance:
                 self.balance = balance - self.amount
-                # update loan balance
                 self.loan.balance = self.balance
                 self.loan.save()
             else:
                 self.balance = -self.amount
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        balance = self.loan.balance
+        self.loan.balance = balance + self.amount
+        self.payment_schedule.is_paid = False
+        self.payment_schedule.payment_date = None
+        self.payment_schedule.save()
+        self.loan.save()
+        super().delete(*args, **kwargs)
 
     def __str__(self) -> str:
         return self.client.name + ' - ' + str(self.amount) + ' - ' + str(self.balance)

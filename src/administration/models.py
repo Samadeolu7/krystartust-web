@@ -89,8 +89,9 @@ class Approval(models.Model):
             elif self.rejected:
                 
                 super().save(*args, **kwargs)
-                # Delete the related object
-                self.content_object.delete()
+                # Delete the related object if it still exists
+                if self.content_object:
+                    self.content_object.delete()
             else:
                 super().save(*args, **kwargs)
 
