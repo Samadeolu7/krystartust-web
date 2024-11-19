@@ -4,8 +4,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib import messages
 
 from main.utils import verify_trial_balance
-from .forms import ExpenseForm, ExpensePaymentForm, ExpenseTypeForm
-from .models import Expense, ExpensePayment, ExpenseType
+from .forms import ExpenseForm, ExpensePaymentBatchForm, ExpensePaymentForm, ExpenseTypeForm, ExpensePaymentBatchItemFormSet
+from .models import Expense, ExpensePayment, ExpensePaymentBatch, ExpenseType
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from administration.decorators import allowed_users
@@ -84,4 +84,31 @@ def expense_detail(request, pk):
     }
     return render(request, 'expense_detail.html', context)
 
-# views.py
+def create_expense_payment_batch(request):
+    if request.method == 'POST':
+        batch_form = ExpensePaymentBatchForm(request.POST)
+        formset = ExpensePaymentBatchItemFormSet(request.POST)
+        print(request.POST)
+        if batch_form.is_valid() and formset.is_valid():
+            batch = batch_form.save(commit=False)
+            batch.created_by = request.user
+            batch.save()
+            formset.instance = batch
+            formset.save()
+            Approval.objects.create(
+                type=Approval.Batch_Expense,
+                content_object=batch,
+                content_type=ContentType.objects.get_for_model(ExpensePaymentBatch),
+                user=request.user,
+                object_id=batch.id
+            )
+            messages.success(request, 'Expense Payment Batch created successfully')
+            return redirect('dashboard')
+    else:
+        batch_form = ExpensePaymentBatchForm()
+        formset = ExpensePaymentBatchItemFormSet()
+
+    return render(request, 'create_expense_payment_batch.html', {
+        'batch_form': batch_form,
+        'formset': formset,
+    })

@@ -1,8 +1,8 @@
 from django import forms
-from django.forms import ModelForm
+from django.forms import ModelForm, inlineformset_factory
 
 from bank.models import Bank
-from .models import Expense, ExpensePayment, ExpenseType
+from .models import Expense, ExpensePayment, ExpensePaymentBatch, ExpensePaymentBatchItem, ExpenseType
 
 class ExpenseForm(ModelForm):
     class Meta:
@@ -24,4 +24,19 @@ class ExpenseTypeForm(ModelForm):
         fields = ['name','description']
 
 
-# forms.py    
+class ExpensePaymentBatchForm(forms.ModelForm):
+    class Meta:
+        model = ExpensePaymentBatch
+        fields = ['bank', 'description']
+
+class ExpensePaymentBatchItemForm(forms.ModelForm):
+    class Meta:
+        model = ExpensePaymentBatchItem
+        fields = ['expense', 'amount', 'description', 'payment_date']
+        widgets = {
+            'payment_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+ExpensePaymentBatchItemFormSet = inlineformset_factory(
+    ExpensePaymentBatch, ExpensePaymentBatchItem, form=ExpensePaymentBatchItemForm, extra=1, can_delete=True
+)

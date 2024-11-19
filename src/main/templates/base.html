@@ -237,6 +237,7 @@
                         {% if is_admin %}
                         <a href="{% url 'create_expense_type' %}" class="dropdown-item">Create Expense Category</a>
                         <a href="{% url 'create_expense' %}" class="dropdown-item">Create Expense</a>
+                        <a href="{% url 'create_expense_payment_batch' %}" class="dropdown-item">Petty Cash Request experimental</a>
                         {% endif %}
                         <a href="{% url 'expense_payment' %}" class="dropdown-item">Petty Cash Request</a>
                         <a href="{% url 'expense_list' %}" class="dropdown-item">Expense Report</a>

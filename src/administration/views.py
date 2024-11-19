@@ -47,6 +47,9 @@ def approve(request, pk):
         approve_expense(approval, request.user)
 
         return redirect('approvals')
+    elif approval.type == Approval.Batch_Expense:
+        batch = approval.content_object
+        batch.approve(request.user)
     elif approval.type == Approval.Salary:
 
         approve_expense(approval, request.user)

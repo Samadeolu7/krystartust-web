@@ -38,11 +38,13 @@ class Salary(models.Model):
 
 class Approval(models.Model):
     Expenses = 'expenses'
+    Batch_Expense = 'batch_expense'
     Loan = 'loan'
     Withdrawal = 'withdrawal'
     Salary = 'salary'
     TYPES = (
         ('Expenses', Expenses),
+        ('Batch_Expense', Batch_Expense),
         ('Loan', Loan),
         ('Withdrawal', Withdrawal),
         ('Salary', Salary)

@@ -2,6 +2,8 @@ from datetime import datetime
 from django.db import models
 from django.db import transaction
 
+from bank.models import BankPayment
+from bank.utils import create_bank_payment
 from main.models import Year
 from user.models import User
 
@@ -66,3 +68,48 @@ class ExpensePayment(models.Model):
             
         def __str__(self) -> str:
             return self.expense.name + ' - ' + str(self.amount)
+
+class ExpensePaymentBatch(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expense_payment_batches')
+    bank = models.ForeignKey('bank.Bank', on_delete=models.CASCADE)
+    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True)
+    approved = models.BooleanField(default=False)
+    description = models.TextField(null=True, blank=True)
+
+    def approve(self, approved_by):
+        with transaction.atomic():
+            total = 0
+            for batch_item in self.batch_items.all():
+                batch_item.create_expense_payment()
+                total += batch_item.amount
+            create_bank_payment(
+                bank=self.bank,
+                description=self.description,
+                amount=total,
+                payment_date=datetime.now().date(),
+                transaction=self.transaction,
+                created_by=approved_by
+            )
+
+    def __str__(self) -> str:
+        return f"Batch {self.id} - Approved: {self.approved}"
+
+class ExpensePaymentBatchItem(models.Model):
+    batch = models.ForeignKey(ExpensePaymentBatch, on_delete=models.CASCADE, related_name='batch_items')
+    expense = models.ForeignKey(Expense, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(null=True)
+    payment_date = models.DateField()
+
+    def create_expense_payment(self):
+        ExpensePayment.objects.create(
+            expense=self.expense,
+            amount=self.amount,
+            description=self.description,
+            payment_date=self.payment_date,
+            transaction=self.batch.transaction,
+            approved=True,
+            balance=self.expense.balance + self.amount
+        )

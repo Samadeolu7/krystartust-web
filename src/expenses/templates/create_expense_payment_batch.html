@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% load custom_filters %}
+
+{% block title %}Create Expense Payment Batch{% endblock %}
+
+{% block content %}
+    <h1>Create Expense Payment Batch</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ batch_form.as_p }}
+        {{ formset.management_form }}
+        <div id="formset-container">
+            {% for form in formset %}
+                <div class="form-row">
+                    {{ form.as_p }}
+                    
+                </div>
+            {% endfor %}
+        </div>
+        <button type="button" id="add-form">Add another item</button>
+        <button type="submit">Save</button>
+    </form>
+    <div id="empty-form" style="display: none;">
+        <div class="form-row">
+            {{ formset.empty_form.as_p }}
+            <div>
+                {{ formset.empty_form.DELETE.label_tag }} {{ formset.empty_form.DELETE }}
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+    
+            $('#add-form').click(function(ev) {
+                // Prevent the formset from being submitted
+                ev.preventDefault();
+                // Get the empty form template and replace __prefix__ with the current form index
+                var count = $('#formset-container').children().length;
+                var form_template = $('#empty-form').html().replace(/__prefix__/g, count );
+                $('#formset-container').append(form_template);
+        
+                
+                $('#id_batch_items-TOTAL_FORMS').attr('value', count+1);
+            });
+        });
+        
+    </script>
+    {% endblock %}
+
+{% extends 'base.html' %}
+
+{% load custom_filters %}
+
+{% block title %}Create Expense Payment Batch{% endblock %}
+
+{% block content %}
+    <h1>Create Expense Payment Batch</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ batch_form.as_p }}
+        {{ formset.management_form }}
+        <table class="table">
+            <thead>
+                <tr>
+                    {% for field in formset.empty_form.visible_fields %}
+                        <th>{{ field.label|capfirst }}</th>
+                    {% endfor %}
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="formset-container">
+                {% for form in formset %}
+                    <tr class="formset_row">
+                        {% for field in form.visible_fields %}
+                            <td>
+                                {{ field.errors.as_ul }}
+                                {{ field }}
+                            </td>
+                        {% endfor %}
+                        <td>
+                            {{ form.DELETE.label_tag }} {{ form.DELETE }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="button" id="add-form">Add another item</button>
+        <button type="submit">Save</button>
+    </form>
+    <div id="empty-form" style="display: none;">
+        <tr class="formset_row">
+            {% for field in formset.empty_form.visible_fields %}
+                <td>
+                    {{ field.errors.as_ul }}
+                    {{ field }}
+                </td>
+            {% endfor %}
+            <td>
+                {{ formset.empty_form.DELETE.label_tag }} {{ formset.empty_form.DELETE }}
+            </td>
+        </tr>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+    
+            $('#add-form').click(function(ev) {
+                // Prevent the formset from being submitted
+                ev.preventDefault();
+                // Get the empty form template and replace __prefix__ with the current form index
+                var count = $('#formset-container').children().length;
+                var form_template = $('#empty-form').html().replace(/__prefix__/g, count );
+                $('#formset-container').append(form_template);
+        
+                
+                $('#id_batch_items-TOTAL_FORMS').attr('value', count+1);
+            });
+        });
+        
+    </script>
+{% endblock %}
