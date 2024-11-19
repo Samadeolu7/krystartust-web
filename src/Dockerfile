@@ -39,6 +39,3 @@ RUN chmod +x /app/entrypoint.sh
 
 # Set the entrypoint
 ENTRYPOINT ["/app/entrypoint.sh"]
-
-# Define default command (handled in entrypoint.sh)
-# CMD ["gunicorn", "phoenix.wsgi:application", "--bind", "0.0.0.0:8000"]

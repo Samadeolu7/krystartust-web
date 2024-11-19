@@ -37,12 +37,12 @@ def bank_list(request):
     bank = Bank.objects.all()
     return render(request, 'bank_list.html', {'bank': bank})
 
-
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def bank_detail(request, pk):
     bank = Bank.objects.get(pk=pk)
-    bank_payment = bank.bankpayment_set.all()
+    bank_payment = bank.payments.all()
+
     context = {
         'bank': bank,
         'bank_payment': bank_payment

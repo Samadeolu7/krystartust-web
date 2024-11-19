@@ -28,12 +28,12 @@ class Bank(models.Model):
 
 
 class BankPayment(models.Model):
-    bank = models.ForeignKey(Bank, on_delete=models.CASCADE)
+    bank = models.ForeignKey(Bank, on_delete=models.CASCADE, related_name='payments', db_index=True)
     description = models.TextField()
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     bank_balance = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
-    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True)
+    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, db_index=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bank_payments', null=True, blank=True)
     payment_date = models.DateField()
 
