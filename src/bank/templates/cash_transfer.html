@@ -1,13 +1,18 @@
-{% extends 'base.html' %}
+{% extends 'base_form.html' %}
 
 {% load custom_filters %}
 
 {% block title %}Cash Transfer{% endblock %}
 
-{% block content %}
+{% block form_content %}
         <h1 class="text-center mb-4">Cash Transfer</h1>
         <form method="post">
             {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="error">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
             <div class="mb-3">
                 {{ form.source_bank.label_tag }}<br>
                 {{ form.source_bank }}

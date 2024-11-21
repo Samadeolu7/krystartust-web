@@ -1,10 +1,10 @@
-{% extends 'base.html' %}
+{% extends 'base_form.html' %}
 
 {% load custom_filters %}
 
 {% block title %}Select Date for Daily Transactions Report{% endblock %}
 
-{% block content %}
+{% block form_content %}
         <h2 class="text-center">Daily Transactions Report</h2>
         <form method="POST" action="{% url 'daily_transactions_report' %}">
             {% csrf_token %}

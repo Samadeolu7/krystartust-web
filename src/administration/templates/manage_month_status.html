@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% load custom_filters %}
+
+{% block title %}Manage Month Status{% endblock %}
+
+{% block content %}
+    <h1>Manage Month Status for {{ current_year }}</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for status in month_statuses %}
+            <tr>
+                <td>{{ status.month }}</td>
+                <td>{{ status.is_closed|yesno:"Closed,Open" }}</td>
+                <td>
+                    <form method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="month" value="{{ status.month }}">
+                        <input type="hidden" name="year" value="{{ status.year }}">
+                        <button type="submit">{{ status.is_closed|yesno:"Reopen,Close" }}</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
