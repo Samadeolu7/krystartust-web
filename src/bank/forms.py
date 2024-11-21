@@ -1,5 +1,7 @@
 from django.forms import ModelForm
 from django import forms
+
+from administration.utils import validate_month_status
 from .models import Bank, BankPayment
 
 class BankForm(ModelForm):
@@ -11,9 +13,6 @@ class BankPaymentForm(ModelForm):
     class Meta:
         model = BankPayment
         fields = ['bank', 'payment_date', 'amount', 'description']
-
-# forms.py
-
 
 class CashTransferForm(forms.Form):
     source_bank = forms.ModelChoiceField(queryset=Bank.objects.all(), label="Source Bank")

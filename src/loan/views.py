@@ -5,6 +5,7 @@ from django.contrib import messages
 
 from administration.decorators import allowed_users
 from administration.models import Transaction
+from administration.utils import validate_month_status
 from client.models import Client
 from income.models import IncomePayment
 from loan.excel_utils import bulk_create_loans_from_excel, loan_from_excel
@@ -36,6 +37,11 @@ def loan_payment(request):
             # Save the loan payment record
             with transaction.atomic():
                 loan_payment = form.save(commit=False)
+                try:
+                    validate_month_status(loan_payment.payment_date)
+                except Exception as e:
+                    form.add_error(None, e)
+                    return render(request, 'loan_payment_form.html', {'form': form})
                 loan_id = loan_payment.loan.id
                 
                 # Retrieve and update the repayment schedule
@@ -132,6 +138,13 @@ def loan_registration(request):
         form = LoanRegistrationForm(request.POST)
         if form.is_valid():
             user = request.user
+            loan_date = form.cleaned_data.get('start_date')
+
+            try:
+                validate_month_status(loan_date)
+            except Exception as e:
+                form.add_error(None, e)
+                return render(request, 'loan_register.html', {'form': form})
             loan = send_for_approval(form, user)
             messages.success(request, "Loan registered successfully and repayment schedule created.")
             return redirect('guarantor_for_loan', loan_id=loan.id) 

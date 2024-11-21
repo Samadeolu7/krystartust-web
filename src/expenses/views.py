@@ -3,6 +3,7 @@ from django.shortcuts import redirect, render
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import messages
 
+from administration.utils import validate_month_status
 from main.utils import verify_trial_balance
 from .forms import ExpenseForm, ExpensePaymentBatchForm, ExpensePaymentForm, ExpenseTypeForm, ExpensePaymentBatchItemFormSet
 from .models import Expense, ExpensePayment, ExpensePaymentBatch, ExpenseType
@@ -43,6 +44,11 @@ def expense_payment(request):
         if form.is_valid():
             with transaction.atomic():
                 expense =form.save(commit=False)
+                try:
+                    validate_month_status(expense.payment_date)
+                except Exception as e:
+                    form.add_error(None, e)
+                    return render(request, 'expense_payment.html', {'form': form})
                 tran = Transaction(description=f'expense for {form.cleaned_data["expense"]}')
                 tran.save(prefix='EXP') 
                 expense.created_by = request.user
@@ -88,22 +94,31 @@ def create_expense_payment_batch(request):
     if request.method == 'POST':
         batch_form = ExpensePaymentBatchForm(request.POST)
         formset = ExpensePaymentBatchItemFormSet(request.POST)
-        print(request.POST)
         if batch_form.is_valid() and formset.is_valid():
-            batch = batch_form.save(commit=False)
-            batch.created_by = request.user
-            batch.save()
-            formset.instance = batch
-            formset.save()
-            Approval.objects.create(
-                type=Approval.Batch_Expense,
-                content_object=batch,
-                content_type=ContentType.objects.get_for_model(ExpensePaymentBatch),
-                user=request.user,
-                object_id=batch.id
-            )
-            messages.success(request, 'Expense Payment Batch created successfully')
-            return redirect('dashboard')
+            with transaction.atomic():
+
+                batch = batch_form.save(commit=False)
+                try:
+                    validate_month_status(batch.payment_date)
+                except Exception as e:
+                    batch_form.add_error(None, e)
+                    return render(request, 'create_expense_payment_batch.html', {
+                        'batch_form': batch_form,
+                        'formset': formset,
+                    })
+                batch.created_by = request.user
+                batch.save()
+                formset.instance = batch
+                formset.save()
+                Approval.objects.create(
+                    type=Approval.Batch_Expense,
+                    content_object=batch,
+                    content_type=ContentType.objects.get_for_model(ExpensePaymentBatch),
+                    user=request.user,
+                    object_id=batch.id
+                )
+                messages.success(request, 'Expense Payment Batch created successfully')
+                return redirect('dashboard')
     else:
         batch_form = ExpensePaymentBatchForm()
         formset = ExpensePaymentBatchItemFormSet()

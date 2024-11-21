@@ -77,6 +77,7 @@ class ExpensePaymentBatch(models.Model):
     transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True)
     approved = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
+    payment_date = models.DateField()
 
     def approve(self, approved_by):
         with transaction.atomic():
@@ -88,7 +89,7 @@ class ExpensePaymentBatch(models.Model):
                 bank=self.bank,
                 description=self.description,
                 amount=total,
-                payment_date=datetime.now().date(),
+                payment_date=self.payment_date,
                 transaction=self.transaction,
                 created_by=approved_by
             )
@@ -100,15 +101,14 @@ class ExpensePaymentBatchItem(models.Model):
     batch = models.ForeignKey(ExpensePaymentBatch, on_delete=models.CASCADE, related_name='batch_items')
     expense = models.ForeignKey(Expense, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    description = models.TextField(null=True)
-    payment_date = models.DateField()
+    description = models.TextField(null=True) 
 
     def create_expense_payment(self):
         ExpensePayment.objects.create(
             expense=self.expense,
             amount=self.amount,
             description=self.description,
-            payment_date=self.payment_date,
+            payment_date=self.batch.payment_date,
             transaction=self.batch.transaction,
             approved=True,
             balance=self.expense.balance + self.amount

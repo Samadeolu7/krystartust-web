@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
+
+from administration.utils import validate_month_status
 from .forms import BankForm, BankPaymentForm, CashTransferForm
 from .models import Bank, BankPayment
 from django.contrib.auth.decorators import login_required
@@ -24,9 +26,11 @@ def create_bank(request):
 @allowed_users(allowed_roles=['Admin'])
 def create_bank_payment(request):
     form = BankPaymentForm()
+    
     if request.method == 'POST':
         form = BankPaymentForm(request.POST)
         if form.is_valid():
+
             form.save()
     return render(request, 'create_bank_payment.html', {'form': form})
 
@@ -57,6 +61,12 @@ def cash_transfer(request):
     if request.method == 'POST':
         form = CashTransferForm(request.POST)
         if form.is_valid():
+            payment_date = form.cleaned_data['payment_date']
+            try:
+                validate_month_status(payment_date)
+            except Exception as e:
+                form.add_error(None, e)
+                return render(request, 'cash_transfer.html', {'form': form})
             source_bank = form.cleaned_data['source_bank']
             destination_bank = form.cleaned_data['destination_bank']
             amount = form.cleaned_data['amount']
@@ -69,7 +79,7 @@ def cash_transfer(request):
                 description=f"Transfer to {destination_bank.name}: {description}",
                 amount=-amount,
                 bank_balance=source_bank.balance - amount,
-                payment_date=form.cleaned_data['payment_date']
+                payment_date=payment_date
             )
 
             # Create BankPayment for destination bank (credit)
@@ -78,7 +88,7 @@ def cash_transfer(request):
                 description=f"Transfer from {source_bank.name}: {description}",
                 amount=amount,
                 bank_balance=destination_bank.balance + amount,
-                payment_date=form.cleaned_data['payment_date']
+                payment_date=payment_date
             )
 
             return redirect('dashboard')

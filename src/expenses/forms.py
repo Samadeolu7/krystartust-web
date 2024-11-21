@@ -27,12 +27,12 @@ class ExpenseTypeForm(ModelForm):
 class ExpensePaymentBatchForm(forms.ModelForm):
     class Meta:
         model = ExpensePaymentBatch
-        fields = ['bank', 'description']
+        fields = ['bank', 'description', 'payment_date']
 
 class ExpensePaymentBatchItemForm(forms.ModelForm):
     class Meta:
         model = ExpensePaymentBatchItem
-        fields = ['expense', 'amount', 'description', 'payment_date']
+        fields = ['expense', 'amount', 'description']
         widgets = {
             'payment_date': forms.DateInput(attrs={'type': 'date'}),
         }

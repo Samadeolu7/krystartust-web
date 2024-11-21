@@ -6,7 +6,7 @@
 
 {% block content %}
     <h1>Manage Month Status for {{ current_year }}</h1>
-    <table>
+    <table class="table-report">
         <thead>
             <tr>
                 <th>Month</th>
@@ -17,7 +17,7 @@
         <tbody>
             {% for status in month_statuses %}
             <tr>
-                <td>{{ status.month }}</td>
+                <td>{{ status.month_name }}</td>
                 <td>{{ status.is_closed|yesno:"Closed,Open" }}</td>
                 <td>
                     <form method="post" style="display:inline;">

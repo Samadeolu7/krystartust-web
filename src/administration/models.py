@@ -126,3 +126,15 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.user.username}"
+    
+
+class MonthStatus(models.Model):
+    month = models.IntegerField()
+    year = models.IntegerField()
+    is_closed = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('month', 'year')
+
+    def __str__(self):
+        return f"{self.month}/{self.year} - {'Closed' if self.is_closed else 'Open'}"

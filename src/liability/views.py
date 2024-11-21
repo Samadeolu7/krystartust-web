@@ -9,6 +9,7 @@ from django.db import transaction
 from administration.decorators import allowed_users
 
 from administration.models import Transaction
+from administration.utils import validate_month_status
 from main.utils import verify_trial_balance
 from .forms import LiabilityForm, LiabilityPaymentForm
 from .models import Liability, LiabilityPayment
@@ -37,6 +38,11 @@ def liability_payment(request):
         if form.is_valid():
             with transaction.atomic():
                 liability = form.save(commit=False)
+                try:
+                    validate_month_status(liability.payment_date)
+                except Exception as e:
+                    form.add_error(None, e)
+                    return render(request, 'liability_payment.html', {'form': form})
                 tran = Transaction(description=f'liability payment for {form.cleaned_data["liability"]}')
                 tran.save(prefix='LIA')
                 liability.created_by = request.user

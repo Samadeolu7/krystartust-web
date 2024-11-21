@@ -1,3 +1,5 @@
+import calendar
+from datetime import datetime
 import os
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
@@ -7,7 +9,7 @@ from administration.decorators import allowed_users
 from expenses.utils import approve_expense
 from main.models import JournalEntry
 from user.pdf_gen import generate_payslip
-from .models import Approval, Notification
+from .models import Approval, MonthStatus, Notification
 from loan.utils import approve_loan, disapprove_loan
 from .forms import SalaryForm
 
@@ -119,4 +121,28 @@ def download_payslip(request, notification_id):
         return response
     else:
         raise Http404("Payslip not found")
-    
+
+
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+def manage_month_status(request):
+    current_year = datetime.now().year
+    current_month = datetime.now().month
+
+    # Generate month statuses for the current year if they don't exist
+    for month in range(1, 13):
+        MonthStatus.objects.get_or_create(month=month, year=current_year)
+
+    if request.method == 'POST':
+        month = int(request.POST.get('month'))
+        year = int(request.POST.get('year'))
+        month_status = MonthStatus.objects.get(month=month, year=year)
+        month_status.is_closed = not month_status.is_closed
+        month_status.save()
+        return redirect('manage_month_status')
+
+    month_statuses = MonthStatus.objects.filter(year=current_year).order_by('month')
+    for month_status in month_statuses:
+        month_status.month_name = calendar.month_name[month_status.month]
+   
+    return render(request, 'manage_month_status.html', {'month_statuses': month_statuses, 'current_year': current_year})

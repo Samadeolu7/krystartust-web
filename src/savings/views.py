@@ -7,6 +7,7 @@ from django.shortcuts import render
 
 from administration.decorators import allowed_users
 from administration.models import Approval, Transaction
+from administration.utils import validate_month_status
 from main.utils import verify_trial_balance
 from savings.utils import make_withdrawal
 from .models import ClientContribution, DailyContribution, Savings, SavingsPayment
@@ -51,6 +52,12 @@ def register_payment(request):
         form = CombinedPaymentForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
+                tran_date = form.cleaned_data['payment_date']
+                try:
+                    validate_month_status(tran_date)
+                except Exception as e:
+                    form.add_error(None, e)
+                    return render(request, 'combined_payment_form.html', {'form': form})
                 loan,savings = form.save()
                 bank = form.cleaned_data['bank']
                 create_bank_payment(
@@ -82,6 +89,14 @@ def register_savings(request):
         form = SavingsForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
+                payment_date = form.cleaned_data['payment_date']
+
+                try:
+                    validate_month_status(payment_date)
+                except Exception as e:
+                    form.add_error(None, e)
+                    return render(request, 'savings_form.html', {'form': form})
+                
                 if form.cleaned_data['amount'] < 0:
                     make_withdrawal(form, request.user)
                     return redirect('dashboard')
@@ -117,6 +132,13 @@ def record_withdrawal(request):
         form = WithdrawalForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
+                payment_date = form.cleaned_data['payment_date']
+                try:
+                    validate_month_status(payment_date)
+                except Exception as e:
+                    form.add_error(None, e)
+                    return render(request, 'withdrawal_form.html', {'form': form})
+                
                 if form.cleaned_data['amount'] > form.cleaned_data['savings'].balance:
                     messages.error(request, 'Insufficient balance')
                     return redirect('savings_withdrawal')
