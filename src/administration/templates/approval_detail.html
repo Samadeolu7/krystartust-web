@@ -1,38 +1,185 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %}Approval Detail{% endblock %}
-
 {% block content %}
-    <h1>Approval Detail</h1>
-    <table>
-        <tr>
-            <th>Type:</th>
-            <td>{{ approval.get_type_display }}</td>
-        </tr>
-        <tr>
-            <th>User:</th>
-            <td>{{ approval.user.username }}</td>
-        </tr>
-        <tr>
-            <th>Comment:</th>
-            <td>{{ approval.comment }}</td>
-        </tr>
-        <tr>
-            <th>Created At:</th>
-            <td>{{ approval.created_at }}</td>
-        </tr>
-        <tr>
-            <th>Status:</th>
-            <td>
-                {% if approval.approved %}
-                    Approved
-                {% elif approval.rejected %}
-                    Rejected
-                {% else %}
-                    Pending
-                {% endif %}
-            </td>
-        </tr>
-    </table>
-    <a href="{% url 'approval_history' %}">Back to Approval History</a>
+    <h1 class="my-4">Approval Detail</h1>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Approval Information</h2>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <tr>
+                    <th>Type:</th>
+                    <td>{{ approval.get_type_display }}</td>
+                </tr>
+                <tr>
+                    <th>User:</th>
+                    <td>{{ approval.user.username }}</td>
+                </tr>
+                <tr>
+                    <th>Comment:</th>
+                    <td>{{ approval.comment }}</td>
+                </tr>
+                <tr>
+                    <th>Created At:</th>
+                    <td>{{ approval.created_at }}</td>
+                </tr>
+                <tr>
+                    <th>Status:</th>
+                    <td>
+                        {% if approval.approved %}
+                            Approved
+                        {% elif approval.rejected %}
+                            Rejected
+                        {% else %}
+                            Pending
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    {% if approval.type == 'loan' %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2>Loan Details</h2>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>Client:</th>
+                        <td>{{ loan.client.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Amount:</th>
+                        <td>{{ loan.amount }}</td>
+                    </tr>
+                    <tr>
+                        <th>Balance:</th>
+                        <td>{{ loan.balance }}</td>
+                    </tr>
+                    <tr>
+                        <th>Interest:</th>
+                        <td>{{ loan.interest }}</td>
+                    </tr>
+                    <tr>
+                        <th>Duration:</th>
+                        <td>{{ loan.duration }}</td>
+                    </tr>
+                    <tr>
+                        <th>Start Date:</th>
+                        <td>{{ loan.start_date }}</td>
+                    </tr>
+                    <tr>
+                        <th>End Date:</th>
+                        <td>{{ loan.end_date }}</td>
+                    </tr>
+                    <tr>
+                        <th>Guarantor:</th>
+                        <td>{{ guarantor.name }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    {% elif approval.type == 'withdrawal' %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2>Withdrawal Details</h2>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>Client:</th>
+                        <td>{{ withdrawal.client.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Amount:</th>
+                        <td>{{ withdrawal.amount }}</td>
+                    </tr>
+                    <tr>
+                        <th>Balance:</th>
+                        <td>{{ withdrawal.balance }}</td>
+                    </tr>
+                    <tr>
+                        <th>Description:</th>
+                        <td>{{ withdrawal.description }}</td>
+                    </tr>
+                    <tr>
+                        <th>Payment Date:</th>
+                        <td>{{ withdrawal.payment_date }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    {% elif approval.type == 'salary' %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2>Salary Details</h2>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>User:</th>
+                        <td>{{ salary.user.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Department:</th>
+                        <td>{{ salary.department }}</td>
+                    </tr>
+                    <tr>
+                        <th>Position:</th>
+                        <td>{{ salary.position }}</td>
+                    </tr>
+                    <tr>
+                        <th>Amount:</th>
+                        <td>{{ salary.amount }}</td>
+                    </tr>
+                    <tr>
+                        <th>Payment Date:</th>
+                        <td>{{ salary.payment_date }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    {% elif approval.type == 'expenses' %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2>Expense Details</h2>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>Name:</th>
+                        <td>{{ expense.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Description:</th>
+                        <td>{{ expense.description }}</td>
+                    </tr>
+                    <tr>
+                        <th>Amount:</th>
+                        <td>{{ expense.amount }}</td>
+                    </tr>
+                    <tr>
+                        <th>Payment Date:</th>
+                        <td>{{ expense.payment_date }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="d-flex justify-content-between">
+        <form action="{% url 'approve' approval.pk %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">Approve</button>
+        </form>
+        <form action="{% url 'disapprove' approval.pk %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Disapprove</button>
+        </form>
+        <a href="{% url 'approval_history' %}" class="btn btn-secondary">Back to Approval History</a>
+    </div>
 {% endblock %}

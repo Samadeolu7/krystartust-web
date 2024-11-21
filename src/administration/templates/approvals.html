@@ -76,14 +76,7 @@
                     <p><strong>Created At:</strong> {{ approval.created_at }}</p>
                 </div>
                 <div class="card-footer">
-                    <form action="{% url 'approve' approval.pk %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-success">Approve</button>
-                    </form>
-                    <form action="{% url 'disapprove' approval.pk %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Disapprove</button>
-                    </form>
+                    <a href="{% url 'approval_detail' approval.pk %}" class="btn btn-primary">View</a>
                 </div>
             </div>
         {% endfor %}

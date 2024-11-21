@@ -76,15 +76,30 @@ def disapprove(request, pk):
 
 @login_required
 @allowed_users(allowed_roles=['Admin'])
+def approval_detail(request, pk):
+    approval = Approval.objects.get(pk=pk)
+    context = {
+        'approval': approval,
+    }
+    if approval.type == Approval.Loan:
+        context['loan'] = approval.content_object
+        context['guarantor'] = approval.content_object.guarantor
+    elif approval.type == Approval.Withdrawal:
+        context['withdrawal'] = approval.content_object
+    elif approval.type == Approval.Salary:
+        context['salary'] = approval.content_object
+    elif approval.type == Approval.Expenses:
+        context['expense'] = approval.content_object
+
+    return render(request, 'approval_detail.html', context)
+
+
+@login_required
+@allowed_users(allowed_roles=['Admin'])
 def approval_history(request):
     approvals = Approval.objects.filter(approved=True, rejected=True)
     return render(request, 'approval_history.html', {'approvals': approvals})
 
-@login_required
-@allowed_users(allowed_roles=['Admin'])
-def approval_detail(request, pk):
-    approval = Approval.objects.get(pk=pk)
-    return render(request, 'approval_detail.html', {'approval': approval})
 
 @login_required
 def download_payslip(request, notification_id):
@@ -104,3 +119,4 @@ def download_payslip(request, notification_id):
         return response
     else:
         raise Http404("Payslip not found")
+    
