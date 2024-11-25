@@ -48,7 +48,7 @@ def bank_list(request):
 def bank_detail(request, pk):
     bank = Bank.objects.get(pk=pk)
     today = timezone.now().date()
-    start_date = today - timedelta(days=60)
+    start_date = today - timedelta(days=30)
 
     if request.method == 'POST':
         form = DateRangeForm(request.POST)
