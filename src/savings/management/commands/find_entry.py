@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = 'Find any entry created between 2024-11-14 14:43:28.486108+00:00  and 2024-11-14 14:59:22.251625+00:00'
     def handle(self, *args, **kwargs):
         today = timezone.now().date()
-        start = datetime(today.year, today.month, today.day, 14, 43, 28, 486108, tzinfo=dt_timezone.utc)
+        start = datetime(today.year, today.month, 22, 14, 43, 28, 486108, tzinfo=dt_timezone.utc)
         end = datetime(today.year, today.month, today.day, 15, 00, 22, 251625, tzinfo=dt_timezone.utc)
 
 

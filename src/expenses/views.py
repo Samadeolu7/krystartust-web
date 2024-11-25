@@ -102,7 +102,7 @@ def create_expense_payment_batch(request):
                     validate_month_status(batch.payment_date)
                 except Exception as e:
                     batch_form.add_error(None, e)
-                    return render(request, 'create_expense_payment_batch.html', {
+                    return render(request, 'test_batch.html', {
                         'batch_form': batch_form,
                         'formset': formset,
                     })
@@ -117,13 +117,22 @@ def create_expense_payment_batch(request):
                     user=request.user,
                     object_id=batch.id
                 )
+                
                 messages.success(request, 'Expense Payment Batch created successfully')
+                
                 return redirect('dashboard')
+        else:
+            print(batch_form.errors)
+            print(formset.errors)
     else:
         batch_form = ExpensePaymentBatchForm()
         formset = ExpensePaymentBatchItemFormSet()
 
-    return render(request, 'create_expense_payment_batch.html', {
+    return render(request, 'test_batch.html', {
         'batch_form': batch_form,
         'formset': formset,
     })
+    # return render(request, 'create_expense_payment_batch.html', {
+    #     'batch_form': batch_form,
+    #     'formset': formset,
+    # })

@@ -28,6 +28,10 @@ class ExpensePaymentBatchForm(forms.ModelForm):
     class Meta:
         model = ExpensePaymentBatch
         fields = ['bank', 'description', 'payment_date']
+        widgets = {
+            'payment_date': forms.DateInput(attrs={'type': 'date'}),
+            'description': forms.TextInput(attrs={'class': 'description-box'}),
+        }
 
 class ExpensePaymentBatchItemForm(forms.ModelForm):
     class Meta:
@@ -35,7 +39,9 @@ class ExpensePaymentBatchItemForm(forms.ModelForm):
         fields = ['expense', 'amount', 'description']
         widgets = {
             'payment_date': forms.DateInput(attrs={'type': 'date'}),
+            'description': forms.TextInput(attrs={'class': 'description-box'}),
         }
+        
 
 ExpensePaymentBatchItemFormSet = inlineformset_factory(
     ExpensePaymentBatch, ExpensePaymentBatchItem, form=ExpensePaymentBatchItemForm, extra=1, can_delete=True

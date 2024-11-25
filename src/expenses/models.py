@@ -88,7 +88,7 @@ class ExpensePaymentBatch(models.Model):
             create_bank_payment(
                 bank=self.bank,
                 description=self.description,
-                amount=total,
+                amount=-total,
                 payment_date=self.payment_date,
                 transaction=self.transaction,
                 created_by=approved_by
