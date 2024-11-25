@@ -69,7 +69,7 @@ class BankPayment(models.Model):
 
         # Check if the payment date is not today and trigger recalculation
         if self.payment_date != timezone.now().date():
-            recalculate_balance_after_payment_date.delay(self.bank.id, self.payment_date)
+            recalculate_balance_after_payment_date(self.bank.id, self.payment_date)
 
     def delete(self, *args, **kwargs):
         self.bank.balance -= self.amount
