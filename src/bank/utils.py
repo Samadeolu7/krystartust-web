@@ -1,3 +1,4 @@
+from decimal import Decimal
 from .models import Bank, BankPayment
 
 def create_bank_payment(bank, description, amount, payment_date, transaction, created_by):
@@ -20,3 +21,5 @@ def get_bank_account():
 def get_union_pulse():
     bank,created = Bank.objects.get_or_create(name='Union Pulse')
     return bank
+
+

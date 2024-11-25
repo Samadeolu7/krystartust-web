@@ -5,69 +5,68 @@
 {% block title %}Bank Detail{% endblock %}
 
 {% block content %}
-        <h1 class="text-center mb-4">Bank Detail</h1>
-        <a href="{% url 'bank_to_excel' bank.id %}" class="btn btn-primary">Download Excel</a>
-        <div class="card">
-            <div class="card-header">
-                <h2>{{ bank.name }}</h2>
-            </div>
-            <div class="card-body">
-                <p><strong>Description:</strong> {{ bank.description }}</p>
-                <p><strong>Balance:</strong> {{ bank.balance }}</p>
-                <p><strong>Balance BF:</strong> {{ bank.balance_bf }}</p>
-                <p><strong>Year:</strong> {{ bank.year }}</p>
-                <p><strong>Created At:</strong> {{ bank.created_at }}</p>
-            </div>
+    <h1 class="text-center mb-4">Bank Detail</h1>
+    <a href="{% url 'bank_to_excel' bank.id %}" class="btn btn-primary">Download Excel</a>
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ bank.name }}</h2>
         </div>
-
-        <!-- Bank Payments Section -->
-        <div class="mt-5">
-            <h3>Bank Payments</h3>
-            {% if bank_payment %}
-                <table class="table-report">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>#</th>
-                            <th>Date</th>
-                            <th>Ref No</th>
-                            <th>Description</th>
-                            <th>Amount</th>
-                            <th>Balance</th>
-                            
-                        </tr>
-                    </thead>
-                    <tbody>
-                        
-                        {% with 0 as running_balance %}
-                        {% for payment in bank_payment %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ payment.payment_date }}</td>
-                            <td>{{ payment.transaction.reference_number }}</td>
-                            <td>{{ payment.description }}</td>
-                            <td>{{ payment.amount|naira }}</td>
-                            <td>{{ running_balance|naira }}</td>
-                            {% update_variable running_balance|add:payment.amount as running_balance %}
-                        </tr>
-                        
-                        {% endfor %}
-                        {% endwith %}
-                        <td> 0 </td>
-                        <td> - </td>
-                        <td> Current Balance </td>
-                        <td> - </td>
-                        <td> {{ bank.balance|naira }} </td>
-                    </tbody>
-                </table>
-            {% else %}
-                <p>No payments found for this bank.</p>
-            {% endif %}
-        </div>
-
-        <div class="mt-4">
-            <a href="{% url 'bank_list' %}" class="btn btn-primary">Back to Bank List</a>
+        <div class="card-body">
+            <p><strong>Description:</strong> {{ bank.description }}</p>
+            <p><strong>Balance:</strong> {{ bank.balance }}</p>
+            <p><strong>Balance BF:</strong> {{ bank.balance_bf }}</p>
+            <p><strong>Year:</strong> {{ bank.year }}</p>
+            <p><strong>Created At:</strong> {{ bank.created_at }}</p>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- Date Range Form -->
+    <div class="mt-4">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+    </div>
+
+    <!-- Bank Payments Section -->
+    <div class="mt-5">
+        <h3>Bank Payments</h3>
+        {% if bank_payment %}
+            <table class="table-report">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Ref No</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in bank_payment %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ payment.payment_date }}</td>
+                        <td>{{ payment.transaction.reference_number }}</td>
+                        <td>{{ payment.description }}</td>
+                        <td>{{ payment.amount|naira }}</td>
+                        <td>{{ payment.bank_balance|naira }}</td>
+                    </tr>
+                    {% endfor %}
+                    
+                </tbody>
+            </table>
+        {% else %}
+            <p>No payments found for this bank.</p>
+        {% endif %}
+    </div>
+
+    <div class="mt-4">
+        <a href="{% url 'bank_list' %}" class="btn btn-primary">Back to Bank List</a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

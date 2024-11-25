@@ -1,9 +1,11 @@
+from decimal import Decimal
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from datetime import timedelta
 import logging
 
 import pytz
+from django.apps import apps
 from expenses.models import Expense, ExpensePayment
 from income.models import Income, IncomePayment
 from liability.models import Liability, LiabilityPayment
@@ -16,62 +18,52 @@ from django.db.models import Sum
 from savings.models import Savings, SavingsPayment, DailyContribution
 
 logger = logging.getLogger(__name__)
+from django.db.models import F
 
 class Command(BaseCommand):
     help = 'Find specific entries in the database, calculate the sum of the amount, delete the entries, and remove the amount from the balance'
 
     def handle(self, *args, **kwargs):
         try:
-            # Find IncomePayments from 655 to 670 and calculate the sum of the amount for each income
-            income_total = {}
-            income_payments = IncomePayment.objects.filter(id__range=[655, 670])
-            for payment in income_payments:
-                if payment.income_id not in income_total:
-                    income_total[payment.income_id] = 0
-                income_total[payment.income_id] += payment.amount
-                payment.delete()
-            logger.info('Income Total: %s', income_total)
+            models_to_recalculate = {
+                'bank': 'bank.BankPayment',
+            }
 
-            # Find BankPayments from 2544 to 2563 and calculate the sum of the amount for each bank
-            bank_total = {}
-            bank_payments = BankPayment.objects.filter(id__range=[2544, 2563])
-            for payment in bank_payments:
-                if payment.bank_id not in bank_total:
-                    bank_total[payment.bank_id] = 0
-                bank_total[payment.bank_id] += payment.amount
-                payment.delete()
-            logger.info('Bank Total: %s', bank_total)
+            for model_name, model_path in models_to_recalculate.items():
+                try:
+                    model = apps.get_model(model_path)
+                    ledger = model_name
+                    accounts = model.objects.values_list(f'{ledger}', flat=True).distinct()
 
-            # Find LiabilityPayments from 100 to 103 and calculate the sum of the amount for each liability
-            liability_total = {}
-            liability_payments = LiabilityPayment.objects.filter(id__range=[100, 103])
-            for payment in liability_payments:
-                if payment.liability_id not in liability_total:
-                    liability_total[payment.liability_id] = 0
-                liability_total[payment.liability_id] += payment.amount
-                payment.delete()
-            logger.info('Liability Total: %s', liability_total)
+                    for account_id in accounts:
+                        payments = model.objects.filter(**{f'{ledger}': account_id}).order_by('payment_date', 'created_at').iterator()
 
-            # Remove the amount from the balance
-            for income_id, amount in income_total.items():
-                with transaction.atomic():
-                    income = Income.objects.select_for_update().get(id=income_id)
-                    income.balance -= amount
-                    income.save()
+                        previous_balance = Decimal('0.00')
+                        batch_size = 100  # Process 100 rows at a time
+                        updates = []
 
-            for bank_id, amount in bank_total.items():
-                with transaction.atomic():
-                    bank = Bank.objects.select_for_update().get(id=bank_id)
-                    bank.balance -= amount
-                    bank.save()
+                        for payment in payments:
+                            payment.bank_balance = previous_balance + payment.amount
+                            previous_balance = payment.bank_balance
+                            updates.append(payment)
 
-            for liability_id, amount in liability_total.items():
-                with transaction.atomic():
-                    liability = Liability.objects.select_for_update().get(id=liability_id)
-                    liability.balance -= amount
-                    liability.save()
+                            if len(updates) >= batch_size:
+                                model.objects.bulk_update(updates, ['bank_balance'])
+                                updates = []
+                            self.stdout.write(self.style.SUCCESS(f'Updated balance for {model_name}'))
 
-            logger.info('Done')
+                        if updates:
+                            model.objects.bulk_update(updates, ['bank_balance'])
+                            self.stdout.write(self.style.SUCCESS(f'Updated balance for {model_name}'))
+
+                    self.stdout.write(self.style.SUCCESS(f'Successfully recalculated balances for {model_name}'))
+                except LookupError:
+                    self.stdout.write(self.style.ERROR(f'Model {model_path} not found'))
+                except Exception as e:
+                    self.stdout.write(self.style.ERROR(f'Error recalculating balances for {model_name}: {e}'))
+
         except Exception as e:
-            logger.error('An error occurred: %s', e)
-            raise
+            self.stdout.write(self.style.ERROR(f'Error recalculating balances for all specified models: {e}'))
+            logger.error(f'Error recalculating balances for all specified models: {e}')
+
+        self.stdout.write(self.style.SUCCESS('Successfully recalculated balances for all specified models'))

@@ -1,9 +1,23 @@
+from decimal import Decimal
 from django.db import models
+from django.utils import timezone
 
 from user.models import User
-
 from main.models import Year
 
+
+def recalculate_balance_after_payment_date(bank_id, payment_date):
+    payments = BankPayment.objects.filter(bank_id=bank_id, payment_date__gt=payment_date).order_by('payment_date', 'created_at')
+    
+    # Find the last payment before the given payment date
+    last_payment = BankPayment.objects.filter(bank_id=bank_id, payment_date__lte=payment_date).order_by('-payment_date', '-created_at').first()
+    previous_balance = last_payment.bank_balance if last_payment else Decimal('0.00')
+
+    for payment in payments:
+        payment.bank_balance = previous_balance + payment.amount
+        previous_balance = payment.bank_balance
+        payment.save()
+        
 class Bank(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField()
@@ -26,7 +40,6 @@ class Bank(models.Model):
     class Meta:
         ordering = ['created_at']
 
-
 class BankPayment(models.Model):
     bank = models.ForeignKey(Bank, on_delete=models.CASCADE, related_name='payments', db_index=True)
     description = models.TextField()
@@ -42,10 +55,21 @@ class BankPayment(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.bank_balance = self.bank.balance
+            # Find the last transaction before the payment date
+            last_payment = BankPayment.objects.filter(bank=self.bank, payment_date__lt=self.payment_date).order_by('-payment_date', '-created_at').first()
+            if last_payment:
+                self.bank_balance = last_payment.bank_balance + self.amount
+            else:
+                self.bank_balance = self.amount  # If no previous payment, start with the amount
+
             self.bank.balance += self.amount
             self.bank.save()
+        
         super(BankPayment, self).save(*args, **kwargs)
+
+        # Check if the payment date is not today and trigger recalculation
+        if self.payment_date != timezone.now().date():
+            recalculate_balance_after_payment_date.delay(self.bank.id, self.payment_date)
 
     def delete(self, *args, **kwargs):
         self.bank.balance -= self.amount
@@ -54,4 +78,9 @@ class BankPayment(models.Model):
     
     class Meta:
         ordering = ['payment_date', 'created_at']
+        indexes = [
+            models.Index(fields=['payment_date'], name='idx_payment_date'),
+            models.Index(fields=['payment_date', 'created_at'], name='idx_payment_date_created_at'),
+            models.Index(fields=['created_by'], name='idx_created_by'),
+        ]
 

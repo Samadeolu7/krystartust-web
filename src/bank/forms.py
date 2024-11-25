@@ -21,5 +21,7 @@ class CashTransferForm(forms.Form):
     description = forms.CharField(widget=forms.Textarea, required=False)
     payment_date = forms.DateField(widget=forms.SelectDateWidget)
 
-    
-    
+
+class DateRangeForm(forms.Form):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))

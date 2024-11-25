@@ -1,9 +1,10 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
+from django.utils import timezone
 
 from administration.utils import validate_month_status
-from .forms import BankForm, BankPaymentForm, CashTransferForm
+from .forms import BankForm, BankPaymentForm, CashTransferForm, DateRangeForm
 from .models import Bank, BankPayment
 from django.contrib.auth.decorators import login_required
 from administration.decorators import allowed_users
@@ -41,15 +42,37 @@ def bank_list(request):
     bank = Bank.objects.all()
     return render(request, 'bank_list.html', {'bank': bank})
 
+
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def bank_detail(request, pk):
     bank = Bank.objects.get(pk=pk)
-    bank_payment = bank.payments.all()
+    today = timezone.now().date()
+    start_date = today - timedelta(days=60)
+
+    if request.method == 'POST':
+        form = DateRangeForm(request.POST)
+        if form.is_valid():
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+            
+            # Ensure the date range does not exceed 2 months
+            if (end_date - start_date).days > 60:
+                form.add_error(None, 'Date range cannot exceed 2 months.')
+                end_date = today
+                start_date = today - timedelta(days=60)
+        else:
+            end_date = today
+    else:
+        form = DateRangeForm(initial={'start_date': start_date, 'end_date': today})
+        end_date = today
+
+    bank_payment = bank.payments.filter(payment_date__range=[start_date, end_date])
 
     context = {
         'bank': bank,
-        'bank_payment': bank_payment
+        'bank_payment': bank_payment,
+        'form': form,
     }
     return render(request, 'bank_detail.html', context)
 
