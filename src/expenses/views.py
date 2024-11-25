@@ -117,7 +117,7 @@ def create_expense_payment_batch(request):
                     user=request.user,
                     object_id=batch.id
                 )
-                
+                verify_trial_balance()
                 messages.success(request, 'Expense Payment Batch created successfully')
                 
                 return redirect('dashboard')
