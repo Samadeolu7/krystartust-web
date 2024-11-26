@@ -36,18 +36,42 @@ def create_loan_payment(client, loan,amount,date):
     bank_payment = create_bank_payment(bank, f'Loan payment from {client.name}', amount, date)
     return loan_payment
 
+from django.db import transaction
+from decimal import Decimal
+from datetime import timedelta
+from django.contrib.contenttypes.models import ContentType
+from loan.models import Loan, LoanRepaymentSchedule
+from administration.models import Approval, Transaction
+from main.utils import verify_trial_balance
+
 def send_for_approval(form, user):
     try:
         with transaction.atomic():
             loan = form.save(commit=False)
-            loan.balance = loan.amount * (Decimal(1) + (Decimal(loan.interest)/Decimal(100)))
+            client = loan.client
+            loan.balance = 0
+            # Check for existing active loan
+            existing_loan = Loan.objects.filter(client=client, status='Active').first()
+            if existing_loan and not existing_loan.is_defaulted:
+                # Update the balance of the new loan
+                loan.balance += existing_loan.balance
+
+                # Add comment to approval
+                comment = f'Client had an existing loan with balance {existing_loan.balance}.'
+            elif existing_loan and existing_loan.is_defaulted:
+
+                raise Exception('Client has defaulted on a previous loan.')
+            else:
+                comment = 'New loan application.'
+        
+            loan.balance += loan.amount * (Decimal(1) + (Decimal(loan.interest) / Decimal(100)))
             loan_type = loan.loan_type
             if loan_type == 'Daily':
                 loan.end_date = loan.start_date + timedelta(days=loan.duration)
             elif loan_type == 'Weekly':
                 loan.end_date = loan.start_date + timedelta(weeks=loan.duration)
             else:
-                loan.end_date = loan.start_date + timedelta(weeks=loan.duration*4)
+                loan.end_date = loan.start_date + timedelta(weeks=loan.duration * 4)
             loan.emi = loan.balance / loan.duration
             loan.status = 'Active'
             loan.created_by = user
@@ -62,9 +86,9 @@ def send_for_approval(form, user):
                 type='loan',
                 content_object=loan,
                 content_type=ContentType.objects.get_for_model(Loan),
-                comment = tran.description,
+                comment=comment,
                 object_id=loan.id,
-                user = user,
+                user=user,
             )
 
             registration_fee = form.cleaned_data.get('registration_fee')
@@ -75,25 +99,20 @@ def send_for_approval(form, user):
             amount = loan.amount
 
             if admin_fees:
-                print
                 admin_fee_amount = Decimal(admin_fees) * Decimal(amount) / Decimal(100)
                 create_administrative_fee_income_payment(bank, admin_fee_amount, start_date, f'Administrative Fee for {loan.client.name}', tran, user)
 
             if registration_fee:
-                print(tran)
                 create_loan_registration_fee_income_payment(bank, registration_fee, start_date, f'Loan Registration Fee for {loan.client.name}', tran, user)
 
             if sms_fees:
-                print(tran)
-                create_sms_fee_income_payment(bank, sms_fees,start_date, f'SMS Fee for {loan.client.name}', tran, user)
-            
+                create_sms_fee_income_payment(bank, sms_fees, start_date, f'SMS Fee for {loan.client.name}', tran, user)
+
             risk_premium_amount = Decimal(loan.risk_premium) * Decimal(amount) / 100
             create_risk_premium_income_payment(bank, risk_premium_amount, start_date, f'Risk Premium for {loan.client.name}', tran, user)
 
             union = form.cleaned_data.get('union_contribution')
-            
-            created_by = user
-            create_union_contribution_income_payment(bank, start_date, union, f'Union Contribution for {loan.client.name}', tran, created_by)
+            create_union_contribution_income_payment(bank, start_date, union, f'Union Contribution for {loan.client.name}', tran, user)
 
             approval.save()
             verify_trial_balance()
@@ -111,8 +130,16 @@ def approve_loan(approval, user):
         approval.save()
 
         loan = approval.content_object
+        client = loan.client
         loan.approved = True
         loan.save()
+
+        existing_loan = Loan.objects.filter(client=client, status='Active').exclude(id=loan.id).first()
+        if existing_loan:
+            existing_loan.status = 'Closed'
+            existing_loan.balance = 0
+            existing_loan.save()
+            LoanRepaymentSchedule.objects.filter(loan=existing_loan).delete()
 
         loan_type = loan.loan_type
         duration = loan.duration
@@ -120,7 +147,7 @@ def approve_loan(approval, user):
         amount = loan.amount
         
         bank = get_bank_account()
-        bank_payment = create_bank_payment(bank, f'Loan disbursement to {loan.client.name}', -amount, start_date,loan.transaction, user)
+        create_bank_payment(bank, f'Loan disbursement to {loan.client.name}', -amount, start_date,loan.transaction, user)
 
         time_increment = {
             'Daily': timedelta(days=1),

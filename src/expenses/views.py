@@ -128,11 +128,7 @@ def create_expense_payment_batch(request):
         batch_form = ExpensePaymentBatchForm()
         formset = ExpensePaymentBatchItemFormSet()
 
-    return render(request, 'test_batch.html', {
+    return render(request, 'create_expense_payment_batch.html', {
         'batch_form': batch_form,
         'formset': formset,
     })
-    # return render(request, 'create_expense_payment_batch.html', {
-    #     'batch_form': batch_form,
-    #     'formset': formset,
-    # })

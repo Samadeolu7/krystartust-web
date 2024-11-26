@@ -5,48 +5,89 @@
 {% block title %}Create Expense Payment Batch{% endblock %}
 
 {% block form_content %}
-    <h1>Create Expense Payment Batch</h1>
+<h1>Create Expense Payment Batch</h1>
 
-    <form method="post">
-        {% csrf_token %}
-        
-        {{ batch_form.as_p }}
-        {{ formset.management_form }}
-        <div id="formset-container">
-            {% for form in formset %}
-                <div class="form-row">
-                    {{ form.as_p }}
-                    
-                </div>
-            {% endfor %}
-        </div>
-        <button type="button" id="add-form">Add another item</button>
-        <button type="submit">Save</button>
-    </form>
-    <div id="empty-form" style="display: none;">
-        <div class="form-row">
-            {{ formset.empty_form.as_p }}
-            <div>
-                {{ formset.empty_form.DELETE.label_tag }} {{ formset.empty_form.DELETE }}
-            </div>
-        </div>
-    </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
+<form method="post">
+    {% csrf_token %}
+    {{ batch_form.as_p }}
+    {{ formset.management_form }}
     
-            $('#add-form').click(function(ev) {
-                // Prevent the formset from being submitted
-                ev.preventDefault();
-                // Get the empty form template and replace __prefix__ with the current form index
-                var count = $('#formset-container').children().length;
-                var form_template = $('#empty-form').html().replace(/__prefix__/g, count );
-                $('#formset-container').append(form_template);
-        
-                
-                $('#id_batch_items-TOTAL_FORMS').attr('value', count+1);
-            });
+    <div id="formset-container">
+        <table class="table-report">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Expense</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in formset %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ form.expense }}</td>
+                        <td>{{ form.amount }}</td>
+                        <td>{{ form.description }}</td>
+                        <td>{{ form.DELETE }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <button type="button" id="add-form" class="btn btn-primary">Add Another Item</button>
+    <button type="submit" class="btn btn-success">Save</button>
+</form>
+
+<div id="empty-form" style="display: none;">
+    <table>
+        <tbody>
+            <tr>
+                <td class="row-number">__prefix__</td>
+                <td>{{ formset.empty_form.expense }}</td>
+                <td>{{ formset.empty_form.amount }}</td>
+                <td>{{ formset.empty_form.description }}</td>
+                <td>{{ formset.empty_form.DELETE }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#add-form').click(function(ev) {
+            ev.preventDefault();
+
+            // Get the current number of forms
+            var count = $('#formset-container tbody tr').length;
+
+            // Generate a new form using the empty form template
+            var form_template = $('#empty-form').html().replace(/__prefix__/g, count);
+
+            // Extract the <tr> element from the form_template
+            var new_form_row = $(form_template).find('tr');
+
+            // Update the row number
+            new_form_row.find('.row-number').text(count + 1);
+
+            // Append the new form row to the table body
+            $('#formset-container tbody').append(new_form_row);
+
+            // Update the total forms count
+            $('#id_batch_items-TOTAL_FORMS').val(count + 1);
         });
-        
-    </script>
-    {% endblock %}
+    });
+</script>
+
+<style>
+    .description-box {
+        width: 100%;
+        max-width: 300px;
+        height: 30px; /* Adjust as needed */
+    }
+    
+</style>
+{% endblock %}

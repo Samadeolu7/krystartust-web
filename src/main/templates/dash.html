@@ -237,10 +237,8 @@
                         {% if is_admin %}
                         <li class="sub-item"><a href="{% url 'create_expense_type' %}">Create Expense Category</a></li>
                         <li class="sub-item"><a href="{% url 'create_expense' %}">Create Expense</a></li>
-                        <li class="sub-item"><a href="{% url 'create_expense_payment_batch' %}">Petty Cash Request experimental</a></li>
                         {% endif %}
-                        <li class="sub-item"><a href="{% url 'expense_payment' %}">Petty Cash Request</a></li>
-
+                        <li class="sub-item"><a href="{% url 'create_expense_payment_batch' %}">Petty Cash Request</a></li>
                         <li class="sub-item"><a href="{% url 'expense_list' %}">Expense Report</a></li>
                     </ul>
                      

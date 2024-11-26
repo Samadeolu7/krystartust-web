@@ -102,7 +102,7 @@ class LoanPayment(models.Model):
     loan = models.ForeignKey(Loan, on_delete=models.CASCADE, related_name='payment', db_index=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_schedule = models.ForeignKey('LoanRepaymentSchedule', on_delete=models.CASCADE, db_index=True)
+    payment_schedule = models.ForeignKey('LoanRepaymentSchedule', on_delete=models.SET_NULL, db_index=True, null=True, blank=True)
     payment_date = models.DateField(db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
