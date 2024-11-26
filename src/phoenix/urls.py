@@ -15,8 +15,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.shortcuts import render
 from django.urls import include, path
 from django.views.generic import RedirectView
+from django.conf.urls import handler500
+from django.http import HttpResponseServerError
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -35,3 +38,8 @@ urlpatterns = [
     path('user/', include('user.urls')),
     path('administration/', include('administration.urls')),
 ]
+
+def custom_error_view(request, exception=None):
+    return render(request, 'error.html', {'exception': str(exception)})
+
+handler500 = custom_error_view
