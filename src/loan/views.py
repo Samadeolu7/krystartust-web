@@ -101,7 +101,8 @@ def load_payment_schedules(request):
 def load_payment_schedules_com(request):
     client_id = request.GET.get('client_id')
     try:
-        loan = Loan.objects.get(client_id=client_id)
+        loans = Loan.objects.filter(client_id=client_id).order_by('-created_at')
+        loan = loans.first()
         payment_schedules = LoanRepaymentSchedule.objects.filter(loan_id=loan.id, is_paid=False).order_by('due_date')
         return JsonResponse(list(payment_schedules.values('id', 'due_date', 'amount_due')), safe=False)
     except Loan.DoesNotExist:
