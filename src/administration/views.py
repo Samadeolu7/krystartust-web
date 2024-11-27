@@ -67,10 +67,10 @@ def approve(request, pk):
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def disapprove(request, pk):
+    approval = Approval.objects.get(pk=pk)
     if approval.type == Approval.Loan:
         disapprove_loan(approval, request.user)
         return redirect('approvals')
-    approval = Approval.objects.get(pk=pk)
     approval.rejected = True
     approval.approved_by = request.user
     approval.save()

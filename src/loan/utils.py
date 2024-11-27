@@ -157,15 +157,15 @@ def approve_loan(approval, user):
         }.get(loan_type, timedelta(weeks=1))
 
         if time_increment == timedelta(weeks=4):
-            start_date = start_date + timedelta(weeks=5)
+            date = start_date + timedelta(weeks=5)
         if time_increment == timedelta(weeks=1):
-            start_date = start_date + timedelta(weeks=2)
+            date = start_date + timedelta(weeks=2)
         if time_increment == timedelta(days=1):
-            start_date = start_date + timedelta(days=1)
+            date = start_date + timedelta(days=1)
 
         amount_due = loan.balance / duration
         for i in range(duration):
-            due_date = start_date + (i * time_increment)
+            due_date = date + (i * time_increment)
 
             LoanRepaymentSchedule.objects.create(
                 loan=loan,
@@ -184,7 +184,7 @@ def approve_loan(approval, user):
             income=interest_income,
             description=f'Interest income from {loan.client.name}',
             amount=interest_amount,
-            payment_date=start_date-timedelta(weeks=2),
+            payment_date=start_date,
             transaction=loan.transaction,
             created_by=user,    
         )
