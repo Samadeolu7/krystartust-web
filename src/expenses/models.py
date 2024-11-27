@@ -58,7 +58,7 @@ class ExpensePayment(models.Model):
         def save(self, *args, **kwargs):
             
             with transaction.atomic():
-                if not self.pk:
+                if self.approved:
                     self.expense_balance = self.expense.balance + self.amount
                     self.expense.balance = self.expense_balance
                     self.expense.save()
@@ -68,6 +68,8 @@ class ExpensePayment(models.Model):
             
         def __str__(self) -> str:
             return self.expense.name + ' - ' + str(self.amount)
+        
+        
 
 class ExpensePaymentBatch(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
