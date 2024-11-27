@@ -211,9 +211,14 @@ def disapprove_loan(approval, user):
         for liability_payment in liability_payments:
             liability_payment.delete()
 
-        loan.delete()
+        
+
+        loan.save()
         approval.rejected = True
         approval.approved_by = user
         approval.approved_at = timezone.now()
         approval.save()
+        if loan.pk:
+            loan.delete()
+        tran.delete()
         verify_trial_balance()

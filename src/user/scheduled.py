@@ -15,6 +15,8 @@ from django_celery_beat.models import PeriodicTask, CrontabSchedule
 
 def get_users_salary(user):
     salaries = Salary.objects.filter(user=user).first()
+    if not salaries:
+        return user.salary
     total_salary = user.salary + salaries.transportation + salaries.food + salaries.house_rent + salaries.utility + salaries.entertainment + salaries.leave
     return total_salary
     

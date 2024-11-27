@@ -16,42 +16,25 @@ from income.utils import create_loan_registration_fee_income_payment
 from income.models import RegistrationFee
 
 class Command(BaseCommand):
-    help = 'Compare the savings payments of each client to their savings balance'
+    help = 'Find all loans where the emi is not equal to the amount_due in the repayment schedule'
 
     def handle(self, *args, **kwargs):
-        # Get all the savings
-        savings = Savings.objects.all().order_by('id')
-        faulty_savings = []
-        for saving in savings:
-            # Get all the savings payments
-            payments = SavingsPayment.objects.filter(savings=saving).order_by('payment_date')
-            balance = 0
-            for payment in payments:
-                balance += payment.amount
-            if balance < saving.balance:
-                print(f'{saving.client} has a negative balance of {saving.balance - balance} on {payment.payment_date}')
-                faulty_savings.append(saving)
-                #write all patyyments to a csv file for further analysis
-                with open('savings_payments.csv', 'w') as file:
-                    for payment in payments:
-                        file.write(f'{saving.client},{payment.payment_date},{payment.amount}\n')
-                    file.write(f'{saving.client},balance,{balance}\n')
-                    file.write(f'{saving.client},savings balance,{saving.balance}\n')
-                    file.write('\n')
-
-            elif balance == saving.balance:
-                print(f'{saving.client} has a zero balance on {payment.payment_date}')
+        # Get all the loans
+        loans = Loan.objects.all()
+        for loan in loans:
+            emi = loan.emi
+            # Get the amount due from any of the repayment schedule
+            amount_due = loan.repayment_schedule.first()
+            # Check if the emi is not equal to the amount due
+            if amount_due:
+                amount_due = amount_due.amount_due
             else:
-                print(f'{saving.client} has a positive balance of {saving.balance - balance} on {payment.payment_date}')
-                faulty_savings.append(saving)
-                #write all patyyments to a csv file for further analysis
-                with open('savings_payments.csv', 'w') as file:
-                    for payment in payments:
-                        file.write(f'{saving.client},{payment.payment_date},{payment.amount}\n')
-                    file.write(f'{saving.client},balance,{balance}\n')
-                    file.write(f'{saving.client},savings balance,{saving.balance}\n')
-                    file.write('\n')
-        print('Done')
-
-
-            
+                print(f'Loan: {loan.client.name} - No repayment schedule found')
+                continue
+            if emi != amount_due:
+                print(f'Loan: {loan.client.name} - EMI: {emi} - Amount Due: {amount_due}')
+                # Update the emi to be equal to the amount due
+                loan.emi = amount_due
+                loan.save()
+                print(f'Loan: {loan.client.name} - EMI updated to {amount_due}')
+                

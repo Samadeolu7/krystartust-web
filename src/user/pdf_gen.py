@@ -28,7 +28,7 @@ def generate_payslip(user):
     # Query users who need a payslip
     now = timezone.now()
     month_year = now.strftime('%B %Y')
-    
+    salary = None
     template_name = 'payslip_template.html'
     
     # Check if the template can be loaded

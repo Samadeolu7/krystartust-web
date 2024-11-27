@@ -127,6 +127,7 @@ class CombinedPaymentForm(forms.ModelForm):
             loan_payment_instance.amount = loan_payment_instance.loan.emi
             loan_payment_instance.payment_schedule.is_paid = True
             loan_payment_instance.payment_schedule.payment_date = loan_payment_instance.payment_date
+            loan_payment_instance.description = self.cleaned_data['description'] + f' for {loan_payment_instance.client.name}'
             loan_payment_instance.payment_schedule.save()
             if self.user:
                 loan_payment_instance.created_by = self.user
