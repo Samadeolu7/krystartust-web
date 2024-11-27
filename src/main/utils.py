@@ -12,7 +12,7 @@ def verify_trial_balance():
 
     # Aggregate sums in a single query for each model
     total_incomes = Income.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
-    total_expenses = Expense.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_expenses = Expense.objects.filter(approved=True).aggregate(total=Sum('balance')).get('total', 0) or 0
     total_savings = Savings.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
     total_loans = Loan.objects.filter(approved=True).aggregate(total=Sum('balance')).get('total', 0) or 0
     total_banks = Bank.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
