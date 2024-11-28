@@ -27,7 +27,7 @@ class ClientForm(forms.ModelForm):
     
     class Meta:
         model = Client
-        fields = ['name', 'email', 'phone', 'address', 'group', 'marital_status', 'next_of_kin', 'next_of_kin_phone', 'bank_name', 'account_number', 'date', 'client_type']
+        fields = ['name', 'client_type', 'email', 'phone', 'address', 'group', 'marital_status', 'next_of_kin', 'next_of_kin_phone', 'bank_name', 'account_number', 'date']
 
     def __init__(self, *args, **kwargs):
         super(ClientForm, self).__init__(*args, **kwargs)
@@ -35,4 +35,3 @@ class ClientForm(forms.ModelForm):
         self.fields['registration_fee'].initial = RegistrationFee.objects.all().first().amount
         self.fields['id_fee'].initial = IDFee.objects.all().first().amount
         self.fields['date'].initial = datetime.now().date()
-    

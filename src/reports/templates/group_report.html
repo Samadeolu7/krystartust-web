@@ -27,6 +27,7 @@
                     <tr>
                         <th>#</th>
                         <th>Client Name</th>
+                        <th>Client ID</th>
                         <th>Email</th>
                         <th>Phone Number</th>
                     </tr>
@@ -36,6 +37,7 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ client.name }}</td>
+                        <td>{{ client.client_id }}</td>
                         <td>{{ client.email }}</td>
                         <td>{{ client.phone_number }}</td>
                     </tr>
@@ -55,6 +57,7 @@
                         <th>#</th>
                         <th>Loan ID</th>
                         <th>Client</th>
+                        <th>Client ID</th>
                         <th>Amount</th>
                         <th>Start Date</th>
                         <th>End Date</th>
@@ -67,6 +70,7 @@
                         <td>{{ forloop.counter }}</td>
                         <td>{{ loan.id }}</td>
                         <td>{{ loan.client.name }}</td>
+                        <td>{{ loan.client.client_id }}</td>
                         <td>{{ loan.balance }}</td>
                         <td>{{ loan.start_date }}</td>
                         <td>{{ loan.end_date }}</td>
@@ -117,6 +121,7 @@
                         <th>#</th>
                         <th>Savings ID</th>
                         <th>Client</th>
+                        <th>Client ID</th>
                         <th>Amount</th>
                         <th>Start Date</th>
                     </tr>
@@ -127,6 +132,7 @@
                         <td>{{ forloop.counter }}</td>
                         <td>{{ saving.id }}</td>
                         <td>{{ saving.client.name }}</td>
+                        <td>{{ saving.client.client_id }}</td>
                         <td>{{ saving.amount }}</td>
                         <td>{{ saving.start_date }}</td>
                     </tr>

@@ -29,6 +29,7 @@
                 <tr>
                     <th>#</th>
                     <th>Client Name</th>
+                    <th>Client ID</th>
                     <th>Loan Amount</th>
                     <th>Loan Balance</th>
                     <th>Payment Date</th>
@@ -43,6 +44,7 @@
                         <td>
                             <a href="{% url 'loan_detail' loan.client.id %}">{{ loan.client.name }}</a>
                         </td>
+                        <td>{{ loan.client.client_id }}</td>
                         <td>{{ loan.total_with_interest|naira }}</td>
                         <td>{{ loan.balance|naira }}</td>
                         <td>{{ loan.payment_date|date:"d M Y" }}</td>
@@ -64,6 +66,7 @@
                 <tr>
                     <th>#</th>
                     <th>Client Name</th>
+                    <th>Client ID</th>
                     <th>Balance</th>
                     <th>Created At</th>
                 </tr>
@@ -75,6 +78,7 @@
                         <td>
                             <a href="{% url 'savings_detail' saving.client.id %}">{{ saving.client.name }}</a>
                         </td>
+                        <td>{{ saving.client.client_id }}</td>
                         <td>{{ saving.balance|naira }}</td>
                         <td>{{ saving.created_at|date:"d M Y" }}</td>
                     </tr>

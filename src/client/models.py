@@ -30,7 +30,7 @@ class Client(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.name}-{self.client_id}"  
 
     @cached_property
     def savings(self):
