@@ -7,6 +7,13 @@ from django.apps import apps
 # Create your models here.
 
 class Client(models.Model):
+    CLIENT_TYPE_CHOICES = [
+        ('WL', 'Weekly Loan'),
+        ('ML', 'Monthly Loan'),
+        ('DC', 'Daily Contribution'),
+    ]
+
+    client_id = models.CharField(max_length=100, default='TEMP')
     name = models.CharField(max_length=100, unique=True)
     email = models.EmailField(null=True, blank=True)
     phone = models.CharField(max_length=15)
@@ -18,6 +25,7 @@ class Client(models.Model):
     bank_name = models.CharField(max_length=100,null=True, blank=True)
     account_number = models.CharField(max_length=100,null=True, blank=True)
     date = models.DateField( default=datetime.now)
+    client_type = models.CharField(max_length=2, choices=CLIENT_TYPE_CHOICES, default='WL')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

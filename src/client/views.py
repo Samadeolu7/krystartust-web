@@ -1,5 +1,5 @@
 import os
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils.timezone import now
@@ -7,13 +7,14 @@ from administration.models import Transaction
 from bank.utils import get_cash_in_hand
 from client.excel_utils import create_clients_from_excel
 from client.models import Client
+from client.utils import generate_client_id
 from loan.models import Loan, LoanPayment
 from main.utils import verify_trial_balance
 from savings.models import Savings, SavingsPayment
 from savings.utils import register_savings
 from income.utils import create_income_payment, get_id_fee_income, get_registration_fee_income
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .forms import ClientExcelForm, ClientForm
+from .forms import ClientForm
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 
@@ -71,6 +72,7 @@ def edit_client(request, client_id):
     return render(request, 'client_form.html', {'form': form})
 
 
+from django.db.models import Q
 
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
@@ -80,8 +82,16 @@ def list_clients(request):
     # Number of clients per page
     clients_per_page = 20  # You can adjust this number as needed
 
+    # Get the search query
+    query = request.GET.get('q')
+
     # Use select_related to fetch 'group' and prefetch_related for 'savings_set' and 'loan_set'
     clients_queryset = Client.objects.select_related('group').prefetch_related('savings_set', 'loan_set').order_by('id')
+
+    if query:
+        clients_queryset = clients_queryset.filter(
+            Q(name__icontains=query) | Q(client_id__icontains=query)
+        )
 
     # Initialize Paginator
     paginator = Paginator(clients_queryset, clients_per_page)
@@ -98,6 +108,7 @@ def list_clients(request):
 
     context = {
         'clients': clients,  # This is now a Page object
+        'query': query,
     }
     return render(request, 'client_list.html', context)
 
@@ -122,28 +133,29 @@ def individual_report(request, pk):
 
 
 @login_required
-@allowed_users(allowed_roles=['Admin'])
-def create_client_excel(request):
-    """View to create clients from an excel file."""
+def create_client(request):
+    """View to handle creating a new client."""
     if request.method == 'POST':
-        form = ClientExcelForm(request.POST, request.FILES)
+        form = ClientForm(request.POST)
         if form.is_valid():
-            file = request.FILES['excel_file']
-            report_path = create_clients_from_excel(file)
-
-            # Create a CSV response
-            response = HttpResponse(content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename="{os.path.basename(report_path)}"'
-
-            with open(report_path, 'r') as report_file:
-                response.write(report_file.read())
-
-            messages.success(request, 'Clients created successfully. Check the report for more details.')
-            return response
+            with transaction.atomic():
+                client = form.save(commit=False)
+                client.client_id = generate_client_id(form.cleaned_data['client_type'])
+                client.created_at = now().date()
+                client.save()
+                messages.success(request, 'Client created successfully.')
+                # Additional logic for handling fees and transactions
+                # ...
+            return redirect('list_clients')
         else:
             messages.error(request, 'Please correct the errors below.')
-
     else:
-        form = ClientExcelForm()
+        form = ClientForm()
     
-    return render(request, 'client_excel_form.html', {'form': form})
+    return render(request, 'client_form.html', {'form': form})
+
+@login_required
+def generate_client_id_view(request):
+    client_type = request.GET.get('client_type')
+    client_id = generate_client_id(client_type)
+    return JsonResponse({'client_id': client_id})

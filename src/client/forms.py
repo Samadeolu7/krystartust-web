@@ -1,3 +1,4 @@
+from datetime import datetime
 from django import forms
 from .models import Client
 from income.models import RegistrationFee, IDFee
@@ -26,17 +27,12 @@ class ClientForm(forms.ModelForm):
     
     class Meta:
         model = Client
-        fields = ['name', 'email', 'phone', 'address', 'group', 'marital_status', 'next_of_kin', 'next_of_kin_phone', 'bank_name', 'account_number', 'date']
+        fields = ['name', 'email', 'phone', 'address', 'group', 'marital_status', 'next_of_kin', 'next_of_kin_phone', 'bank_name', 'account_number', 'date', 'client_type']
 
     def __init__(self, *args, **kwargs):
         super(ClientForm, self).__init__(*args, **kwargs)
         self.fields['compulsory_savings'].initial = CompulsorySavings.objects.all().first().amount
         self.fields['registration_fee'].initial = RegistrationFee.objects.all().first().amount
         self.fields['id_fee'].initial = IDFee.objects.all().first().amount
-
-
-class ClientExcelForm(forms.Form):
-    excel_file = forms.FileField(
-        label='Excel File'
-    )
+        self.fields['date'].initial = datetime.now().date()
     
