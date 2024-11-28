@@ -9,12 +9,19 @@
     <h2 class="text-center">Clients List</h2>
 
     <!-- Search Form -->
-    <form method="GET" action="{% url 'list_clients' %}" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="q" class="form-control" placeholder="Search by name or client ID" value="{{ query }}">
-            <button class="btn btn-primary" type="submit">Search</button>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <form method="GET" action="{% url 'list_clients' %}" class="mb-4">
+                    <div class="input-group mb-3">
+                        <input type="text" name="q" class="form-control" placeholder="Search by name or client ID" >
+                        <button class="btn btn-primary" type="submit">Search</button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </form>
+    </div>
+
 
     <table class="table table-striped mt-4">
         <a href="{% url 'client_list_excel' %}" class="btn btn-primary">Download Excel</a>
