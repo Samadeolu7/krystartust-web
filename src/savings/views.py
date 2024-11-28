@@ -62,16 +62,8 @@ def register_payment(request):
                 bank = form.cleaned_data['bank']
                 create_bank_payment(
                     bank=bank,
-                    description=form.cleaned_data['description'],
-                    amount=loan.amount,
-                    payment_date=form.cleaned_data['payment_date'],
-                    transaction=loan.transaction,
-                    created_by=request.user
-                )
-                create_bank_payment(
-                    bank=bank,
-                    description=f"Savings Payment by {savings.client.name}",
-                    amount=savings.amount,
+                    description=f"Combined Savings and Loan Payment by {savings.client.name}",
+                    amount=savings.amount+loan.amount,
                     payment_date=form.cleaned_data['payment_date'],
                     transaction=savings.transaction,
                     created_by=request.user

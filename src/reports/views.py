@@ -129,16 +129,21 @@ def daily_collection_form(request):
     return render(request, 'daily_collection_form.html')
 
 
+from django.db.models import Prefetch
+
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def daily_transactions_report(request):
     if request.method == 'POST':
-        date = request.POST.get('date')
-        schedule = LoanRepaymentSchedule.objects.filter(due_date=date)
-        loan_payments = LoanPayment.objects.filter(payment_date=date)
-        savings_payments = SavingsPayment.objects.filter(payment_date=date)
+        start_date = request.POST.get('start-date')
+        end_date = request.POST.get('end-date')
+
+        schedule = LoanRepaymentSchedule.objects.filter(due_date__range=[start_date, end_date]).select_related('loan__client')
+        loan_payments = LoanPayment.objects.filter(payment_date__range=[start_date, end_date]).select_related('loan__client', 'payment_schedule')
+        savings_payments = SavingsPayment.objects.filter(payment_date__range=[start_date, end_date]).select_related('savings__client')
+
         context = {
-            'Schedule': schedule,
+            'schedule': schedule,
             'loan_payments': loan_payments,
             'savings_payments': savings_payments,
         }

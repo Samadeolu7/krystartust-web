@@ -5,12 +5,14 @@
 {% block title %}Select Date for Daily Transactions Report{% endblock %}
 
 {% block form_content %}
-        <h2 class="text-center">Daily Transactions Report</h2>
+        <h2 class="text-center">Remittance Report</h2>
         <form method="POST" action="{% url 'daily_transactions_report' %}">
             {% csrf_token %}
-            <div class="mb-3">
-                <label for="date" class="form-label">Select Date</label>
-                <input type="date" id="date" name="date" class="form-control" required>
+            <div class="mb-3 col-md-6">
+                <label for="start-date" class="form-label">Start Date</label>
+                <input type="date" id="start-date" name="start-date" class="form-control" required>
+                <label for="end-date" class="form-label">End Date</label>
+                <input type="date" id="end-date" name="end-date" class="form-control" required>
             </div>
             <button type="submit" class="btn btn-primary">Generate Report</button>
         </form>

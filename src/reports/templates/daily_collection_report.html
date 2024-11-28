@@ -9,7 +9,7 @@
 
         <!-- Loan Repayment Schedule Section -->
         <h3>Loan Repayment Schedule</h3>
-        {% if Schedule %}
+        {% if schedule %}
             <table class="table-report">
                 <thead class="table-dark">
                     <tr>
@@ -23,10 +23,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in Schedule %}
+                    {% for item in schedule %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ item.loan.id }}</td>
                         <td>{{ item.loan.client.name }}</td>
                         <td>{{ item.loan.client.client_id }}</td>
                         <td>{{ item.due_date }}</td>
@@ -47,7 +46,6 @@
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>
-                        <th>Loan ID</th>
                         <th>Client Name</th>
                         <th>Client ID</th>
                         <th>Amount Paid</th>

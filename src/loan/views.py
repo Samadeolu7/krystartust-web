@@ -178,10 +178,12 @@ def guarantor_for_loan(request, loan_id):
 def loan_detail(request, client_id):
     loan = Loan.objects.filter(client=client_id).first()
     loan_payments = LoanPayment.objects.filter(loan=loan)
+    loan_repayment_schedules = LoanRepaymentSchedule.objects.filter(loan=loan)
     loan_interest_amount = Decimal(loan.interest) * Decimal(loan.amount) / Decimal(100)
     context = {
         'loan': loan,
         'loan_payments': loan_payments,
+        'loan_schedules': loan_repayment_schedules,
         'loan_interest_amount': loan_interest_amount,
     }
     return render(request, 'loan_detail.html', context)
