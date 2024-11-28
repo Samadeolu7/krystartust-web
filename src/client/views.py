@@ -6,8 +6,7 @@ from django.utils.timezone import now
 from administration.models import Transaction
 from bank.utils import get_cash_in_hand
 from client.excel_utils import create_clients_from_excel
-from client.models import Client
-from client.utils import generate_client_id
+from client.models import Client, generate_client_id
 from loan.models import Loan, LoanPayment
 from main.utils import verify_trial_balance
 from savings.models import Savings, SavingsPayment
@@ -140,7 +139,6 @@ def create_client(request):
         if form.is_valid():
             with transaction.atomic():
                 client = form.save(commit=False)
-                client.client_id = generate_client_id(form.cleaned_data['client_type'])
                 client.created_at = now().date()
                 client.save()
                 messages.success(request, 'Client created successfully.')
