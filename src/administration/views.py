@@ -4,10 +4,12 @@ import os
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 
 from administration.decorators import allowed_users
 from expenses.utils import approve_expense
 from main.models import JournalEntry
+from main.utils import verify_trial_balance
 from user.pdf_gen import generate_payslip
 from .models import Approval, MonthStatus, Notification
 from loan.utils import approve_loan, disapprove_loan
@@ -41,27 +43,29 @@ def approvals(request):
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def approve(request, pk):
     approval = Approval.objects.get(pk=pk)
+    with transaction.atomic():
+        if approval.type == Approval.Loan:
+            approve_loan(approval, request.user)
+            return redirect('approvals')
+        elif approval.type == Approval.Expenses:
+            approve_expense(approval, request.user)
 
-    if approval.type == Approval.Loan:
-        approve_loan(approval, request.user)
-        return redirect('approvals')
-    elif approval.type == Approval.Expenses:
-        approve_expense(approval, request.user)
+            return redirect('approvals')
+        elif approval.type == Approval.Batch_Expense:
+            batch = approval.content_object
+            batch.approve(request.user)
+        elif approval.type == Approval.Salary:
 
-        return redirect('approvals')
-    elif approval.type == Approval.Batch_Expense:
-        batch = approval.content_object
-        batch.approve(request.user)
-    elif approval.type == Approval.Salary:
-
-        approve_expense(approval, request.user)
-        print("Generating payslip")
-        generate_payslip(approval.user)
-        print("Payslip generated")
-        return redirect('approvals')
-    approval.approved = True
-    approval.approved_by = request.user
-    approval.save()
+            approve_expense(approval, request.user)
+            print("Generating payslip")
+            generate_payslip(approval.user)
+            print("Payslip generated")
+            return redirect('approvals')
+        approval.approved = True
+        approval.approved_by = request.user
+        approval.save()
+        
+        verify_trial_balance()
     return redirect('approvals')
 
 @login_required

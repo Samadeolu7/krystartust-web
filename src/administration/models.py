@@ -68,14 +68,8 @@ class Approval(models.Model):
         else:
             if self.approved:
                 if self.type == self.Withdrawal:
-                    # Set the approved attribute on the related object to True
                     savings_payment = self.content_object
-                    savings_payment.approved = True
                     savings = savings_payment.savings
-                    savings.balance += savings_payment.amount
-                    savings_payment.balance = savings.balance
-                    savings.save()
-                    savings_payment.save()
                     create_bank_payment(
                         bank=savings_payment.bank,
                         description=f"Withdrawal by {savings.client.name}",
