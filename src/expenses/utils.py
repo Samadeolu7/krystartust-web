@@ -13,7 +13,6 @@ def approve_expense(approval, user):
         approval.save()
         expense_payment = approval.content_object
         expense_payment.balance = expense_payment.expense.balance
-        expense_payment.expense.balance += expense_payment.amount
         expense_payment.update_at = datetime.now()
         expense_payment.expense.save()
         create_bank_payment(expense_payment.bank, f'expense for {expense_payment.expense}', -expense_payment.amount, datetime.now(), expense_payment.transaction, user)
