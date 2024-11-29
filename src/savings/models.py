@@ -55,23 +55,29 @@ class SavingsPayment(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:
             savings_record = self.savings
-            if self.transaction_type == self.SAVINGS or self.transaction_type == self.DC:
-                savings_record.balance += Decimal(self.amount)
+            if self.transaction_type in [self.SAVINGS, self.DC]:
+                savings_record.balance += self.amount
                 self.balance = savings_record.balance
-                savings_record.save()
-                super().save(*args, **kwargs)
+                savings_record.save(update_fields=['balance'])
             elif self.transaction_type == self.WITHDRAWAL:
-                if self.approved:
-                    savings_record = self.savings
-                    savings_record.balance += Decimal(self.amount)
-                    self.balance = savings_record.balance
-                    savings_record.save()
-                    super().save(*args, **kwargs)
-                if (-1*self.amount) > savings_record.balance:
+                if (-1 * self.amount) > savings_record.balance:
                     raise ValueError('Insufficient balance')
-                super().save(*args, **kwargs)
-        else:
+                self.amount = -self.amount
+                self.balance = savings_record.balance + self.amount
             super().save(*args, **kwargs)
+        else:
+            if self.transaction_type == self.WITHDRAWAL and self.approved:
+                savings_record = self.savings
+                savings_record.balance += self.amount
+                self.balance = savings_record.balance
+                savings_record.save(update_fields=['balance'])
+            super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.client} - {self.get_transaction_type_display()} - {self.amount}"
+    
+    class Meta:
+        ordering = ['payment_date', 'created_at']
 
     def __str__(self):
         return f"{self.client} - {self.get_transaction_type_display()} - {self.amount}"
