@@ -153,7 +153,7 @@ class LoanRepaymentSchedule(models.Model):
         return self.loan.client.name + ' - ' + str(self.amount_due) + ' - ' + str(self.due_date)
 
     class Meta:
-        ordering = ['due_date', 'created_at']
+        ordering = ['due_date']
         indexes = [
             models.Index(fields=['loan', 'due_date']),
             models.Index(fields=['loan', 'is_paid']),
