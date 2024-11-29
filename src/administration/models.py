@@ -73,7 +73,7 @@ class Approval(models.Model):
                     create_bank_payment(
                         bank=savings_payment.bank,
                         description=f"Withdrawal by {savings.client.name}",
-                        amount=savings_payment.amount,
+                        amount=-savings_payment.amount,
                         payment_date=savings_payment.payment_date,
                         transaction=savings_payment.transaction,
                         created_by=savings_payment.created_by
