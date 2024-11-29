@@ -60,16 +60,16 @@ class SavingsPayment(models.Model):
                 self.balance = savings_record.balance
                 savings_record.save()
                 super().save(*args, **kwargs)
-        elif self.transaction_type == self.WITHDRAWAL:
-            if self.approved:
-                savings_record = self.savings
-                savings_record.balance += Decimal(self.amount)
-                self.balance = savings_record.balance
-                savings_record.save()
+            elif self.transaction_type == self.WITHDRAWAL:
+                if self.approved:
+                    savings_record = self.savings
+                    savings_record.balance += Decimal(self.amount)
+                    self.balance = savings_record.balance
+                    savings_record.save()
+                    super().save(*args, **kwargs)
+                if (-1*self.amount) > savings_record.balance:
+                    raise ValueError('Insufficient balance')
                 super().save(*args, **kwargs)
-            if (-1*self.amount) > savings_record.balance:
-                raise ValueError('Insufficient balance')
-            super().save(*args, **kwargs)
         else:
             super().save(*args, **kwargs)
 
