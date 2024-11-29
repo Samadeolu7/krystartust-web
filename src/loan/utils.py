@@ -10,6 +10,7 @@ from main.utils import verify_trial_balance
 from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 from decimal import Decimal
 
 from administration.models import Transaction, Approval
@@ -152,15 +153,15 @@ def approve_loan(approval, user):
         time_increment = {
             'Daily': timedelta(days=1),
             'Weekly': timedelta(weeks=1),
-            'Monthly': timedelta(weeks=4),
+            'Monthly': relativedelta(months=1),
             
         }.get(loan_type, timedelta(weeks=1))
 
-        if time_increment == timedelta(weeks=4):
-            date = start_date + timedelta(weeks=5)
-        if time_increment == timedelta(weeks=1):
+        if loan_type == "Monthly":
+            date = start_date + relativedelta(months=1)
+        if loan_type == "Weekly":
             date = start_date + timedelta(weeks=2)
-        if time_increment == timedelta(days=1):
+        if loan_type == "Daily":
             date = start_date + timedelta(days=1)
 
         amount_due = loan.balance / duration

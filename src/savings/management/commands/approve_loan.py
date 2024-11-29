@@ -2,51 +2,30 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from decimal import Decimal
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 from income.models import IncomePayment
-from loan.models import Loan, LoanRepaymentSchedule
+from loan.models import Loan, LoanPayment, LoanRepaymentSchedule
 from administration.models import Transaction
 from main.utils import verify_trial_balance
 from django.utils import timezone
 
 class Command(BaseCommand):
-    help = 'Find monthly loan where the interest income is on a diffrent payment date than loan start date'
+    help = 'Find all monthly loans and recalculate the date in due date using months from start date'
 
     def handle(self, *args, **kwargs):
-        today = timezone.now().date()
-        loans = Loan.objects.all()
+        loans = Loan.objects.filter(loan_type='Monthly')
 
         for loan in loans:
-            #find interest income payment with the same transaction model as loan
-            print(f'Loan: {loan.client.name} - {loan.start_date}')
-            if loan.transaction:
-                interest_income_payment = IncomePayment.objects.filter(transaction=loan.transaction).first()
-            #find interest income payment with the same creation date as the loan
-                if not interest_income_payment:
-                    #look for interest income payment with the same creation date as the loan
-                    interest_income_payment = IncomePayment.objects.filter(created_at=loan.created_at).first()
-                    interest_income_payment.transaction = loan.transaction
-                    interest_income_payment.save()
-
-            elif loan.transaction == None:
-                interest_income_payment = IncomePayment.objects.filter(created_at=loan.created_at).first()
-                if interest_income_payment:
-                    interest_income_payment.transaction = loan.transaction
-                    interest_income_payment.save()
-                else:
-                    name = loan.client.name
-                    #find an interest income with the client name in its description
-                    interest_income_payment = IncomePayment.objects.filter(description__contains=name)
-                    if interest_income_payment:
-                        interest_income_payment=interest_income_payment.first()
-                        interest_income_payment.transaction = loan.transaction
-                        interest_income_payment.save()
-                    else:
-                        print(f'No interest income payment found for {loan.client.name}')
-                        continue
-
-            if loan.start_date != interest_income_payment.payment_date:    
-                print(f'Loan: {loan.start_date} - Interest Income Payment: {interest_income_payment.payment_date}')
-                interest_income_payment.payment_date = loan.start_date
-                interest_income_payment.save()
-                print(f'Interest income payment date updated to {loan.start_date}')
-        
+            # Get the number of months between the start date and the end date
+            months = loan.duration
+            # Get the end date of the loan
+            loan_payments = LoanPayment.objects.filter(loan=loan)
+            for payment in loan_payments:
+                payment.payment_schedule = LoanRepaymentSchedule.objects.filter(loan=loan, is_paid=False).first()
+                payment.payment_schedule.is_paid = True
+                payment.payment_schedule.payment_date = payment.payment_date
+                payment.payment_schedule.save()
+                payment.save()
+            
+            self.stdout.write(self.style.SUCCESS('Successfully updated loan repayment schedule'))
+        self.stdout.write(self.style.SUCCESS('Successfully updated all loan repayment schedule'))
