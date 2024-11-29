@@ -136,6 +136,9 @@ class LoanPayment(models.Model):
         ordering = ['payment_date', 'created_at']
         indexes = [
             models.Index(fields=['client', 'loan']),
+            models.Index(fields=['loan', 'payment_date']),
+            models.Index(fields=['loan', 'payment_schedule']),
+            models.Index(fields=['loan', 'created_at']),
         ]
 
 
@@ -150,7 +153,10 @@ class LoanRepaymentSchedule(models.Model):
         return self.loan.client.name + ' - ' + str(self.amount_due) + ' - ' + str(self.due_date)
 
     class Meta:
+        ordering = ['due_date', 'created_at']
         indexes = [
             models.Index(fields=['loan', 'due_date']),
             models.Index(fields=['loan', 'is_paid']),
+            models.Index(fields=['loan', 'due_date', 'is_paid']),
+            models.Index(fields=['loan', 'due_date', 'payment_date']),
         ]
