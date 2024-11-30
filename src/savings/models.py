@@ -15,9 +15,9 @@ class Savings(models.Model):
         (NORMAL, 'Normal Savings'),
         (DC, 'Daily Contribution')
     ]
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, db_index=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
-    type = models.CharField(max_length=1, choices=SAVINGS_TYPE_CHOICES, default=NORMAL)
+    type = models.CharField(max_length=1, choices=SAVINGS_TYPE_CHOICES, default=NORMAL, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -39,13 +39,13 @@ class SavingsPayment(models.Model):
         (WITHDRAWAL, 'Withdrawal'),
         (DC, 'Daily Contribution')
     ]
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    savings = models.ForeignKey(Savings, on_delete=models.SET_NULL, null=True)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, db_index=True)
+    savings = models.ForeignKey(Savings, on_delete=models.SET_NULL, null=True, db_index=True)
     bank = models.ForeignKey('bank.Bank', on_delete=models.SET_NULL, null=True, blank=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_date = models.DateField()
+    payment_date = models.DateField(db_index=True)
     transaction_type = models.CharField(max_length=1, choices=TRANSACTION_TYPE_CHOICES, default=SAVINGS)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)

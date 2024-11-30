@@ -42,6 +42,9 @@
                         <th>Description</th>
                         <th>Amount</th>
                         <th>Balance</th>
+                        {% if user.is_superuser %}
+                        <th>Created At</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -53,6 +56,9 @@
                         <td>{{ payment.description }}</td>
                         <td>{{ payment.amount|naira }}</td>
                         <td>{{ payment.bank_balance|naira }}</td>
+                        {% if user.is_superuser %}
+                        <td>{{ payment.created_at }}</td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                     

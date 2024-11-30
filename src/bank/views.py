@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 
+from administration.models import Transaction
 from administration.utils import validate_month_status
 from .forms import BankForm, BankPaymentForm, CashTransferForm, DateRangeForm
 from .models import Bank, BankPayment
@@ -96,13 +97,16 @@ def cash_transfer(request):
             description = form.cleaned_data['description']
 
             # Create BankPayment for source bank (debit)
+
+            tran = Transaction(description=f'Transfer to {destination_bank.name}: {description}')
             
             BankPayment.objects.create(
                 bank=source_bank,
                 description=f"Transfer to {destination_bank.name}: {description}",
                 amount=-amount,
                 bank_balance=source_bank.balance - amount,
-                payment_date=payment_date
+                payment_date=payment_date,
+                transaction=tran
             )
 
             # Create BankPayment for destination bank (credit)
@@ -111,7 +115,8 @@ def cash_transfer(request):
                 description=f"Transfer from {source_bank.name}: {description}",
                 amount=amount,
                 bank_balance=destination_bank.balance + amount,
-                payment_date=payment_date
+                payment_date=payment_date,
+                transaction=tran
             )
 
             return redirect('dashboard')

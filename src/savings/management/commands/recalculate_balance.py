@@ -39,7 +39,7 @@ class Command(BaseCommand):
                         payments = model.objects.filter(**{f'{ledger}': account_id}).order_by('payment_date', 'created_at').iterator()
 
                         previous_balance = Decimal('0.00')
-                        batch_size = 100  # Process 100 rows at a time
+                        batch_size = 1000  # Process 1000 rows at a time
                         updates = []
 
                         for payment in payments:
@@ -50,7 +50,6 @@ class Command(BaseCommand):
                             if len(updates) >= batch_size:
                                 model.objects.bulk_update(updates, ['bank_balance'])
                                 updates = []
-                            self.stdout.write(self.style.SUCCESS(f'Updated balance for {model_name}'))
 
                         if updates:
                             model.objects.bulk_update(updates, ['bank_balance'])
