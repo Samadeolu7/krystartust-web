@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+<h1 class="text-center mb-4">Search Results for "{{ query }}"</h1>
+
+<h2>Clients</h2>
+{% if clients %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Client ID</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ client.name }}</td>
+                <td>{{ client.client_id }}</td>
+                <td>
+                    <a href="{{ client.get_absolute_url }}">View Details</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No clients found.</p>
+{% endif %}
+
+<h2>Payments</h2>
+{% if payments %}
+    <table class="table-report">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Payment Date</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in payments %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ payment.get_transaction_type_display }}</td>
+                <td>{{ payment.amount }}</td>
+                <td>{{ payment.payment_date }}</td>
+                <td>
+                    <a href="{{ payment.get_absolute_url }}">View Details</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No payments found.</p>
+{% endif %}
+{% endblock %}

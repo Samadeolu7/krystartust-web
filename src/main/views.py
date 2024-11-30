@@ -15,9 +15,9 @@ from administration.decorators import allowed_users
 from administration.models import Approval, Notification, Transaction
 from bank.models import Bank
 from client.models import Client
-from expenses.models import Expense
-from income.models import Income
-from liability.models import Liability
+from expenses.models import Expense, ExpensePayment
+from income.models import Income, IncomePayment
+from liability.models import Liability, LiabilityPayment
 from loan.models import Loan, LoanPayment, LoanRepaymentSchedule as LoanRepayment
 from main.utils import verify_trial_balance
 from savings.models import Savings, SavingsPayment
@@ -386,3 +386,23 @@ def test_html(request):
         ticks[date] = (date.day % 2 == 0)  # Example: tick every even day
 
     return render(request, 'test.html', {'ticks': ticks})
+
+
+@login_required
+def search(request):
+    query = request.GET.get('q')
+    clients = Client.objects.filter(name__icontains=query)
+    transactions = Transaction.objects.filter(reference_number__icontains=query)
+    savings_payment = SavingsPayment.objects.filter(transaction__in=transactions)
+    loan_payment = LoanPayment.objects.filter(transaction__in=transactions)
+    expense_payment = ExpensePayment.objects.filter(transaction__in=transactions)
+    income_payment = IncomePayment.objects.filter(transaction__in=transactions)
+    liability_payment = LiabilityPayment.objects.filter(transaction__in=transactions)
+
+    payments = list(savings_payment) + list(loan_payment) + list(expense_payment) + list(income_payment) + list(liability_payment)
+    context = {
+        'clients': clients,
+        'payments': payments,
+        'query': query
+    }
+    return render(request, 'search_result.html', context)

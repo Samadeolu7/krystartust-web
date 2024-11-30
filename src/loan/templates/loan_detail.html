@@ -49,16 +49,32 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% with loan.balance as running_balance %}
+                    <tr>
+                    <td>0</td>
+                    <td>{{ loan.created_at }}</td>
+                    <td>{{ loan.transaction.reference_number }}</td>
+                    <td>Loan Disbursement</td>
+                    <td>{{ loan.amount|naira }}</td>
+                    <td>{{ loan.amount|naira }}</td>
+                    </tr>
+                    <tr>
+                    <td>1</td>
+                    <td>{{ loan.created_at }}</td>
+                    <td>{{ loan.transaction.reference_number }}</td>
+                    <td>Interest</td>
+                    <td>{{ loan_interest_amount|naira }}</td>
+                    <td>{{ loan.amount|add:loan_interest_amount|naira }}</td>
+                    </tr>
+                    {% with loan.amount|add:loan_interest_amount as running_balance %}
                     {% for payment in loan_payments %}
                     <tr>
-                        <td>{{ forloop.counter }}</td>
+                        <td>{{ forloop.counter|add:1 }}</td>
                         <td>{{ payment.payment_date }}</td>
                         <td>{{ payment.transaction.reference_number }}</td>
                         <td>{{ payment.description }}</td>
-                        <td>{{ payment.amount|naira }}</td>
-                        <td>{{ running_balance|add:payment.amount|naira }}</td>
-                        {% update_variable running_balance|add:payment.amount as running_balance %}
+                        <td>-{{  payment.amount|naira }}</td>
+                        <td>{{ running_balance|subtract:payment.amount|naira }}</td>
+                        {% update_variable running_balance|subtract:payment.amount as running_balance %}
                     </tr>
                     {% endfor %}
                     {% endwith %}

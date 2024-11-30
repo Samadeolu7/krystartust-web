@@ -1,5 +1,6 @@
 from decimal import Decimal
 from django.db import models
+from django.urls import reverse
 
 from client.models import Client
 from user.models import User
@@ -49,7 +50,7 @@ class SavingsPayment(models.Model):
     transaction_type = models.CharField(max_length=1, choices=TRANSACTION_TYPE_CHOICES, default=SAVINGS)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    transaction = models.ForeignKey('administration.Transaction', on_delete=models.SET_NULL, null=True, blank=True)
+    transaction = models.ForeignKey('administration.Transaction', on_delete=models.SET_NULL, null=True, blank=True, related_name='savings_payments')
     approved = models.BooleanField(default=False, blank=True, null=True)
 
     def save(self, *args, **kwargs):
@@ -76,11 +77,8 @@ class SavingsPayment(models.Model):
     def __str__(self):
         return f"{self.client} - {self.get_transaction_type_display()} - {self.amount}"
     
-    class Meta:
-        ordering = ['payment_date', 'created_at']
-
-    def __str__(self):
-        return f"{self.client} - {self.get_transaction_type_display()} - {self.amount}"
+    def get_absolute_url(self):
+        return reverse('savings_detail', kwargs={'client_id': self.client.pk})
     
     class Meta:
         ordering = ['payment_date', 'created_at']    

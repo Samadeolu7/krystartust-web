@@ -1,6 +1,7 @@
 from datetime import datetime
 from django.db import models
 from django.db import transaction
+from django.urls import reverse
 
 from bank.models import BankPayment
 from bank.utils import create_bank_payment
@@ -52,7 +53,7 @@ class ExpensePayment(models.Model):
         created_at = models.DateTimeField(auto_now_add=True)
         updated_at = models.DateTimeField(auto_now=True)
         created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expense_payments', null=True, blank=True)
-        transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True)
+        transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='expense_payments')
         approved = models.BooleanField(default=False)
     
         def save(self, *args, **kwargs):
@@ -69,6 +70,9 @@ class ExpensePayment(models.Model):
         def __str__(self) -> str:
             return self.expense.name + ' - ' + str(self.amount)
         
+        def get_absolute_url(self):
+            return reverse('expense_detail', kwargs={'pk': self.pk})
+        
         
 
 class ExpensePaymentBatch(models.Model):
@@ -76,7 +80,7 @@ class ExpensePaymentBatch(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expense_payment_batches')
     bank = models.ForeignKey('bank.Bank', on_delete=models.CASCADE)
-    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True)
+    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='expense_payment_batches')
     approved = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
     payment_date = models.DateField()

@@ -68,7 +68,7 @@ def bank_detail(request, pk):
         form = DateRangeForm(initial={'start_date': start_date, 'end_date': today})
         end_date = today
 
-    bank_payment = bank.payments.filter(payment_date__range=[start_date, end_date])
+    bank_payment = bank.payments.filter(payment_date__range=[start_date, end_date]).select_related('transaction')
 
     context = {
         'bank': bank,

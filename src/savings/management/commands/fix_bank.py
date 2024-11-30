@@ -16,25 +16,27 @@ from income.utils import create_loan_registration_fee_income_payment
 from income.models import RegistrationFee
 
 class Command(BaseCommand):
-    help = 'Find all loans where the emi is not equal to the amount_due in the repayment schedule'
+    help = 'Find all bank with transaction.reference_number starting with COM and if there are any payments with the same reference number, combine them into one payment'
 
     def handle(self, *args, **kwargs):
-        # Get all the loans
-        loans = Loan.objects.all()
-        for loan in loans:
-            emi = loan.emi
-            # Get the amount due from any of the repayment schedule
-            amount_due = loan.repayment_schedule.first()
-            # Check if the emi is not equal to the amount due
-            if amount_due:
-                amount_due = amount_due.amount_due
-            else:
-                print(f'Loan: {loan.client.name} - No repayment schedule found')
-                continue
-            if emi != amount_due:
-                print(f'Loan: {loan.client.name} - EMI: {emi} - Amount Due: {amount_due}')
-                # Update the emi to be equal to the amount due
-                loan.emi = amount_due
-                loan.save()
-                print(f'Loan: {loan.client.name} - EMI updated to {amount_due}')
+        # Get all the bank payments with reference number starting with COM
+        bank_payments = BankPayment.objects.filter(transaction__reference_number__startswith='COM').order_by('transaction__reference_number')
+        # Find transactions with the same reference number
+        for payment in bank_payments:
+            payments = BankPayment.objects.filter(transaction__reference_number=payment.transaction.reference_number)
+            if payments.count() > 1:
+                with transaction.atomic():
+                    # Combine the payments
+                    total_amount = Decimal('0.00')
+                    for p in payments:
+                        total_amount += p.amount
+                    # Get the first payment
+                    first_payment = payments.first()
+                    # Update the first payment with the total amount
+                    first_payment.amount = total_amount
+                    first_payment.save()
+                    # Delete the other payments
+                    payments.exclude(pk=first_payment.pk).delete()
+
+                self.stdout.write(self.style.SUCCESS(f'Combined payments for reference number {payment.transaction.reference_number} with {payments.count()} payments'))
                 

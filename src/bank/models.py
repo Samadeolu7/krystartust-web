@@ -48,7 +48,7 @@ class BankPayment(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     bank_balance = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
-    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, db_index=True)
+    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, db_index=True, related_name='bank_payments')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bank_payments', null=True, blank=True)
     payment_date = models.DateField()
 
@@ -71,6 +71,7 @@ class BankPayment(models.Model):
 
         # Check if the payment date is not today and trigger recalculation
         if self.payment_date != timezone.now().date():
+            print('Recalculating balance')
             recalculate_balance_after_payment_date(self.bank.id, self.payment_date)
 
     def delete(self, *args, **kwargs):
@@ -81,6 +82,7 @@ class BankPayment(models.Model):
     class Meta:
         ordering = ['payment_date', 'created_at']
         indexes = [
+            models.Index(fields=['bank', 'payment_date', 'transaction'], name='idx_bank_payment_transaction'),
             models.Index(fields=['payment_date'], name='idx_payment_date'),
             models.Index(fields=['payment_date', 'created_at'], name='idx_payment_date_created_at'),
             models.Index(fields=['created_by'], name='idx_created_by'),

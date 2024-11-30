@@ -273,8 +273,9 @@
                     </div>
                 </div>
             </div>
-            <form class="form-inline ml-auto">
-                <input class="form-control mr-sm-2" type="search" placeholder="Search">
+            <form method="GET" action="{% url 'search' %}" class="d-inline-block">
+                <input type="search" name="q" class="form-control d-inline-block" placeholder="Search transactions, customers" style="width: 250px;">
+                <button type="submit" class="btn btn-primary">Search</button>
             </form>
         </div>
     </nav>

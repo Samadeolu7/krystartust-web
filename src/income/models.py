@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from user.models import User
 
 class Income(models.Model):
@@ -26,7 +27,7 @@ class IncomePayment(models.Model):
     income_balance = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='income_payments', null=True, blank=True)
-    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True)
+    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='income_payments')
     payment_date = models.DateField()
 
     def __str__(self):
@@ -44,6 +45,9 @@ class IncomePayment(models.Model):
         self.income.balance = self.income_balance
         self.income.save()
         super(IncomePayment, self).delete(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse('income_details', kwargs={'pk': self.pk})
     
     class Meta:
         ordering = ['created_at']

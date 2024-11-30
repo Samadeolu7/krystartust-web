@@ -2,6 +2,7 @@ from datetime import date
 from django.core.cache import cache
 from django.db import models
 from django.db.models import Case, When, BooleanField
+from django.urls import reverse
 
 from client.models import Client
 
@@ -38,7 +39,7 @@ class Loan(models.Model):
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
     objects = LoanManager()
-    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True)
+    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='loans')
     approved = models.BooleanField(default=False)
 
     def is_approved(self):
@@ -106,7 +107,7 @@ class LoanPayment(models.Model):
     payment_date = models.DateField(db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
-    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True)
+    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='loan_payments')
     created_by = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='loan_payments', db_index=True, null=True, blank=True)
 
     def save(self, *args, **kwargs):
@@ -128,6 +129,9 @@ class LoanPayment(models.Model):
         self.payment_schedule.save()
         self.loan.save()
         super().delete(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse('loan_detail', kwargs={'client_id': self.client.id})
 
     def __str__(self) -> str:
         return self.client.name + ' - ' + str(self.amount) + ' - ' + str(self.balance)

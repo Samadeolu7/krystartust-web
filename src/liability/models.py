@@ -17,7 +17,7 @@ class Liability(models.Model):
         return f'{self.name} - {self.balance}'
 
     def get_absolute_url(self):
-        return reverse('liability:liability_detail', kwargs={'pk': self.pk})
+        return reverse('liability_detail', kwargs={'pk': self.pk})
     
     def save(self, *args, **kwargs):
         if not self.year:
@@ -37,7 +37,7 @@ class LiabilityPayment(models.Model):
     payment_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True)
+    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='liability_payments')
     created_by = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='liability_payments', null=True, blank=True)
 
     def __str__(self):
@@ -60,7 +60,7 @@ class LiabilityPayment(models.Model):
         super(LiabilityPayment, self).delete(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('liability:liability_record_detail', kwargs={'pk': self.pk})
+        return reverse('liability_detail', kwargs={'pk': self.pk})
     
     class Meta:
         ordering = ['payment_date', 'created_at']

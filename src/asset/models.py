@@ -15,7 +15,7 @@ class Asset(models.Model):
         return self.asset_name
     
     def get_absolute_url(self):
-        return reverse('asset:asset_detail', kwargs={'pk': self.pk})
+        return reverse('asset_detail', kwargs={'pk': self.pk})
     
 
 class AssetRecord(models.Model):
@@ -29,4 +29,4 @@ class AssetRecord(models.Model):
         return self.asset.name
 
     def get_absolute_url(self):
-        return reverse('asset:asset_record_detail', kwargs={'pk': self.pk})
+        return reverse('asset_record_detail', kwargs={'pk': self.pk})

@@ -285,7 +285,10 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2>Welcome {{ user.username|first_word }} </h2>
                     <div>
-                        <input type="search" class="form-control d-inline-block" placeholder="Search transactions, customers, subscription" style="width: 250px;">
+                        <form method="GET" action="{% url 'search' %}" class="d-inline-block">
+                            <input type="search" name="q" class="form-control d-inline-block" placeholder="Search transactions, customers" style="width: 250px;">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </form>
                         <form method="post" action="{% url 'logout' %}" class="d-inline-block">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-dark ml-2">LOG OUT</button>
