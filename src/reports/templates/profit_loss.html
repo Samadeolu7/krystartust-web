@@ -65,8 +65,8 @@
                     <td>Total</td>
                     {% for month_number, _ in months %}
                     <td>
-                        {% with monthly_expenses|get_item:month_number as expense_dict %}
-                            {{ expense_dict|get_item:expense_type|get_item:"total"|default:"0"|naira }}
+                        {% with monthly_expenses|get_item:expense_type as expense_dict %}
+                            {{ expense_dict|get_item:month_number|default:"0"|naira }}
                         {% endwith %}
                     </td>
                     {% endfor %}
