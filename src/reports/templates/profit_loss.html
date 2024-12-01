@@ -50,9 +50,7 @@
                 </tr>
 
                 <!-- Individual Expense Rows -->
-                {% for month_number, _ in months %}
-                    {% with monthly_expenses|get_item:month_number as expense_dict %}
-                        {% with expense_dict|get_item:expense_type|get_item:"expenses" as expenses %}
+                    {% with monthly_expenses|get_item:expense_type|get_item:"expenses" as expenses %}
                             {% for expense_name, expense_total in expenses.items %}
                             <tr>
                                 <td>{{ expense_name }}</td>
@@ -62,9 +60,7 @@
                                 <td>{{ expense_total|get_item:'year' }}</td>
                             </tr>
                             {% endfor %}
-                        {% endwith %}
                     {% endwith %}
-                {% endfor %}
                 <tr class="table-danger">
                     <td>Total</td>
                     {% for month_number, _ in months %}

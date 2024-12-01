@@ -200,20 +200,17 @@ def profit_and_loss_report(request):
         expense_name = expense['expense__name']
         total = expense['monthly_total']
 
-        if expense_type not in monthly_expenses[month]:
-            monthly_expenses[month][expense_type] = {'total': 0, 'expenses': {}}
+        if expense_type not in monthly_expenses:
+            monthly_expenses[expense_type] = {'total': 0, 'expenses': {}}
+            
+        if expense_name not in monthly_expenses[expense_type]['expenses']:
+            monthly_expenses[expense_type]['expenses'][expense_name] = {month: 0 for month in range(1, 13)}
+            monthly_expenses[expense_type]['expenses'][expense_name]['year'] = 0
 
+        monthly_expenses[expense_type]['expenses'][expense_name][month] = expense['monthly_total']
+        monthly_expenses[expense_type]['expenses'][expense_name]['year'] += expense['monthly_total']
 
-
-        if expense_name not in monthly_expenses[month][expense_type]['expenses']:
-            monthly_expenses[month][expense_type]['expenses'][expense_name] = {month: 0 for month in range(1, 13)}
-            monthly_expenses[month][expense_type]['expenses'][expense_name]['year'] = 0
-
-        monthly_expenses[month][expense_type]['expenses'][expense_name][month] = expense['monthly_total']
-        monthly_expenses[month][expense_type]['expenses'][expense_name]['year'] += expense['monthly_total']
-
-
-        monthly_expenses[month][expense_type]['total'] += total
+        monthly_expenses[expense_type]['total'] += total
         monthly_expense_totals[month] += total
         yearly_expense_total += total
 
@@ -221,7 +218,7 @@ def profit_and_loss_report(request):
             yearly_expense_by_type[expense_type] = 0
         
         yearly_expense_by_type[expense_type] += total
-
+    
     months = [(month, calendar.month_name[month]) for month in range(1, 13)]
 
     context = {
