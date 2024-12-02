@@ -24,9 +24,9 @@ class Savings(models.Model):
 
     def __str__(self):
         if self.type == self.NORMAL:
-            return self.client.name + ' - ' + str(self.balance)
+            return self.client + ' - ' + str(self.balance)
         else:
-            return self.client.name + ' - ' + str(self.balance) + ' -DC'
+            return self.client + ' - ' + str(self.balance) + ' -DC'
 
     class Meta:
         unique_together = ('client', 'type')
