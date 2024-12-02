@@ -63,8 +63,6 @@ class SavingsPayment(models.Model):
             elif self.transaction_type == self.WITHDRAWAL:
                 if (-1 * self.amount) > savings_record.balance:
                     raise ValueError('Insufficient balance')
-                self.amount = -self.amount
-                self.balance = savings_record.balance + self.amount
             super().save(*args, **kwargs)
         else:
             if self.transaction_type == self.WITHDRAWAL and self.approved:
