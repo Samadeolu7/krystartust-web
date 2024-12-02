@@ -2,9 +2,11 @@ from datetime import datetime, timedelta
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.db import transaction
 
 from administration.models import Transaction
 from administration.utils import validate_month_status
+from main.utils import verify_trial_balance
 from .forms import BankForm, BankPaymentForm, CashTransferForm, DateRangeForm
 from .models import Bank, BankPayment
 from django.contrib.auth.decorators import login_required
@@ -85,39 +87,41 @@ def cash_transfer(request):
     if request.method == 'POST':
         form = CashTransferForm(request.POST)
         if form.is_valid():
-            payment_date = form.cleaned_data['payment_date']
-            try:
-                validate_month_status(payment_date)
-            except Exception as e:
-                form.add_error(None, e)
-                return render(request, 'cash_transfer.html', {'form': form})
-            source_bank = form.cleaned_data['source_bank']
-            destination_bank = form.cleaned_data['destination_bank']
-            amount = form.cleaned_data['amount']
-            description = form.cleaned_data['description']
+            with transaction.atomic():
+                payment_date = form.cleaned_data['payment_date']
+                try:
+                    validate_month_status(payment_date)
+                except Exception as e:
+                    form.add_error(None, e)
+                    return render(request, 'cash_transfer.html', {'form': form})
+                source_bank = form.cleaned_data['source_bank']
+                destination_bank = form.cleaned_data['destination_bank']
+                amount = form.cleaned_data['amount']
+                description = form.cleaned_data['description']
 
-            # Create BankPayment for source bank (debit)
+                # Create BankPayment for source bank (debit)
 
-            tran = Transaction(description=f'Transfer to {destination_bank.name}: {description}')
-            
-            BankPayment.objects.create(
-                bank=source_bank,
-                description=f"Transfer to {destination_bank.name}: {description}",
-                amount=-amount,
-                bank_balance=source_bank.balance - amount,
-                payment_date=payment_date,
-                transaction=tran
-            )
+                tran = Transaction(description=f'Transfer to {destination_bank.name}: {description}')
+                
+                BankPayment.objects.create(
+                    bank=source_bank,
+                    description=f"Transfer to {destination_bank.name}: {description}",
+                    amount=-amount,
+                    bank_balance=source_bank.balance - amount,
+                    payment_date=payment_date,
+                    transaction=tran
+                )
 
-            # Create BankPayment for destination bank (credit)
-            BankPayment.objects.create(
-                bank=destination_bank,
-                description=f"Transfer from {source_bank.name}: {description}",
-                amount=amount,
-                bank_balance=destination_bank.balance + amount,
-                payment_date=payment_date,
-                transaction=tran
-            )
+                # Create BankPayment for destination bank (credit)
+                BankPayment.objects.create(
+                    bank=destination_bank,
+                    description=f"Transfer from {source_bank.name}: {description}",
+                    amount=amount,
+                    bank_balance=destination_bank.balance + amount,
+                    payment_date=payment_date,
+                    transaction=tran
+                )
+                verify_trial_balance()
 
             return redirect('dashboard')
     else:

@@ -7,3 +7,4 @@ ca.pem
 *.csv
 *.json
 *.pdf
+src/savings/management/commands/untracked.py
