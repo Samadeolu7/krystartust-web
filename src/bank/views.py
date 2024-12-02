@@ -102,7 +102,8 @@ def cash_transfer(request):
                 # Create BankPayment for source bank (debit)
 
                 tran = Transaction(description=f'Transfer to {destination_bank.name}: {description}')
-                
+                tran.save(prefix='TRF')
+
                 BankPayment.objects.create(
                     bank=source_bank,
                     description=f"Transfer to {destination_bank.name}: {description}",
