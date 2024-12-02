@@ -130,6 +130,7 @@ def cash_transfer(request):
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def bank_to_excel_view(request, pk):
+
     bank = Bank.objects.get(pk=pk)
     df = bank_to_excel(bank)
     response = HttpResponse(content_type='application/ms-excel')
