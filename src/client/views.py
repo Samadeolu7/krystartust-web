@@ -130,28 +130,6 @@ def individual_report(request, pk):
 
     return render(request, 'individual_report.html', context)
 
-
-@login_required
-def create_client(request):
-    """View to handle creating a new client."""
-    if request.method == 'POST':
-        form = ClientForm(request.POST)
-        if form.is_valid():
-            with transaction.atomic():
-                client = form.save(commit=False)
-                client.created_at = now().date()
-                client.save()
-                messages.success(request, 'Client created successfully.')
-                # Additional logic for handling fees and transactions
-                # ...
-            return redirect('list_clients')
-        else:
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        form = ClientForm()
-    
-    return render(request, 'client_form.html', {'form': form})
-
 @login_required
 def generate_client_id_view(request):
     client_type = request.GET.get('client_type')
