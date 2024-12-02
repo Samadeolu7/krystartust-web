@@ -24,7 +24,7 @@ class Savings(models.Model):
 
     def __str__(self):
         if self.type == self.NORMAL:
-            return self.client + ' - ' + str(self.balance)
+            return str(self.client) + ' - ' + str(self.balance)
         else:
             return self.client + ' - ' + str(self.balance) + ' -DC'
 
