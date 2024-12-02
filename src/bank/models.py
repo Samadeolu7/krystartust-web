@@ -69,9 +69,8 @@ class BankPayment(models.Model):
         
         super(BankPayment, self).save(*args, **kwargs)
 
-        # Check if the payment date is not today and trigger recalculation
-        if self.payment_date != timezone.now().date():
-            recalculate_balance_after_payment_date(self.bank.id, self.payment_date)
+        payment_date = self.payment_date - timezone.timedelta(days=1)
+        recalculate_balance_after_payment_date(self.bank.id, payment_date)
 
     def delete(self, *args, **kwargs):
         self.bank.balance -= self.amount
