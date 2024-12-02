@@ -1,73 +1,41 @@
-{% extends 'base_form.html' %}
-
-{% load custom_filters %}
-
-{% block title %}Create New Customer{% endblock %}
-
-{% block form_content %}
+{% extends 'base_form.html' %} {% load custom_filters %} {% block title %}Create
+New Customer{% endblock %} {% block form_content %}
 <h1>{{ form.instance.id|yesno:"Edit Client,Create New Customer" }}</h1>
 
 <form method="POST">
-    {% csrf_token %}
-    <div class="mb-3">
-        {{ form.name.label_tag }} {{ form.name }}
-    </div>
-    <div class="mb-3">
-        {{ form.client_type.label_tag }} {{ form.client_type }}
-    </div>
-    <div class="mb-3 col-md-6">
-        <label for="id_client_id">Client ID</label>
-        <input type="text" id="id_client_id" name="client_id" readonly class="form-control">
-    </div>
-    <div class="mb-3">
-        {{ form.email.label_tag }} {{ form.email }}
-    </div>
-    <div class="mb-3">
-        {{ form.phone.label_tag }} {{ form.phone }}
-    </div>
-    <div class="mb-3">
-        {{ form.address.label_tag }} {{ form.address }}
-    </div>
-    <div class="mb-3">
-        {{ form.group.label_tag }} {{ form.group }}
-    </div>
-    <div class="mb-3">
-        {{ form.marital_status.label_tag }} {{ form.marital_status }}
-    </div>
-    <div class="mb-3">
-        {{ form.next_of_kin.label_tag }} {{ form.next_of_kin }}
-    </div>
-    <div class="mb-3">
-        {{ form.next_of_kin_phone.label_tag }} {{ form.next_of_kin_phone }}
-    </div>
-    <div class="mb-3">
-        {{ form.bank_name.label_tag }} {{ form.bank_name }}
-    </div>
-    <div class="mb-3">
-        {{ form.account_number.label_tag }} {{ form.account_number }}
-    </div>
-    <div class="mb-3">
-        {{ form.date.label_tag }} {{ form.date }}
-    </div>
-    <button type="submit" class="btn btn-primary">{{ form.instance.id|yesno:"Update,Create" }}</button>
+  {% csrf_token %}
+  <div class="mb-3 col-md-6">
+    <label for="id_client_id">Client ID</label>
+    <input
+      type="text"
+      id="id_client_id"
+      name="client_id"
+      readonly
+      class="form-control"
+    />
+  </div>
+  {% csrf_token %} {{ form.as_p }}
+  <button type="submit" class="btn btn-primary">
+    {{ form.instance.id|yesno:"Update,Create" }}
+  </button>
 </form>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function() {
-        $('#id_client_type').change(function() {
-            var clientType = $(this).val();
-            $.ajax({
-                url: '{% url "generate_client_id" %}',
-                data: {
-                    'client_type': clientType
-                },
-                success: function(data) {
-                    $('#id_client_id').val(data.client_id);
-                }
-            });
-        });
+  $(document).ready(function () {
+    $("#id_client_type").change(function () {
+      var clientType = $(this).val();
+      $.ajax({
+        url: '{% url "generate_client_id" %}',
+        data: {
+          client_type: clientType,
+        },
+        success: function (data) {
+          $("#id_client_id").val(data.client_id);
+        },
+      });
     });
+  });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
