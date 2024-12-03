@@ -82,6 +82,7 @@ class Loan(models.Model):
         return defaulted_loans
 
     class Meta:
+        ordering = ['-start_date']
         indexes = [
             models.Index(fields=['client', 'loan_type']),
             models.Index(fields=['start_date', 'end_date']),
