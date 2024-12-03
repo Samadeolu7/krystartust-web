@@ -127,6 +127,7 @@ class CombinedPaymentForm(forms.ModelForm):
             loan_payment_instance.payment_date = self.cleaned_data['payment_date']
             loan_payment_instance.client = loan_payment_instance.loan.client
             loan_payment_instance.amount = loan_payment_instance.loan.emi
+            loan_payment_instance.payment_schedule = self.cleaned_data['payment_schedule']
             loan_payment_instance.payment_schedule.is_paid = True
             loan_payment_instance.payment_schedule.payment_date = loan_payment_instance.payment_date
             loan_payment_instance.description = self.cleaned_data['description'] + f' for {loan_payment_instance.client.name}'
