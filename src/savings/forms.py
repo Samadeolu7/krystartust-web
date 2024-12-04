@@ -164,12 +164,15 @@ class ClientContributionForm(forms.ModelForm):
     def save(self, commit=True):
         instance = super(ClientContributionForm, self).save(commit=False)
         # Create a Savings record for the client
-        savings = Savings.objects.create(
-            client=instance.client,
-            balance=0,
-            type=Savings.DC
-        )
-        savings.save()
+        if not Savings.objects.filter(client=instance.client,type=Savings.DC).exists():
+            savings = Savings.objects.create(
+                client=instance.client,
+                balance=0,
+                type=Savings.DC
+            )
+            savings.save()
+        if commit:
+            instance.save()
 
 class SetupMonthlyContributionsForm(forms.Form):
     client_contribution = forms.ModelChoiceField(queryset=ClientContribution.objects.all())
