@@ -6,6 +6,7 @@ from savings.utils import create_dc_payment, setup_monthly_contributions
 from .models import SavingsPayment, CompulsorySavings, Savings, DailyContribution, ClientContribution
 from loan.models import LoanRepaymentSchedule as PaymentSchedule
 from django_select2.forms import Select2Widget
+from django.utils import timezone
 
 from django import forms
 
@@ -201,7 +202,13 @@ class ToggleDailyContributionForm(forms.Form):
             )
             instance.payment_made = not instance.payment_made
         except DailyContribution.DoesNotExist:
-            raise ValueError('No daily contribution found for the selected client and date.')
+            today = timezone.now()
+            if self.cleaned_data['date'].month != today.month:
+                instance = DailyContribution.objects.create(
+                    client_contribution=self.cleaned_data['client_contribution'],
+                    date=self.cleaned_data['date'],
+                    payment_made=self.cleaned_data['payment_made']
+                )
         if instance.payment_made:
             create_dc_payment(instance, user)
         else:

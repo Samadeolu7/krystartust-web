@@ -102,12 +102,12 @@ def setup_monthly_contributions(client_contribution, month, year,user):
     current_date += timedelta(days=1)
     contributions = []
     while current_date <= last_day:
-        if current_date.weekday() < 5:  # Monday to Friday
-            contributions.append(DailyContribution(
-                client_contribution=client_contribution,
-                date=current_date,
-                payment_made=False
-            ))
+    
+        contributions.append(DailyContribution(
+            client_contribution=client_contribution,
+            date=current_date,
+            payment_made=False
+        ))
         current_date += timedelta(days=1)
     DailyContribution.objects.bulk_create(contributions)
 
