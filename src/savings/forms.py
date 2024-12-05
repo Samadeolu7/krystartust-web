@@ -182,23 +182,32 @@ class SetupMonthlyContributionsForm(forms.Form):
     def setup_monthly_contributions(self, user):
         setup_monthly_contributions(self.cleaned_data['client_contribution'], self.cleaned_data['month'], self.cleaned_data['year'], user)
         return True
+class ToggleDailyContributionForm(forms.Form):
+    client_contribution = forms.ModelChoiceField(queryset=ClientContribution.objects.all(), widget=Select2Widget)
+    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    payment_made = forms.BooleanField(required=False, widget=forms.CheckboxInput())
 
-class ToggleDailyContributionForm(forms.ModelForm):
-    class Meta:
-        model = DailyContribution
-        fields = ['client_contribution', 'date', 'payment_made']
-        widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'}),
-            'client_contribution': Select2Widget,
-            'payment_made': forms.CheckboxInput(),
-        }
+    
+    def __init__(self, *args, **kwargs):
+        self.instance = kwargs.pop('instance', None)
+        super().__init__(*args, **kwargs)
 
     def save(self, user, commit=True):
-        instance = super().save(commit=False)
+        instance = self.instance
+        try:
+            instance = DailyContribution.objects.get(
+                client_contribution=self.cleaned_data['client_contribution'],
+                date=self.cleaned_data['date']
+            )
+            instance.payment_made = not instance.payment_made
+        except DailyContribution.DoesNotExist:
+            raise ValueError('No daily contribution found for the selected client and date.')
         if instance.payment_made:
-            # Create a SavingsPayment record
             create_dc_payment(instance, user)
+        else:
+            raise ValueError('Payment has already been made for the selected client and date.')
 
         if commit:
             instance.save()
+
         return instance
