@@ -203,7 +203,7 @@ class ToggleDailyContributionForm(forms.Form):
             instance.payment_made = not instance.payment_made
         except DailyContribution.DoesNotExist:
             today = timezone.now()
-            if self.cleaned_data['date'].month != today.month:
+            if self.cleaned_data['date'].month == today.month:
                 instance = DailyContribution.objects.create(
                     client_contribution=self.cleaned_data['client_contribution'],
                     date=self.cleaned_data['date'],
