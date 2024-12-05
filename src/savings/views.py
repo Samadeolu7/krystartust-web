@@ -8,6 +8,7 @@ from django.shortcuts import render
 from administration.decorators import allowed_users
 from administration.models import Approval, Transaction
 from administration.utils import validate_month_status
+from main.models import ClientGroup
 from main.utils import verify_trial_balance
 from savings.utils import make_withdrawal
 from .models import ClientContribution, DailyContribution, Savings, SavingsPayment
@@ -37,11 +38,23 @@ def compulsory_savings(request):
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def savings_detail(request, client_id):
-    savings = Savings.objects.get(client_id=client_id)
-    savings_payments = SavingsPayment.objects.filter(client_id=client_id)
+    ajo = ClientGroup.objects.filter(name='Ajo').first()
+    id = ajo.id
+    
+    referring_page = request.META.get('HTTP_REFERER')
+    if referring_page and f'/reports/individual-group-report/{id}' in referring_page:
+        savings = Savings.objects.filter(client_id=client_id, type=Savings.DC).first()
+    else:
+        savings = Savings.objects.filter(client_id=client_id).first()
+    
+    
+    # Filter the savings payments using the savings IDs
+    savings_payments = SavingsPayment.objects.filter(savings_id=savings.id)
+    
     context = {
         'savings': savings,
-        'savings_payments': savings_payments
+        'savings_payments': savings_payments,
+        'client_id': client_id
     }
     return render(request, 'savings_detail.html', context)
 
