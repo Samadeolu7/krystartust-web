@@ -3,6 +3,7 @@ from django.db import transaction
 from decimal import Decimal
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
+from client.models import Client
 from income.models import IncomePayment
 from loan.models import Loan, LoanPayment, LoanRepaymentSchedule
 from administration.models import Transaction
@@ -10,22 +11,36 @@ from main.utils import verify_trial_balance
 from django.utils import timezone
 
 class Command(BaseCommand):
-    help = 'Find all monthly loans and recalculate the date in due date using months from start date'
+    help = 'Find all weekly loans and recalculate the date in due date using months from start date'
 
     def handle(self, *args, **kwargs):
-        loans = Loan.objects.filter(loan_type='Monthly')
-
-        for loan in loans:
-            # Get the number of months between the start date and the end date
-            months = loan.duration
-            # Get the end date of the loan
-            loan_payments = LoanPayment.objects.filter(loan=loan)
-            for payment in loan_payments:
-                payment.payment_schedule = LoanRepaymentSchedule.objects.filter(loan=loan, is_paid=False).first()
-                payment.payment_schedule.is_paid = True
-                payment.payment_schedule.payment_date = payment.payment_date
-                payment.payment_schedule.save()
-                payment.save()
-            
-            self.stdout.write(self.style.SUCCESS('Successfully updated loan repayment schedule'))
-        self.stdout.write(self.style.SUCCESS('Successfully updated all loan repayment schedule'))
+        try:
+            with transaction.atomic():
+                clients = Client.objects.filter(client_id='WL0029').first()
+                loan = Loan.objects.filter(client=clients, loan_type= Loan.WEEKLY).latest('start_date')
+                loan_repayment_schedule = LoanRepaymentSchedule.objects.filter(loan=loan)
+                start_date = loan.start_date
+                end_date = start_date + timedelta(weeks=25)
+                balance = loan.balance
+                #delete all loan repayment schedule
+                LoanRepaymentSchedule.objects.filter(loan=loan).delete()
+                #create new ones using the current balance and ends on the end date
+                time_increment = relativedelta(weeks=1)
+                date = start_date
+                today = timezone.now().date()
+                duration = (end_date - today).days // 7
+                amount_due = balance / duration
+                remainder = balance
+                for i in range(duration):   
+                    due_date = date + ((i+1) * time_increment)
+                    if i == duration - 1:
+                        amount_due = remainder
+                    LoanRepaymentSchedule.objects.create(loan=loan, due_date=due_date, amount_due=amount_due)
+                    remainder -= amount_due
+                    print(remainder)
+                
+                verify_trial_balance()
+                    
+        except Exception as e:
+            print(e)
+            print("Done")

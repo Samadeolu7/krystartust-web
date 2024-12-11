@@ -57,7 +57,7 @@
                 </td>
                 <td>
                     {% if client.loan %}
-                        <a href="{% url 'loan_detail' client.id %}">
+                        <a href="{% url 'loan_detail' client.loan.id %}">
                             {{ client.loan.balance|naira }}
                         </a>
                     {% else %}

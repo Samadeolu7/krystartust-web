@@ -135,7 +135,7 @@ class LoanPayment(models.Model):
         super().delete(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('loan_detail', kwargs={'client_id': self.client.id})
+        return reverse('loan_detail', kwargs={'id': self.loan.id})
 
     def __str__(self) -> str:
         return self.client.name + ' - ' + str(self.amount) + ' - ' + str(self.balance)
