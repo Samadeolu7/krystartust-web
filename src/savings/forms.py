@@ -105,7 +105,7 @@ class CombinedPaymentForm(forms.ModelForm):
             try:
                 client_id = int(self.data.get('client'))
                 loan = Loan.objects.filter(client=client_id).latest('start_date')
-                savings = Savings.objects.get(client=client_id)
+                savings = Savings.objects.filter(client=client_id).exclude(type=Savings.DC).first()
                 self.fields['payment_schedule'].queryset = PaymentSchedule.objects.filter(loan=loan).order_by('due_date')
                 self.instance.loan = loan
                 self.instance.savings = savings
