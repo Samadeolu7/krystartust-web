@@ -17,11 +17,14 @@ class LoanManager(models.Manager):
             )
         )
 class Loan(models.Model):
-    LOAN_TYPE = (
-        ('Daily', 'Daily'),
-        ('Weekly', 'Weekly'),
-        ('Monthly', 'Monthly')
-    )
+    DAILY = 'Daily'
+    WEEKLY = 'Weekly'
+    MONTHLY = 'Monthly'
+    LOAN_TYPE = [
+        (DAILY, 'Daily'),
+        (WEEKLY, 'Weekly'),
+        (MONTHLY, 'Monthly'),
+    ]
 
     client = models.ForeignKey(Client, on_delete=models.CASCADE, db_index=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)

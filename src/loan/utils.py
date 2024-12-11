@@ -37,14 +37,6 @@ def create_loan_payment(client, loan,amount,date):
     bank_payment = create_bank_payment(bank, f'Loan payment from {client.name}', amount, date)
     return loan_payment
 
-from django.db import transaction
-from decimal import Decimal
-from datetime import timedelta
-from django.contrib.contenttypes.models import ContentType
-from loan.models import Loan, LoanRepaymentSchedule
-from administration.models import Approval, Transaction
-from main.utils import verify_trial_balance
-
 def send_for_approval(form, user):
     try:
         with transaction.atomic():
@@ -136,7 +128,7 @@ def approve_loan(approval, user):
         loan.save()
 
         existing_loan = Loan.objects.filter(client=client, status='Active').exclude(id=loan.id).first()
-        if existing_loan:
+        if existing_loan and loan.loan_type == existing_loan.loan_type:
             existing_loan.status = 'Closed'
             existing_loan.balance = 0
             existing_loan.save()

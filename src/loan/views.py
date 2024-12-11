@@ -102,8 +102,7 @@ def load_payment_schedules_com(request):
     client_id = request.GET.get('client_id')
     try:
         loans = Loan.objects.filter(client_id=client_id).order_by('-created_at')
-        loan = loans.first()
-        payment_schedules = LoanRepaymentSchedule.objects.filter(loan_id=loan.id, is_paid=False).order_by('due_date')
+        payment_schedules = LoanRepaymentSchedule.objects.filter(loan__in=loans, is_paid=False).order_by('due_date')
         return JsonResponse(list(payment_schedules.values('id', 'due_date', 'amount_due')), safe=False)
     except Loan.DoesNotExist:
         return JsonResponse({'error': 'Loan not found'}, status=404)
@@ -175,8 +174,8 @@ def guarantor_for_loan(request, loan_id):
 
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
-def loan_detail(request, client_id):
-    loan = Loan.objects.filter(client=client_id).first()
+def loan_detail(request, id):
+    loan = Loan.objects.filter(id=id).first()
     loan_payments = LoanPayment.objects.filter(loan=loan)
     loan_repayment_schedules = LoanRepaymentSchedule.objects.filter(loan=loan)
     loan_interest_amount = Decimal(loan.interest) * Decimal(loan.amount) / Decimal(100)

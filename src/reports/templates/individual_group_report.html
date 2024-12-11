@@ -42,7 +42,7 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>
-                            <a href="{% url 'loan_detail' loan.client.id %}">{{ loan.client.name }}</a>
+                            <a href="{% url 'loan_detail' loan.id %}">{{ loan.client.name }}</a>
                         </td>
                         <td>{{ loan.client.client_id }}</td>
                         <td>{{ loan.total_with_interest|naira }}</td>
