@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% load custom_filters %}
+
+{% block title %}Group Detail{% endblock %}
+
+{% block content %}
+    <h1 class="text-center mb-4">Thift Detail</h1>
+
+
+    <!-- Savings Information Table -->
+    <h3>Savings Information</h3>
+    {% if savings %}
+        <table class="table-report">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Client Name</th>
+                    <th>Client ID</th>
+                    <th>Balance</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for saving in savings %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <a href="{% url 'individual_thrift_report' saving.id %}">{{ saving.client.name }}</a>
+                        </td>
+                        <td>{{ saving.client.client_id }}</td>
+                        <td>{{ saving.balance|naira }}</td>
+                        <td>{{ saving.created_at|date:"d M Y" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No savings found.</p>
+    {% endif %}
+{% endblock %}

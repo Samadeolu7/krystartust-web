@@ -77,51 +77,6 @@ def individual_group_report(request, group_id):
 
     return render(request, 'individual_group_report.html', context)
 
-@login_required
-@allowed_users(allowed_roles=['Admin', 'Manager'])
-def all_loans_report(request):
-    loans = Loan.objects.all()
-    clients = Client.objects.filter(loan__in=loans)
-    loan_payments = LoanPayment.objects.filter(loan__in=loans)
-    context = {
-        'loans': loans,
-        'clients': clients,
-        'loan_payments': loan_payments,
-    }
-
-    return render(request, 'all_loans_report.html', context)
-
-@login_required
-@allowed_users(allowed_roles=['Admin', 'Manager'])
-def all_savings_report(request):
-    savings = Savings.objects.all()
-    clients = Client.objects.filter(savings__in=savings)
-    savings_payments = SavingsPayment.objects.filter(savings__in=savings)
-    context = {
-        'savings': savings,
-        'clients': clients,
-        'savings_payments': savings_payments,
-    }
-
-    return render(request, 'all_savings_report.html', context)
-
-@login_required
-@allowed_users(allowed_roles=['Admin', 'Manager'])
-def all_transactions_report(request):
-    loan_payments = LoanPayment.objects.all()
-    savings_payments = SavingsPayment.objects.all()
-    loans = Loan.objects.filter(loan_payment__in=loan_payments)
-    savings = Savings.objects.filter(savings_payment__in=savings_payments)
-    clients = Client.objects.filter(loan__in=loans, savings__in=savings)
-    context = {
-        'loan_payments': loan_payments,
-        'savings_payments': savings_payments,
-        'loans': loans,
-        'savings': savings,
-        'clients': clients,
-    }
-    
-    return render(request, 'all_transactions_report.html', context)
 
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
@@ -129,7 +84,31 @@ def daily_collection_form(request):
     return render(request, 'daily_collection_form.html')
 
 
-from django.db.models import Prefetch
+@login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
+def thrift_report(request):
+    savings = Savings.objects.filter(type=Savings.DC)
+
+    context = {
+        'savings': savings
+    }
+    return render(request, 'thrift_report.html', context)
+
+
+@login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
+def individual_thrift_report(request, savings_id):
+    savings = Savings.objects.get(pk=savings_id)
+    client_id = savings.client.id
+    savings_payments = SavingsPayment.objects.filter(savings_id=savings.id)
+    
+    context = {
+        'savings': savings,
+        'savings_payments': savings_payments,
+        'client_id': client_id
+    }
+    return render(request, 'savings_detail.html', context)
+
 
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])

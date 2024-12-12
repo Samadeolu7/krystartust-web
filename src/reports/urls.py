@@ -1,7 +1,7 @@
 from .views import all_clients_report, all_groups_report, client_loans_payments_excel
 from .views import client_savings_payments_excel, daily_transactions_report, defaulter_report_excel
 from .views import individual_group_report, profit_and_loss_report, trial_balance_report, client_list_excel
-from .views import weekly_cash_flow_report, report_summary_by_date, daily_report
+from .views import weekly_cash_flow_report, report_summary_by_date, daily_report, thrift_report, individual_thrift_report
 
 from django.urls import path
 from django.conf import settings
@@ -21,6 +21,8 @@ urlpatterns = [
     path('weekly-cash-flow-report/', weekly_cash_flow_report, name='weekly_cash_flow_report'),
     path('report-summary-by-date/', report_summary_by_date, name='report_summary_by_date'),
     path('daily-report/', daily_report, name='daily_report'),
+    path('thrift-report/', thrift_report, name='thrift_report'),
+    path('individual-thrift-report/<int:client_id>/', individual_thrift_report, name='individual_thrift_report'),
     
 ]
 

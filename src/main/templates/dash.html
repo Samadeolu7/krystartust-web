@@ -251,6 +251,7 @@
                         {% endif %}
                         {% if is_admin or is_manager %}  
                         <li class="sub-item"><a href="{% url 'list_clients' %}">Debtors Reports</a></li>
+                        <li class="sub-item"><a href="{% url 'thrift_report' %}">Thrift Reports</a></li>
                         <li class="sub-item"><a href="{% url 'loan_defaulters_report' %}">Defaulters Report</a></li>
                         <li class="sub-item"><a href="{% url 'daily_transactions_report' %}">Remittance Reports</a></li>
                         {% endif %}
