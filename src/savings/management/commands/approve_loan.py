@@ -26,13 +26,14 @@ class Command(BaseCommand):
                 LoanRepaymentSchedule.objects.filter(loan=loan).delete()
                 #create new ones using the current balance and ends on the end date
                 time_increment = relativedelta(weeks=1)
-                date = start_date
+                
                 today = timezone.now().date()
-                duration = (end_date - today).days // 7
+                date = today - timedelta(days=2)
+                duration = 11
                 amount_due = balance / duration
                 remainder = balance
                 for i in range(duration):   
-                    due_date = date + ((i+1) * time_increment)
+                    due_date = date + ((i) * time_increment)
                     if i == duration - 1:
                         amount_due = remainder
                     LoanRepaymentSchedule.objects.create(loan=loan, due_date=due_date, amount_due=amount_due)

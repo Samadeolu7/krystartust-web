@@ -104,12 +104,10 @@ class CombinedPaymentForm(forms.ModelForm):
         if 'client' in self.data:
             try:
                 client_id = int(self.data.get('client'))
-                loan = Loan.objects.filter(client=client_id).latest('start_date')
+                loans = Loan.objects.filter(client=client_id)
                 savings = Savings.objects.filter(client=client_id).exclude(type=Savings.DC).first()
-                self.fields['payment_schedule'].queryset = PaymentSchedule.objects.filter(loan=loan).order_by('due_date')
-                self.instance.loan = loan
+                self.fields['payment_schedule'].queryset = PaymentSchedule.objects.filter(loan__in=loans).order_by('due_date')
                 self.instance.savings = savings
-                
                 
             except (ValueError, TypeError, Loan.DoesNotExist):
                 pass  # invalid input from the client; ignore and fallback to empty queryset
@@ -119,6 +117,7 @@ class CombinedPaymentForm(forms.ModelForm):
     def save(self, commit=True):
         loan_payment_instance = super().save(commit=False)
         savings_payment_instance = SavingsPayment()
+        loan_payment_instance.loan = loan_payment_instance.payment_schedule.loan
 
         # Handle loan payment
         if self.cleaned_data['payment_date']:

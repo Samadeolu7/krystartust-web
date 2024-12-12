@@ -97,8 +97,8 @@ def thrift_report(request):
 
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
-def individual_thrift_report(request, savings_id):
-    savings = Savings.objects.get(pk=savings_id)
+def individual_thrift_report(request, id):
+    savings = Savings.objects.get(pk=id)
     client_id = savings.client.id
     savings_payments = SavingsPayment.objects.filter(savings_id=savings.id)
     

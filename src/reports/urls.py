@@ -22,7 +22,7 @@ urlpatterns = [
     path('report-summary-by-date/', report_summary_by_date, name='report_summary_by_date'),
     path('daily-report/', daily_report, name='daily_report'),
     path('thrift-report/', thrift_report, name='thrift_report'),
-    path('individual-thrift-report/<int:client_id>/', individual_thrift_report, name='individual_thrift_report'),
+    path('individual-thrift-report/<int:id>/', individual_thrift_report, name='individual_thrift_report'),
     
 ]
 
