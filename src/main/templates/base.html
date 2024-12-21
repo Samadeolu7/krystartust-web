@@ -269,6 +269,7 @@
                     <div class="dropdown-menu">
                         <a href="{% url 'change_password' user.id %}" class="dropdown-item">Change Password</a>
                         {% if is_admin %}
+                        <a href="{% url 'reverse_payment' %}" class="dropdown-item">Transaction Reversal</a>
                         <a href="{% url 'manage_month_status' %}" class="dropdown-item">Close Month</a>
                         {% endif %}
                     </div>

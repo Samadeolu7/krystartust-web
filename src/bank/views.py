@@ -1,17 +1,20 @@
 from datetime import datetime, timedelta
-from django.http import HttpResponse
+
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.db import transaction
+from django.contrib.auth.decorators import login_required
+from django.template.loader import render_to_string
 
 from administration.models import Transaction
 from administration.utils import validate_month_status
+from loan.models import LoanPayment
 from main.utils import verify_trial_balance
-from .forms import BankForm, BankPaymentForm, CashTransferForm, DateRangeForm
+from savings.models import SavingsPayment
+from .forms import BankForm, BankPaymentForm, CashTransferForm, DateRangeForm, ReversePaymentForm
 from .models import Bank, BankPayment
-from django.contrib.auth.decorators import login_required
 from administration.decorators import allowed_users
-
 from .excel_utils import bank_to_excel
 # Create your views here.
 
@@ -142,3 +145,97 @@ def bank_to_excel_view(request, pk):
     response['Content-Disposition'] = f'attachment; filename={bank.name}_payments.xlsx'
     df.to_excel(response, index=False)
     return response
+
+@login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
+def payment_reversal(request):
+    form = ReversePaymentForm()
+    if request.method == 'POST':
+        form = ReversePaymentForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                type = form.cleaned_data['type']
+                bank = form.cleaned_data['bank']
+                payment = form.cleaned_data['payment']
+                reversal_date = form.cleaned_data['reversal_date']
+                reason = form.cleaned_data['reason']
+
+                # Create a new transaction for the reversal
+                tran = Transaction(description=f'Payment reversal: {payment.description} - {reason}')
+                tran.save(prefix='REV')
+
+                # Create a new BankPayment for the reversal
+                BankPayment.objects.create(
+                    bank=bank,
+                    description=f'Payment reversal: {payment.description} - {reason}',
+                    amount=-payment.amount,
+                    bank_balance=bank.balance - payment.amount,
+                    payment_date=reversal_date,
+                    transaction=tran
+                )
+                if type == 'COM':
+                    # Create a new BankPayment for the reversal
+                    loan_payment = LoanPayment.objects.get(transaction=payment.transaction)
+                    loan_payment.payment_schedule.is_paid = False
+                    loan_payment.payment_schedule.payment_date = None
+                    loan_payment.payment_schedule = None
+                    loan_payment.save()
+                    LoanPayment.objects.create(
+                        client=loan_payment.client,
+                        loan=loan_payment.loan,
+                        amount=-loan_payment.amount,
+                        balance=loan_payment.loan.balance - loan_payment.amount,
+                        payment_date=reversal_date,
+                        transaction=tran
+                    )
+                    savings_payment = SavingsPayment.objects.get(transaction=payment.transaction)
+                    SavingsPayment.objects.create(
+                        client=savings_payment.client,
+                        savings=savings_payment.savings,
+                        description=f'Payment reversal: {payment.description} - {reason}',
+                        amount=-savings_payment.amount,
+                        balance=savings_payment.savings.balance - savings_payment.amount,
+                        payment_date=reversal_date,
+                        transaction=tran
+                    )
+                elif type == 'SVS':
+                    savings_payment = SavingsPayment.objects.get(transaction=payment.transaction)
+                    SavingsPayment.objects.create(
+                        savings=savings_payment.savings,
+                        description=f'Payment reversal: {payment.description} - {reason}',
+                        amount=-savings_payment.amount,
+                        savings_balance=savings_payment.savings.balance - savings_payment.amount,
+                        payment_date=reversal_date,
+                        transaction=tran
+                    )
+                elif type == 'LOA':
+                    loan_payment = LoanPayment.objects.get(transaction=payment.transaction)
+                    LoanPayment.objects.create(
+                        loan=loan_payment.loan,
+                        description=f'Payment reversal: {payment.description} - {reason}',
+                        amount=-loan_payment.amount,
+                        loan_balance=loan_payment.loan.balance - loan_payment.amount,
+                        payment_date=reversal_date,
+                        transaction=tran
+                    )
+                verify_trial_balance()
+
+            return redirect('dashboard')
+    else:
+        form = ReversePaymentForm()
+
+    return render(request, 'payment_reversal.html', {'form': form})
+
+
+def update_payments(request):
+    type = request.GET.get('type')
+    bank_id = int(request.GET.get('bank'))
+    payment_date = request.GET.get('payment_date')
+    payments = BankPayment.objects.filter(
+        bank=bank_id,
+        payment_date=payment_date,
+        transaction__reference_number__startswith=type[:3]
+    )
+
+    html = render_to_string('payments_dropdown_list_options.html', {'payments': payments})
+    return JsonResponse(html, safe=False)

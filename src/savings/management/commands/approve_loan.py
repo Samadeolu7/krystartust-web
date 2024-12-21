@@ -16,7 +16,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         try:
             with transaction.atomic():
-                clients = Client.objects.filter(client_id='WL0029').first()
+                clients = Client.objects.filter(client_id='WL0008').first()
                 loan = Loan.objects.filter(client=clients, loan_type= Loan.WEEKLY).latest('start_date')
                 loan_repayment_schedule = LoanRepaymentSchedule.objects.filter(loan=loan)
                 start_date = loan.start_date
@@ -28,9 +28,10 @@ class Command(BaseCommand):
                 time_increment = relativedelta(weeks=1)
                 
                 today = timezone.now().date()
-                date = today - timedelta(days=2)
-                duration = 11
+                date = today + timedelta(days=4)
+                duration = 21
                 amount_due = balance / duration
+                print(amount_due)
                 remainder = balance
                 for i in range(duration):   
                     due_date = date + ((i) * time_increment)

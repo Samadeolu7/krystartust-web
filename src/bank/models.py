@@ -53,7 +53,7 @@ class BankPayment(models.Model):
     payment_date = models.DateField()
 
     def __str__(self):
-        return f'{self.bank.name} - {self.amount}'
+        return f'{self.bank.name} - {self.description} - {self.amount}'
     
     def save(self, *args, **kwargs):
         if not self.pk:

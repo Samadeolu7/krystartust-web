@@ -274,6 +274,7 @@
                     <ul class="collapse list-unstyled" id="settingsSubmenu" data-parent="#sidebarAccordion">
                         <li class="sub-item"><a href="{% url 'change_password' user.id %}">Change Password</a></li>
                         {% if is_admin %}
+                        <li class="sub-item"><a href="{% url 'reverse_payment' %}">Transaction Reversal</a></li>
                         <li class="sub-item"><a href="{% url 'manage_month_status' %}">Close Month</a></li>
                         {% endif %}
                     </ul>

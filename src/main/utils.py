@@ -25,6 +25,6 @@ def verify_trial_balance():
     if total_credit == total_debit:
         return True
     else:
-        raise ValueError('Trial balance does not match')
+        raise ValueError(f'Trial balance does not match. Credit: {total_credit}, Debit: {total_debit}')
     
     

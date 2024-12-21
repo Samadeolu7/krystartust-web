@@ -1,0 +1,43 @@
+{% extends 'base_form.html' %}
+
+{% load custom_filters %}
+
+{% block title %}Reverse Payment{% endblock %}
+
+{% block form_content %}
+        <h1>Reverse Payment</h1>
+
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        function updatePayments() {
+            var type = $('#id_type').val();
+            var bank = $('#id_bank').val();
+            var payment_date = $('#id_payment_date_year').val() + '-' + $('#id_payment_date_month').val() + '-' + $('#id_payment_date_day').val();
+    
+            if (type && bank && payment_date) {
+                $.ajax({
+                    url: '{% url "update_payments" %}',
+                    data: {
+                        'type': type,
+                        'bank': bank,
+                        'payment_date': payment_date
+                    },
+                    success: function(data) {
+                        $('#id_payment').html(data);
+                    }
+                });
+            }
+        }
+    
+        $('#id_type, #id_bank, #id_payment_date_year, #id_payment_date_month, #id_payment_date_day').change(updatePayments);
+    });
+    </script>
+{% endblock %}

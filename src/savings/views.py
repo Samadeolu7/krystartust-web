@@ -88,6 +88,7 @@ def register_payment(request):
         form = CombinedPaymentForm()
     return render(request, 'combined_payment_form.html', {'form': form})
 
+
 @login_required
 def register_savings(request):
     if request.method == 'POST':
