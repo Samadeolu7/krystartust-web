@@ -147,7 +147,7 @@ def bank_to_excel_view(request, pk):
     return response
 
 @login_required
-@allowed_users(allowed_roles=['Admin', 'Manager'])
+@allowed_users(allowed_roles=['Admin'])
 def payment_reversal(request):
     form = ReversePaymentForm()
     if request.method == 'POST':

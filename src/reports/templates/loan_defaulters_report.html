@@ -4,46 +4,110 @@
 
 {% block title %}Loan Defaulters Report{% endblock %}
 
-        {% block content %}
-        <h1 class="text-center mb-4">Loan Defaulters Report</h1>
-        
-        <!-- Defaulters Section -->
-        <h3>Defaulters</h3>
-        <a href="{% url 'defaulter_report_excel' %}" class="btn btn-primary">Download Excel</a>
+{% block content %}
+<h1 class="text-center mb-4">Loan Defaulters Report</h1>
 
-        <!-- Repayment Schedule Section -->
-        <h3>Repayment Schedule</h3>
-        {% if schedule %}
-            <table class="table-report">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Phone</th>
-                        <th>Group</th>
-                        <th>Due Date</th>
-                        <th>Amount Due</th>
-                        <th>Payment Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in schedule %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ item.loan.client.name }}</td>
-                        <td>{{ item.loan.client.phone }}</td>
-                        <td>{{ item.loan.client.group.name }}</td>
-                        <td>{{ item.due_date }}</td>
-                        <td>{{ item.amount_due }}</td>
-                        <td>{{ item.is_paid }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No defaulters found.</p>
-        {% endif %}
-    </div>
+<!-- Defaulters Section -->
+<h3>Defaulters</h3>
+<a href="{% url 'defaulter_report_excel' %}" class="btn btn-primary">Download Excel</a>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<!-- Repayment Schedule Section -->
+<h3>Repayment Schedule</h3>
+{% if schedule %}
+    <table class="table-report">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Group</th>
+                <th>Due Date</th>
+                <th>Amount Due</th>
+                <th>Payment Status</th>
+                {% if user.is_superuser %}
+                <th>Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in schedule %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ item.loan.client.name }}</td>
+                <td>{{ item.loan.client.phone }}</td>
+                <td>{{ item.loan.client.group.name }}</td>
+                <td>{{ item.due_date }}</td>
+                <td>{{ item.amount_due }}</td>
+                <td>{{ item.is_paid }}</td>
+                {% if user.is_superuser %}
+                <td>
+                    <button class="btn btn-primary extend-btn" data-loan-id="{{ item.loan.id }}">Extend</button>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No defaulters found.</p>
+{% endif %}
+<div id="completion-message" class="alert alert-success" style="display: none;">
+    All requests have been processed. You can leave the page now.
+</div>
+<script>
+$(document).ready(function() {
+    var requestQueue = [];
+    var isProcessing = false;
+
+    function processQueue() {
+        if (requestQueue.length > 0) {
+            isProcessing = true;
+            var request = requestQueue.shift();
+            $.ajax(request).done(function(response) {
+                if (response.success) {
+                    request.button.text('Extended');
+                    request.button.prop('disabled', true);
+                } else {
+                    alert('Failed to extend loan.');
+                }
+                processQueue();
+            }).fail(function() {
+                alert('An error occurred.');
+                processQueue();
+            });
+        } else {
+            isProcessing = false;
+            $('#completion-message').show();
+        }
+    }
+
+    $('.extend-btn').click(function() {
+        var loanId = $(this).data('loan-id');
+        var button = $(this);
+
+        var request = {
+            url: '{% url "extend_loan" %}',
+            method: 'POST',
+            data: {
+                'loan_id': loanId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            button: button
+        };
+
+        requestQueue.push(request);
+        if (!isProcessing) {
+            processQueue();
+        }
+    });
+
+    $(window).on('beforeunload', function() {
+        if (isProcessing) {
+            return 'You have pending requests. Are you sure you want to leave?';
+        }
+    });
+});
+
+</script>
+
 {% endblock %}

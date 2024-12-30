@@ -1,7 +1,13 @@
-from decimal import Decimal
+
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+
+from datetime import date, timedelta
+from decimal import Decimal
 
 from administration.decorators import allowed_users
 from administration.models import Transaction
@@ -14,13 +20,8 @@ from savings.models import Savings, SavingsPayment
 from main.models import ClientGroup as Group
 from .models import Loan, LoanPayment, LoanRepaymentSchedule
 from .forms import GuarantorForm, LoanRegistrationForm, LoanPaymentForm, LoanExcelForm, LoanUploadForm
-from django.contrib.auth.decorators import login_required
-from django.db import transaction
-
 from bank.utils import create_bank_payment
 from main.utils import verify_trial_balance
-
-from datetime import date, timedelta
 
 
 @login_required
@@ -259,3 +260,22 @@ def loan_upload(request):
     else:
         form = LoanExcelForm()
     return render(request, 'upload_loan.html', {'form': form})
+
+
+@login_required
+@csrf_exempt
+def extend_loan(request):
+    if request.method == 'POST':
+        loan_id = request.POST.get('loan_id')
+        try:
+            loan = Loan.objects.get(id=loan_id)
+            # Perform the extension logic here
+            unpaid_schedules = LoanRepaymentSchedule.objects.filter(loan=loan, is_paid=False)
+            #extend due date of all unpaid schedules by 7 days
+            for schedule in unpaid_schedules:
+                schedule.due_date += timedelta(days=7)
+                schedule.save()
+            return JsonResponse({'success': True})
+        except Loan.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Loan not found'})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
