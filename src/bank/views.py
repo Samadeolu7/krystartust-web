@@ -130,7 +130,6 @@ def cash_transfer(request):
             return redirect('dashboard')
     else:
         form = CashTransferForm()
-        form.fields['payment_date'].initial = datetime.now().date()
 
     return render(request, 'cash_transfer.html', {'form': form})
 

@@ -21,7 +21,7 @@ class JVForm(forms.Form):
     jv_debit = forms.ChoiceField(choices=choices, label="Debit Type")
     jv_debit_account = forms.ModelChoiceField(queryset=Expense.objects.none(), label="Debit Account")
     amount = forms.DecimalField(max_digits=10, decimal_places=2)
-    payment_date = forms.DateField(widget=forms.SelectDateWidget)
+    payment_date = forms.DateField(widget=forms.SelectDateWidget(years=range(2000, 2030)))
     description = forms.CharField(widget=forms.Textarea, required=False)
 
     def __init__(self, *args, **kwargs):
