@@ -203,7 +203,7 @@ def payment_reversal(request):
                         savings=savings_payment.savings,
                         description=f'Payment reversal: {payment.description} - {reason}',
                         amount=-savings_payment.amount,
-                        savings_balance=savings_payment.savings.balance - savings_payment.amount,
+                        balance=savings_payment.savings.balance - savings_payment.amount,
                         payment_date=reversal_date,
                         transaction=tran
                     )
