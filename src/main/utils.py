@@ -26,5 +26,21 @@ def verify_trial_balance():
         return True
     else:
         raise ValueError(f'Trial balance does not match. Credit: {total_credit}, Debit: {total_debit}')
-    
-    
+
+def close_trial_balance():
+    pass
+
+def close_pandl():
+    pass
+
+def close_balance_sheet():
+    pass
+
+def close_loan_repayment():
+    pass
+
+def close_savings():
+    pass
+
+def close_liability():
+    pass

@@ -6,7 +6,16 @@
 
 {% block content %}
         <h1 class="text-center mb-4">Profit and Loss Report</h1>
-
+        <form method="post" action="{% url 'profit_and_loss_report' %}" class="mb-4">
+            {% csrf_token %}
+            <label for="year">Select Year:</label>
+            <select name="year" id="year" class="form-select" style="width: auto; display: inline-block;">
+                {% for year in year_range %}
+                <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
         <!-- Profit and Loss Table -->
         <table class="table-report">
             <thead class="table-dark">

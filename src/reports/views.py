@@ -134,13 +134,16 @@ def daily_transactions_report(request):
 @login_required
 @allowed_users(allowed_roles=['Admin'])
 def profit_and_loss_report(request):
-    current_year = datetime.now().year
+    if request.method == 'POST':
+        current_year = request.POST.get('year')
+    else:
+        current_year = datetime.now().year
 
     incomes_by_month = IncomePayment.objects.filter(created_at__year=current_year).values(
         'payment_date__month', 'income__name'
     ).annotate(monthly_total=Sum('amount'))
 
-    expenses_by_month = ExpensePayment.objects.filter(created_at__year=current_year).values(
+    expenses_by_month = ExpensePayment.objects.filter(payment_date__year=current_year).values(
         'payment_date__month', 'expense__name', 'expense__expense_type__name'  # Include expense name
     ).annotate(monthly_total=Sum('amount'))
 
@@ -203,6 +206,8 @@ def profit_and_loss_report(request):
         yearly_expense_by_type[expense_type] += total
     
     months = [(month, calendar.month_name[month]) for month in range(1, 13)]
+    current_year = datetime.now().year
+    year_range = range(2024, current_year + 1)
 
     context = {
         'monthly_incomes': monthly_incomes,
@@ -217,7 +222,9 @@ def profit_and_loss_report(request):
         'monthly_profit': {
             month: (monthly_income_totals.get(month, 0) - monthly_expense_totals.get(month, 0))
             for month in range(1, 13)
-        }
+        },
+        'year_range': year_range,
+        'current_year': current_year
     }
 
     return render(request, 'profit_loss.html', context)

@@ -19,7 +19,7 @@ from expenses.models import Expense, ExpensePayment
 from income.models import Income, IncomePayment
 from liability.models import Liability, LiabilityPayment
 from loan.models import Loan, LoanPayment, LoanRepaymentSchedule as LoanRepayment
-from main.utils import verify_trial_balance
+from main.utils import close_balance_sheet, close_liability, close_loan_repayment, close_pandl, close_savings, close_trial_balance, verify_trial_balance
 from savings.models import Savings, SavingsPayment
 from user.models import User
 
@@ -406,3 +406,17 @@ def search(request):
         'query': query
     }
     return render(request, 'search_result.html', context)
+
+def close_year(request):
+    # Close the year
+    with transaction.atomic():
+        close_trial_balance()
+        close_pandl()
+        close_balance_sheet()
+        close_loan_repayment()
+        close_savings()
+        close_liability()
+
+        verify_trial_balance()
+
+    return redirect('dashboard')
