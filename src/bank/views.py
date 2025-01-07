@@ -200,6 +200,7 @@ def payment_reversal(request):
                 elif type == 'SVS':
                     savings_payment = SavingsPayment.objects.get(transaction=payment.transaction)
                     SavingsPayment.objects.create(
+                        client=savings_payment.client,
                         savings=savings_payment.savings,
                         description=f'Payment reversal: {payment.description} - {reason}',
                         amount=-savings_payment.amount,
@@ -210,6 +211,7 @@ def payment_reversal(request):
                 elif type == 'LOA':
                     loan_payment = LoanPayment.objects.get(transaction=payment.transaction)
                     LoanPayment.objects.create(
+                        client=loan_payment.client,
                         loan=loan_payment.loan,
                         description=f'Payment reversal: {payment.description} - {reason}',
                         amount=-loan_payment.amount,

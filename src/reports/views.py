@@ -270,6 +270,12 @@ def trial_balance_report(request):
 
 @login_required
 @allowed_users(allowed_roles=['Admin'])
+def balance_sheet_report(request):
+    pass
+
+
+@login_required
+@allowed_users(allowed_roles=['Admin'])
 def client_list_excel(request):
     merged_df = client_list_to_excel()
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
