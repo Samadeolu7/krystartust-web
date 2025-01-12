@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+
+{% load custom_filters %}
+
+{% block title %}Trial Balance Report{% endblock %}
+
+        {% block content %}
+        <h1 class="text-center mb-4">Trial Balance Report - {{ current_year }}</h1>
+        <table class="table-report">
+            <thead class="table-dark">
+                <tr>
+                    <th>Account Type</th>
+                    <th>Current Year</th>
+                    {% for year in years %}
+                    <th>YEAR</th>
+                    {% endfor %}
+
+
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr class="table-dark">
+                    <td>Assets</td>
+                    <td>{{ current_year }}</td>
+                    {% for year in years %}
+                    <td>{{ year }}</td>
+                    {% endfor %}
+                </tr>
+
+                <tr class="table-success">
+                    <td>Property, Plant, and Equipment</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+
+                <tr class="table-success">
+                    <td>Intangible Asset</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+                
+                <tr class="table-success">
+                    <td>Non-current Investment</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+                <tr class="table-success">
+                    <td>Deferred Tax Asset</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+                <tr class="table-success">
+                    <td>Other Non-current Asset</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+
+                <tr class="table-dark">
+                    <td>Total Non-Current Assets</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+                
+                <tr class="table-dark">
+                    <td>Current Assets</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td>{{ year }}</td>
+                    {% endfor %}
+                </tr>
+
+                <tr class="table-success">
+                    <td>Current Investments</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+
+                <tr class="table-success">
+                    <td>Inventories</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+                
+                <tr class="table-success">
+                    <td>Trade Receivables</td>
+                    <td>{{ total_loans |naira }}</td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+                <tr class="table-success">
+                    <td>Prepayments</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+                
+                {% for bank in banks %}
+                <tr>
+                    <td>{{ bank.name }}</td>
+                    <td>{{ bank.balance |naira }}</td>
+                    {% for year in years %}
+                    <td>{{ year.bank_balance |naira }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                <tr class="table-dark">
+                    <td>Total Current Asset</td>
+                    <td>{{total_current_assets |naira }}</td>
+                    {% for year in years %}
+                    <td>{{ year }}</td>
+                    {% endfor %}
+                </tr>
+                <tr class="table-dark">
+                    <td>Total Asset</td>
+                    <td>{{ total_current_assets |naira }}</td>
+                    {% for year in years %}
+                    <td>{{ year }}</td>
+                    {% endfor %}
+                </tr>
+                <tr class="table-dark">
+                    <td>Equity and Liabilities:</td>
+                    <td>{{ current_year }}</td>
+                    {% for year in years %}
+                    <td>{{ year }}</td>
+                    {% endfor %}
+                </tr>
+                
+                <tr class="table-success">
+                    <td>Share Capital</td>
+                    <td>{{ share_capital |naira }}</td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+
+                <tr class="table-success">
+                    <td>Retained Earnings</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+
+                <tr class="table-success">
+                    <td>Reserves and Surplus</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+
+                <tr class="table-success">
+                    <td>Deferred tax liabilities</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+                <tr class="table-dark">
+                    <td>Total Equity</td>
+                    <td>{{ total_equity |naira }}</td>
+                    {% for year in years %}
+                    <td>{{ year }}</td>
+                    {% endfor %}
+                </tr>
+
+                <tr class="table-dark">
+                    <td>Current Liabilities</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+
+                <tr class="table-success">
+                    <td>Short-term Borrowings</td>
+                    <td>{{ total_loan_liability |naira }}</td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+
+                <tr class="table-success">
+                    <td>Customer Savings</td>
+                    <td>{{ total_savings |naira }}</td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+
+                <tr class="table-success">
+                    <td>Union Contribution</td>
+                    <td>{{ total_union_contribution |naira }}</td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+
+                <tr class="table-success">
+                    <td>Trade Payables</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+
+                <tr class="table-success">
+                    <td>Intangible Asset</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+                
+                <tr class="table-success">
+                    <td>Non-current Investment</td>
+                    <td></td>
+                    {% for year in years %}
+                    <td></td>
+                    {% endfor %}
+                </tr>
+                <tr class="table-dark">
+                    <td>Total Current Liabilites</td>
+                    <td>{{ total_current_liabilities |naira }}</td>
+                    {% for year in years %}
+                    <td>{{ year }}</td>
+                    {% endfor %}
+                </tr>
+                <tr class="table-dark">
+                    <td>Total Equity and Liabilites</td>
+                    <td>{{ total_equity_and_liability|naira }}</td>
+                    {% for year in years %}
+                    <td>{{ year }}</td>
+                    {% endfor %}
+                </tr>
+
+            </tbody>
+            
+
+        </table>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

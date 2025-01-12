@@ -11,6 +11,7 @@
                 <tr>
                     <th>Account Type</th>
                     <th>Account Name</th>
+                    <th>Previous Balance</th>
                     <th>Debit</th>
                     <th>Credit</th>
 
@@ -21,6 +22,7 @@
                 <tr class="table-success">
                     <td>Savings</td>
                     <td>Savings</td>
+                    <td>{{ total_previous_savings |naira }}</td>
                     <td></td>
                     <td>{{ total_savings |naira }}</td>
                 </tr>
@@ -29,6 +31,7 @@
                 <tr class="table-success">
                     <td>Loans</td>
                     <td>Total Debtors</td>
+                    <td>{{ total_previous_loans |naira }}</td>
                     <td>{{ total_loans |naira }}</td>
                     <td></td>
                 </tr>
@@ -38,6 +41,7 @@
                 <tr>
                     <td>Banks</td>
                     <td>{{ bank.name }}</td>
+                    <td>{{ bank.balance_bf |naira }}</td>
                     <td>{{ bank.balance |naira }}</td>
                     <td></td>
                 </tr>
@@ -48,6 +52,7 @@
                 <tr>
                     <td>Incomes</td>
                     <td>{{ income.name }}</td>
+                    <td> {{ income.balance_bf |naira }}</td>
                     <td></td>
                     <td>{{ income.balance |naira }}</td>
 
@@ -59,6 +64,7 @@
                 <tr>
                     <td>Expenses</td>
                     <td>{{ expense.name }}</td>
+                    <td>{{ expense.balance_bf |naira }}</td>
                     <td>{{ expense.balance |naira }}</td>
                     <td></td>
                 </tr>
@@ -69,12 +75,14 @@
                 <tr>
                     <td>Liabilities</td>
                     <td>{{ liability.name }}</td>
+                    <td>{{ liability.balance_bf |naira }}</td>
                     <td></td>
                     <td>{{ liability.balance |naira }} </td>
                 </tr>    
                     {% endfor %}
                     <tr>
                         <td><strong>Total</strong></td>
+                        <td></td>
                         <td></td>
                         <td><strong>{{ total_debit |naira }}</strong></td>
                         <td><strong>{{ total_credit |naira }}</strong></td>

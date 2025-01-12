@@ -47,3 +47,10 @@ class JournalEntry(models.Model):
     rejected = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='journal_entries')
+
+
+class YearEndEntry(models.Model):
+    year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='year_end_entries')
+    total_savings = models.DecimalField(max_digits=10, decimal_places=2)
+    total_loans = models.DecimalField(max_digits=10, decimal_places=2)
+    

@@ -1,4 +1,4 @@
-from .views import all_clients_report, all_groups_report, client_loans_payments_excel
+from .views import all_clients_report, all_groups_report, client_loans_payments_excel, balance_sheet_report
 from .views import client_savings_payments_excel, daily_transactions_report, defaulter_report_excel
 from .views import individual_group_report, profit_and_loss_report, trial_balance_report, client_list_excel
 from .views import weekly_cash_flow_report, report_summary_by_date, daily_report, thrift_report, individual_thrift_report
@@ -14,6 +14,7 @@ urlpatterns = [
     path('daily-transactions-report/', daily_transactions_report, name='daily_transactions_report'),
     path('pandl-report/', profit_and_loss_report, name='profit_and_loss_report'),
     path('trial-balance-report/', trial_balance_report, name='trial_balance'),
+    path('balance-sheet-report/', balance_sheet_report, name='balance_sheet_report'),
     path('client-list-excel/', client_list_excel, name='client_list_excel'),
     path('defaulter-report-excel/', defaulter_report_excel, name='defaulter_report_excel'),
     path('client-savings-payments-excel/<int:client_id>/', client_savings_payments_excel, name='client_savings_payments_excel'),

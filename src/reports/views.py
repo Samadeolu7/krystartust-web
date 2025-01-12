@@ -15,7 +15,7 @@ from liability.utils import get_union_contribution_income
 from loan.models import Loan, LoanPayment, LoanRepaymentSchedule
 from reports.excel_utils import client_list_to_excel, client_loans_payments_to_excel, client_savings_payments_to_excel, defaulter_report_to_excel
 from savings.models import Savings, SavingsPayment
-from main.models import ClientGroup as Group
+from main.models import ClientGroup as Group, Year, YearEndEntry
 from django.contrib.auth.decorators import login_required
 from django.utils.timezone import make_aware
 
@@ -234,18 +234,31 @@ def profit_and_loss_report(request):
 @allowed_users(allowed_roles=['Admin'])
 def trial_balance_report(request):
     # Fetch all objects
-    incomes = Income.objects.all()
-    expenses = Expense.objects.all()
-    banks = Bank.objects.all()
-    liability = Liability.objects.all()
+    year = Year.current_year()
+    incomes = Income.objects.filter(year=year)
+    expenses = Expense.objects.filter(year=year)
+    banks = Bank.objects.filter(year=year)
+    liability = Liability.objects.filter(year=year)
+    previous_year_entry = YearEndEntry.objects.filter(year=year-1)
+    if previous_year_entry:
+        previous_year_entry = previous_year_entry.first()
+        previous_total_savings = previous_year_entry.total_savings
+        previous_total_loans = previous_year_entry.total_loans
+    else:
+        previous_total_savings = 0
+        previous_total_loans = 0
 
     # Aggregate sums in a single query for each model
-    total_incomes = Income.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
-    total_expenses = Expense.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_incomes = Income.objects.filter(year=year).aggregate(total=Sum('balance')).get('total', 0) or 0
+    previous_total_incomes = Income.objects.filter(year=year-1).aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_expenses = Expense.objects.filter(year=year).aggregate(total=Sum('balance')).get('total', 0) or 0
+    previous_total_expenses = Expense.objects.filter(year=year-1).aggregate(total=Sum('balance')).get('total', 0) or 0
     total_savings = Savings.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
     total_loans = Loan.objects.filter(approved=True).aggregate(total=Sum('balance')).get('total', 0) or 0
-    total_banks = Bank.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
-    total_liability = Liability.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_banks = Bank.objects.filter(year=year).aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_previous_banks = Bank.objects.filter(year=year-1).aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_liability = Liability.objects.filter(year=year).aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_previous_liability = Liability.objects.filter(year=year-1).aggregate(total=Sum('balance')).get('total', 0) or 0
 
     # Calculate total credit and debit
     total_credit = total_incomes + total_savings + total_liability
@@ -253,11 +266,17 @@ def trial_balance_report(request):
 
     context = {
         'total_savings': total_savings,
+        'total_previous_savings': previous_total_savings,
         'total_loans': total_loans,
+        'total_previous_loans': previous_total_loans,
         'total_incomes': total_incomes,
+        'total_previous_incomes': previous_total_incomes,
         'total_expenses': total_expenses,
+        'total_previous_expenses': previous_total_expenses,
         'total_banks': total_banks,
+        'total_previous_banks': total_previous_banks,
         'total_liability': total_liability,
+        'total_previous_liability': total_previous_liability,
         'total_credit': total_credit,
         'total_debit': total_debit,
         'banks': banks,
@@ -271,7 +290,80 @@ def trial_balance_report(request):
 @login_required
 @allowed_users(allowed_roles=['Admin'])
 def balance_sheet_report(request):
-    pass
+    # Fetch all objects
+    year = Year.current_year()
+    incomes = Income.objects.filter(year=year)
+    expenses = Expense.objects.filter(year=year)
+    banks = Bank.objects.filter(year=year)
+    liability = Liability.objects.filter(year=year)
+    share_capital = liability.filter(name='Paid Up Capital').first().balance
+    # all liabilities are loans except for paid up capital, union contribution and union pulse
+    liability_l = liability.exclude(name='Paid Up Capital')
+    liability_l = liability_l.exclude(name='Union Contribution')
+    liability_l= liability_l.exclude(name='Union Pulse')
+    total_loan_liability = liability_l.aggregate(total=Sum('balance')).get('total', 0) or 0
+
+    total_union_contribution = Liability.objects.filter(name='Union Contribution').first().balance + Liability.objects.filter(name='Union Pulse').first().balance
+    
+    previous_year_entry = YearEndEntry.objects.filter(year=year-1)
+
+    if previous_year_entry:
+        previous_year_entry = previous_year_entry.first()
+        previous_total_savings = previous_year_entry.total_savings
+        previous_total_loans = previous_year_entry.total_loans
+    else:
+        previous_total_savings = 0
+        previous_total_loans = 0
+
+    # Aggregate sums in a single query for each model
+    total_incomes = Income.objects.filter(year=year).aggregate(total=Sum('balance')).get('total', 0) or 0
+    previous_total_incomes = Income.objects.filter(year=year-1).aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_expenses = Expense.objects.filter(year=year).aggregate(total=Sum('balance')).get('total', 0) or 0
+    previous_total_expenses = Expense.objects.filter(year=year-1).aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_savings = Savings.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_loans = Loan.objects.filter(approved=True).aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_banks = Bank.objects.filter(year=year).aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_previous_banks = Bank.objects.filter(year=year-1).aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_liability = Liability.objects.filter(year=year).aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_previous_liability = Liability.objects.filter(year=year-1).aggregate(total=Sum('balance')).get('total', 0) or 0
+
+    # Calculate total credit and debit
+    total_credit = total_incomes + total_savings + total_liability
+    total_debit = total_expenses + total_loans + total_banks
+    total_current_assets = total_loans + total_banks
+    total_equity = share_capital
+    total_current_liabilities = total_loan_liability + total_union_contribution + total_savings
+    total_equity_and_liability = total_equity + total_current_liabilities
+
+    context = {
+        'total_savings': total_savings,
+        'total_previous_savings': previous_total_savings,
+        'total_loans': total_loans,
+        'total_previous_loans': previous_total_loans,
+        'total_incomes': total_incomes,
+        'total_previous_incomes': previous_total_incomes,
+        'total_expenses': total_expenses,
+        'total_previous_expenses': previous_total_expenses,
+        'total_banks': total_banks,
+        'total_previous_banks': total_previous_banks,
+        'total_liability': total_liability,
+        'total_previous_liability': total_previous_liability,
+        'total_credit': total_credit,
+        'total_debit': total_debit,
+        'banks': banks,
+        'incomes': incomes,
+        'expenses': expenses,
+        'liabilities': liability,
+        'share_capital': share_capital,
+        'total_loan_liability': total_loan_liability,
+        "total_union_contribution": total_union_contribution,
+        'total_current_assets': total_current_assets,
+        'total_equity': total_equity,
+        'total_current_liabilities': total_current_liabilities,
+        'total_equity_and_liability': total_equity_and_liability,
+    }
+    return render(request, 'balance_sheet.html', context)
+
 
 
 @login_required
