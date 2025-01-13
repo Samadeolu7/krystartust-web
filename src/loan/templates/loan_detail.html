@@ -31,6 +31,16 @@
                 <th>Loan Balance</th>
                 <td>{{ loan.balance|naira }}</td>
             </tr>
+                        <tr>
+                <th>Loan Guarantor</th>
+                <td>
+                    {% if loan.guarantor.name %}
+                        {{ loan.guarantor.name }}
+                    {% else %}
+                        <a href="{% url 'guarantor_for_loan' loan.id %}">Add/Edit Guarantor</a>
+                    {% endif %}
+                </td>
+            </tr>
         </table>
 
         <!-- Repayment Schedule Table -->
