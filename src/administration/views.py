@@ -8,7 +8,7 @@ from django.db import transaction
 
 from administration.decorators import allowed_users
 from expenses.utils import approve_expense
-from main.models import JournalEntry
+from main.models import JournalEntry, Year
 from main.utils import verify_trial_balance
 from user.pdf_gen import generate_payslip
 from .models import Approval, MonthStatus, Notification
@@ -130,8 +130,7 @@ def download_payslip(request, notification_id):
 @login_required
 @allowed_users(allowed_roles=['Admin'])
 def manage_month_status(request):
-    current_year = datetime.now().year
-    current_month = datetime.now().month
+    current_year = Year.current_year()
 
     # Generate month statuses for the current year if they don't exist
     for month in range(1, 13):
