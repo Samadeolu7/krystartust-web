@@ -19,7 +19,7 @@ from expenses.models import Expense, ExpensePayment
 from income.models import Income, IncomePayment
 from liability.models import Liability, LiabilityPayment
 from loan.models import Loan, LoanPayment, LoanRepaymentSchedule as LoanRepayment
-from main.utils import close_balance_sheet, close_bank, close_liability, close_loan_repayment, close_savings, close_trial_balance, verify_trial_balance
+from main.utils import close_balance_sheet, close_bank, close_liability, close_loan_repayment, close_savings, close_trial_balance, close_year, verify_trial_balance
 from savings.models import Savings, SavingsPayment
 from user.models import User
 
@@ -159,6 +159,10 @@ def dashboard(request):
         approvals += journal_entry_approvals
     if is_manager:
         approvals = Approval.objects.filter(approved=False,rejected=False,type='Loan').count()
+
+    if is_employee:
+        approvals = Approval.objects.filter(approved=False,rejected=False,type='Loan').count()
+
     notifications = Notification.objects.filter(user=request.user, is_read=False)
     
     context = {
@@ -407,16 +411,13 @@ def search(request):
     }
     return render(request, 'search_result.html', context)
 
-def close_year(request):
+def close_year_view(request):
     # Close the year
     with transaction.atomic():
-        close_bank()
-        close_trial_balance()
-        close_balance_sheet()
-        close_loan_repayment()
-        close_savings()
-        close_liability()
+        
+        close_year()
 
         verify_trial_balance()
+        raise Exception("Test exception")
 
     return redirect('dashboard')
