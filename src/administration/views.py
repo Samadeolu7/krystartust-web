@@ -220,7 +220,7 @@ def ticket_update(request, pk):
             update.save()
             return redirect('ticket_detail', pk=pk)
     else:
-        form = TicketUpdateForm()
+        form = TicketUpdateForm(instance=ticket)
     return render(request, 'ticket_detail.html', {'form': form, 'ticket': ticket})
 
 @login_required

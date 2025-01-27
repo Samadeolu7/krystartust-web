@@ -10,27 +10,35 @@ class SalaryForm(forms.ModelForm):
         model = Salary
         fields = '__all__'
 
+ALL_USERS_OPTION = -1
 
+class UserChoiceField(forms.ModelChoiceField):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.choices = [(ALL_USERS_OPTION, 'All Staff')] + list(self.choices)
+
+    def to_python(self, value):
+        if value == str(ALL_USERS_OPTION):
+            return ALL_USERS_OPTION
+        return super().to_python(value)
 
 class TicketForm(forms.ModelForm):
-    ALL_USERS_OPTION = -1
-
     class Meta:
         model = Tickets
         fields = ['users', 'client', 'title', 'description', 'priority']
 
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
-        self.fields['users'].queryset = User.objects.all()
-        self.fields['users'].choices = [('', 'Select User')] + [(self.ALL_USERS_OPTION, 'All Staff')] + list(self.fields['users'].choices)
+    users = UserChoiceField(
+        queryset=User.objects.all(),
+        empty_label=None,
+        label="Assign to",
+        widget=forms.Select,
+    )
 
     def clean_users(self):
-        users = self.cleaned_data['users']
-        if users and users[0] == self.ALL_USERS_OPTION:
+        user = self.cleaned_data['users']
+        if user == ALL_USERS_OPTION:
             return User.objects.all()
-        return users
-
+        return [user]
 
 class TicketUpdateForm(forms.ModelForm):
     class Meta:

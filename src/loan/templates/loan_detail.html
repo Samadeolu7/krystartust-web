@@ -44,55 +44,55 @@
         </table>
 
         <!-- Repayment Schedule Table -->
-        <h3>Loan Payments</h3>
-        {% if loan_payments%}
-            <table class="table-report">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Date</th>
-                        <th>Ref No</th>
-                        <th>Description</th>
-                        <th>Amount</th>
-                        <th>Balance</th>
+                <h3>Loan Payments</h3>
+                {% if loan_payments%}
+                    <table class="table-report">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th>Ref No</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Balance</th>
 
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                    <td>0</td>
-                    <td>{{ loan.created_at }}</td>
-                    <td>{{ loan.transaction.reference_number }}</td>
-                    <td>Loan Disbursement</td>
-                    <td>{{ loan.amount|naira }}</td>
-                    <td>{{ loan.amount|naira }}</td>
-                    </tr>
-                    <tr>
-                    <td>1</td>
-                    <td>{{ loan.created_at }}</td>
-                    <td>{{ loan.transaction.reference_number }}</td>
-                    <td>Interest</td>
-                    <td>{{ loan_interest_amount|naira }}</td>
-                    <td>{{ loan.amount|add:loan_interest_amount|naira }}</td>
-                    </tr>
-                    {% with loan.amount|add:loan_interest_amount as running_balance %}
-                    {% for payment in loan_payments %}
-                    <tr>
-                        <td>{{ forloop.counter|add:1 }}</td>
-                        <td>{{ payment.payment_date }}</td>
-                        <td>{{ payment.transaction.reference_number }}</td>
-                        <td>{{ payment.description }}</td>
-                        <td>-{{  payment.amount|naira }}</td>
-                        <td>{{ running_balance|subtract:payment.amount|naira }}</td>
-                        {% update_variable running_balance|subtract:payment.amount as running_balance %}
-                    </tr>
-                    {% endfor %}
-                    {% endwith %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No loan payments found</p>
-        {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                            <td>0</td>
+                            <td>{{ loan.created_at }}</td>
+                            <td>{{ loan.transaction.reference_number }}</td>
+                            <td>Loan Disbursement</td>
+                            <td>{{ loan.amount|naira }}</td>
+                            <td>{{ loan.amount|naira }}</td>
+                            </tr>
+                            <tr>
+                            <td>1</td>
+                            <td>{{ loan.created_at }}</td>
+                            <td>{{ loan.transaction.reference_number }}</td>
+                            <td>Interest</td>
+                            <td>{{ loan_interest_amount|naira }}</td>
+                            <td>{{ loan.amount|add:loan_interest_amount|naira }}</td>
+                            </tr>
+                            {% with loan.amount|add:loan_interest_amount as running_balance %}
+                            {% for payment in loan_payments %}
+                            <tr>
+                                <td>{{ forloop.counter|add:1 }}</td>
+                                <td>{{ payment.payment_date }}</td>
+                                <td>{{ payment.transaction.reference_number }}</td>
+                                <td>{{ payment.description }}</td>
+                                <td>-{{  payment.amount|naira }}</td>
+                                <td>{{ running_balance|subtract:payment.amount|naira }}</td>
+                                {% update_variable running_balance|subtract:payment.amount as running_balance %}
+                            </tr>
+                            {% endfor %}
+                            {% endwith %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No loan payments found</p>
+                {% endif %}
 
         <h3>Repayment Schedule</h3>
         {% if loan_schedules %}

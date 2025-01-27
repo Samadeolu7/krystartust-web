@@ -1,3 +1,4 @@
+from decimal import Decimal
 import os
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -120,12 +121,17 @@ def individual_report(request, pk):
     savings = Savings.objects.filter(client=client)
     loan_payments = LoanPayment.objects.filter(loan__in=loans)
     savings_payments = SavingsPayment.objects.filter(savings__in=savings)
+    for loan in loans:
+        loan.interest_amount = Decimal(loan.interest) * Decimal(loan.amount) / Decimal(100)
+        
+    loan_interest_amount= sum([loan.interest_amount for loan in loans])
     context = {
         'client': client,
         'loans': loans,
         'savings': savings,
         'loan_payments': loan_payments,
         'savings_payments': savings_payments,
+        'loan_interest_amount': loan_interest_amount,
     }
 
     return render(request, 'individual_report.html', context)
