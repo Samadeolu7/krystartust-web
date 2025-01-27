@@ -1,0 +1,72 @@
+<!-- filepath: /d:/Users/User/Desktop/krystartust web/src/administration/templates/ticket_detail.html -->
+{% extends 'base.html' %}
+
+{% load custom_filters %}
+
+{% block title %}Ticket Details{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header">
+                <h4 class="my-0 font-weight-normal">{{ ticket.title }}</h4>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title pricing-card-title">{{ ticket.get_priority_display }}</h5>
+                <p class="card-text">Client: {{ ticket.client.name }}</p>
+                <p class="card-text">Assigned to: {% for user in ticket.users.all %}{{ user.username }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                <p class="card-text">{{ ticket.description }}</p>
+                <p class="card-text"><small class="text-muted">Created on: {{ ticket.created_at|date:"Y-m-d H:i" }}</small></p>
+                <p class="card-text"><small class="text-muted">Status: {{ ticket.status }}</small></p>
+            </div>
+        </div>
+
+        <h5>Updates</h5>
+        <div class="updates">
+            {% for update in ticket_updates %}
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <p class="card-text">{{ update.message }}</p>
+                        <p class="card-text"><small class="text-muted">Updated by: {{ update.created_by.username }} on {{ update.created_at|date:"Y-m-d H:i" }}</small></p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <h5>Add Update</h5>
+                <form method="post" action="{% url 'ticket_detail' ticket.pk %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <textarea class="form-control" name="message" rows="3" placeholder="Add your update here..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Add Update</button>
+                </form>
+            </div>
+            <div class="col-md-4">
+                <h5>Reassign Ticket</h5>
+                <form method="post" action="{% url 'ticket_reassign' ticket.pk %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <select class="form-control" name="new_user">
+                            {% for user in reassign_form.fields.new_user.queryset %}
+                                <option value="{{ user.id }}">{{ user.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-warning mt-2">Reassign Ticket</button>
+                </form>
+            </div>
+            <div class="col-md-4">
+                <h5>Close Ticket</h5>
+                <form method="post" action="{% url 'ticket_close' ticket.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger mt-2">Close Ticket</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

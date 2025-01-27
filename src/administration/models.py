@@ -134,3 +134,46 @@ class MonthStatus(models.Model):
 
     def __str__(self):
         return f"{self.month}/{self.year} - {'Closed' if self.is_closed else 'Open'}"
+    
+
+class Tickets(models.Model):
+    ESCALATE = 'e'
+    HIGH = 'h'
+    NORMAL = 'n'
+    LOW = 'l'
+    PRIORITY = (
+        (ESCALATE, 'Escalate'),
+        (HIGH, 'High'),
+        (NORMAL, 'Normal'),
+        (LOW, 'Low')
+    )
+
+    users = models.ManyToManyField(User, related_name='tickets')
+    client = models.ForeignKey('client.Client', on_delete=models.CASCADE, related_name='tickets')
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    priority = models.CharField(max_length=1, choices=PRIORITY, default=NORMAL)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_tickets')
+    closed = models.BooleanField(default=False)
+    closed_at = models.DateTimeField(null=True, blank=True)
+    closed_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='closed_tickets', null=True, blank=True)
+
+    def __str__(self):
+        return self.title
+    
+    def close(self, user):
+        self.closed = True
+        self.closed_at = datetime.now()
+        self.closed_by = user
+        self.save()
+    
+#create updates model for Tickets
+class TicketUpdates(models.Model):
+    ticket = models.ForeignKey(Tickets, on_delete=models.CASCADE, related_name='updates')
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ticket_updates')
+
+    def __str__(self):
+        return f"Update for {self.ticket.title}"

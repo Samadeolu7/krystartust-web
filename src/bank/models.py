@@ -21,7 +21,7 @@ def recalculate_balance_after_payment_date(bank_id, payment_date):
     BankPayment.objects.bulk_update(updates, ['bank_balance'])
         
 class Bank(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     description = models.TextField()
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     balance_bf = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -41,6 +41,7 @@ class Bank(models.Model):
         payment.save()
     class Meta:
         ordering = ['created_at']
+        unique_together = ['name', 'year']
 
 class BankPayment(models.Model):
     bank = models.ForeignKey(Bank, on_delete=models.CASCADE, related_name='payments', db_index=True)

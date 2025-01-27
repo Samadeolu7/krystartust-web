@@ -22,6 +22,9 @@
             </div>
         </div>
 
+        <!-- Open Tickets button -->
+        <a href="{% url 'ticket_list' client.id %}" class="btn btn-primary">View Open Tickets</a>
+
         <!-- Loans Section -->
         <h3>Loans</h3>
         {% if loans %}

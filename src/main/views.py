@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.conf import settings
 
 from administration.decorators import allowed_users
-from administration.models import Approval, Notification, Transaction
+from administration.models import Approval, Notification, Tickets, Transaction
 from bank.models import Bank
 from client.models import Client
 from expenses.models import Expense, ExpensePayment
@@ -157,11 +157,15 @@ def dashboard(request):
         approvals = Approval.objects.filter(approved=False,rejected=False).count()
         journal_entry_approvals = JournalEntry.objects.filter(approved=False,rejected=False).count()
         approvals += journal_entry_approvals
+        open_tickets = Tickets.objects.filter(closed=False).count()
     if is_manager:
         approvals = Approval.objects.filter(approved=False,rejected=False,type='Loan').count()
+        # check for open tickets where the user is one of the assigned employees
+        open_tickets = Tickets.objects.filter(closed=False, users__in=[user]).count()
 
     if is_employee:
         approvals = Approval.objects.filter(approved=False,rejected=False,type='Loan').count()
+        open_tickets = Tickets.objects.filter(closed=False, users__in=[user]).count()
 
     notifications = Notification.objects.filter(user=request.user, is_read=False)
     
@@ -185,7 +189,8 @@ def dashboard(request):
         'is_employee': is_employee,
         'group_clients': group_clients,
         'approvals': approvals,
-        'notifications': notifications
+        'notifications': notifications,
+        'open_tickets': open_tickets,
     }
 
     return render(request, 'dash.html', context)

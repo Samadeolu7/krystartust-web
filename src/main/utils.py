@@ -183,7 +183,7 @@ def close_liability(year):
     difference = 0
     # Update the mapping with the newly created liabilities
     for new_liability in new_liabilities:
-        old_liability = liabilities.get(name=new_liability.name, description=new_liability.description, year=year-1)
+        old_liability = liabilities.get(name=new_liability.name, description=new_liability.description, year=year)
         liability_mapping[old_liability.id] = new_liability
 
     # Collect all liability payments that need to be updated
@@ -193,7 +193,8 @@ def close_liability(year):
             payment.liability = liability_mapping[liability.id]
             liability_payments_updates.append(payment)
             difference += payment.amount
-
+        liability.balance -= difference
+        liability.save()
 
     # Bulk update liability payments
     LiabilityPayment.objects.bulk_update(liability_payments_updates, ['liability'])

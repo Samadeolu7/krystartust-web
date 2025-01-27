@@ -15,6 +15,7 @@ class Income(models.Model):
     
     class Meta:
         ordering = ['created_at']
+        unique_together = ['name', 'year']
 
     def record_payment(self, amount,description, payment_date,transaction):
         payment = IncomePayment(income=self, amount=amount,description=description, payment_date=payment_date,transaction=transaction)

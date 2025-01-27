@@ -53,4 +53,5 @@ class YearEndEntry(models.Model):
     year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='year_end_entries')
     total_savings = models.DecimalField(max_digits=10, decimal_places=2)
     total_loans = models.DecimalField(max_digits=10, decimal_places=2)
+    retained_earnings = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     

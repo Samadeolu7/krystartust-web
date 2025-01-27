@@ -13,6 +13,11 @@ class Liability(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     year = models.IntegerField(default=2024)
+
+    class Meta:
+        ordering = ['created_at']
+        unique_together = ['name', 'year']
+        
     def __str__(self):
         return f'{self.name} - {self.balance}'
 

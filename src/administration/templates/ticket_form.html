@@ -1,0 +1,18 @@
+{% extends 'base_form.html' %}
+
+{% load custom_filters %}
+
+{% block title %}Create Ticket{% endblock %}
+
+{% block form_content %}
+        <h1>Create Ticket</h1>
+
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

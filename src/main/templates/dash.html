@@ -346,6 +346,12 @@
                         <div class="status-box status-red">Pending Approvals - {{approvals}}</div>
                         </a>
                     </div>
+
+                    <div class="col-md-3">
+                        <a href="{% url 'ticket_list' %}">
+                        <div class="status-box status-red">Pending Tickets - {{open_tickets}}</div>
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Charts -->

@@ -19,13 +19,17 @@ class ExpenseType(models.Model):
 
 class Expense(models.Model):
 
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     balance_bf = models.DecimalField(max_digits=10, decimal_places=2)
     expense_type = models.ForeignKey(ExpenseType, on_delete=models.CASCADE, related_name='expenses')
     created_at = models.DateTimeField(auto_now_add=True)
     year = models.IntegerField()
+
+    class Meta:
+        ordering = ['created_at']
+        unique_together = ['name', 'year']
 
     def save(self, *args, **kwargs):
         if not self.year:
@@ -40,6 +44,7 @@ class Expense(models.Model):
             expense=self, amount=amount,description=description, payment_date=payment_date, approved=True,transaction=transaction, balance=self.balance + amount)
         payment.save()
 
+    
     
 
 class ExpensePayment(models.Model):
