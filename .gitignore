@@ -8,3 +8,6 @@ ca.pem
 *.json
 *.pdf
 src/savings/management/commands/untracked.py
+src/savings/management/commands/test_sms.py
+src/savings/management/commands/contacts.py
+src/administration/bulk_sms.py
