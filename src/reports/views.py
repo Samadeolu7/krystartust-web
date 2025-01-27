@@ -24,7 +24,6 @@ from django.db.models import Sum
 
 
 @login_required
-@allowed_users(allowed_roles=['Admin', 'Manager'])
 def all_clients_report(request):
     clients = Client.objects.all()
     loans = Loan.objects.filter(client__in=clients)
@@ -85,7 +84,6 @@ def daily_collection_form(request):
 
 
 @login_required
-@allowed_users(allowed_roles=['Admin', 'Manager'])
 def thrift_report(request):
     savings = Savings.objects.filter(type=Savings.DC)
 
@@ -96,7 +94,6 @@ def thrift_report(request):
 
 
 @login_required
-@allowed_users(allowed_roles=['Admin', 'Manager'])
 def individual_thrift_report(request, id):
     savings = Savings.objects.get(pk=id)
     client_id = savings.client.id

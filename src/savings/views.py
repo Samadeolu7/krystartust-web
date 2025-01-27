@@ -36,7 +36,6 @@ def compulsory_savings(request):
         return render(request, 'fees.html', {'form': form,'title': title})
 
 @login_required
-@allowed_users(allowed_roles=['Admin', 'Manager'])
 def savings_detail(request, client_id):
     ajo = ClientGroup.objects.filter(name='Ajo').first()
     id = ajo.id

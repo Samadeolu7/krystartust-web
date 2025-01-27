@@ -174,7 +174,6 @@ def guarantor_for_loan(request, loan_id):
     return render(request, 'guarantor_form.html', {'form': form})
 
 @login_required
-@allowed_users(allowed_roles=['Admin', 'Manager'])
 def loan_detail(request, id):
     loan = Loan.objects.filter(id=id).first()
     loan_payments = LoanPayment.objects.filter(loan=loan)
