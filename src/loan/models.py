@@ -4,7 +4,9 @@ from django.db import models
 from django.db.models import Case, When, BooleanField
 from django.urls import reverse
 
+from administration.models import TicketUpdates, Tickets
 from client.models import Client
+from user.models import User
 
 
 class LoanManager(models.Manager):
@@ -159,6 +161,50 @@ class LoanRepaymentSchedule(models.Model):
 
     def __str__(self) -> str:
         return self.loan.client.name + ' - ' + str(self.amount_due) + ' - ' + str(self.due_date)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.handle_ticket()
+
+    def handle_ticket(self):
+        ticket = Tickets.objects.filter(repayment_schedule=self, closed=False).first()
+
+        if ticket:
+            if self.is_paid:
+                if self.payment_date and self.payment_date <= self.due_date:
+                        ticket.title = f"False Loan Default Alert for {self.loan.client.name}"
+                        ticket.description += f"\nNo issue!!!\n Payment made on {self.payment_date} but uploaded on {self.payment_date}"
+                        ticket.closed = True
+                        ticket.save()
+                elif self.payment_date and self.payment_date > self.due_date:
+                    ticket.title = f"Loan Default Alert for {self.loan.client.name}"
+                    ticket.description += f"\n Payment made on {self.payment_date} and uploaded on {self.payment_date}"
+                    ticket.closed = True
+                    ticket.save()     
+
+            elif self.due_date > date.today():
+                update = TicketUpdates.objects.create(
+                    ticket=ticket,
+                    message=f"Due date for loan repayment schedule {self.id} has been updated to {self.due_date}",
+                    created_by=User.objects.filter(is_superuser=True).first()
+                )
+                ticket.closed = True
+                ticket.save()
+            return
+
+        if not ticket and self.due_date < date.today():
+            new_ticket = Tickets.objects.create(
+                client=self.loan.client,
+                title=f"Loan Default Alert for {self.loan.client.name}",
+                description=f"Loan defaulted. Loan Repayment Schedule ID: {self.id}",
+                priority='n',
+                closed=False,
+                created_by=User.objects.filter(is_superuser=True).first(),
+                repayment_schedule=self
+            )
+            new_ticket.users.set(User.objects.all())
+            new_ticket.save()
+
 
     class Meta:
         ordering = ['due_date']

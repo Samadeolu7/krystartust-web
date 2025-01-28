@@ -3,6 +3,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from bank.utils import create_bank_payment, get_cash_in_hand
+from client.models import Client
 from user.models import User
 import uuid
 
@@ -149,7 +150,7 @@ class Tickets(models.Model):
     )
 
     users = models.ManyToManyField(User, related_name='tickets')
-    client = models.ForeignKey('client.Client', on_delete=models.CASCADE, related_name='tickets')
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='tickets')
     title = models.CharField(max_length=255)
     description = models.TextField()
     priority = models.CharField(max_length=1, choices=PRIORITY, default=NORMAL)
@@ -158,15 +159,16 @@ class Tickets(models.Model):
     closed = models.BooleanField(default=False)
     closed_at = models.DateTimeField(null=True, blank=True)
     closed_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='closed_tickets', null=True, blank=True)
+    repayment_schedule = models.ForeignKey('loan.LoanRepaymentSchedule', on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets')
 
-    def __str__(self):
-        return self.title
-    
     def close(self, user):
         self.closed = True
         self.closed_at = datetime.now()
         self.closed_by = user
         self.save()
+
+    def __str__(self):
+        return self.title
     
 #create updates model for Tickets
 class TicketUpdates(models.Model):
