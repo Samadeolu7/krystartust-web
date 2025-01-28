@@ -32,8 +32,7 @@ def record_salary_expense(user):
     ).exists()
     
     if last_payment:
-        print("Salary expense for this month has already been recorded.")
-        return None
+        raise ValueError("Salary expense for this month has already been recorded.")
       
     tran = Transaction(description="Salary Payment")
     bank = get_bank_account()
