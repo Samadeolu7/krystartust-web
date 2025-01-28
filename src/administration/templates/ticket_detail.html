@@ -36,7 +36,7 @@
         <div class="row mt-4">
             <div class="col-md-4">
                 <h5>Add Update</h5>
-                <form method="post" action="{% url 'ticket_detail' ticket.pk %}">
+                <form method="post" action="{% url 'ticket_update' ticket.pk %}">
                     {% csrf_token %}
                     <div class="form-group">
                         <textarea class="form-control" name="message" rows="3" placeholder="Add your update here..."></textarea>
