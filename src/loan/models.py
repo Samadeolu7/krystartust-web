@@ -55,7 +55,10 @@ class Loan(models.Model):
         cache_key = f"loan_{self.id}_is_defaulted"
         is_defaulted = cache.get(cache_key)
         if is_defaulted is None:
-            is_defaulted = self.repayment_schedule.filter(due_date__lt=date.today(), is_paid=False).exists()
+            repayment = self.repayment_schedule.filter(due_date__lt=date.today(), is_paid=False)
+            is_defaulted = repayment.exists()
+            if is_defaulted:
+                repayment.first().handle_ticket()
             next_due_date = self.repayment_schedule.filter(is_paid=False).order_by('due_date').first()
             if next_due_date:
                 next_due_date = next_due_date.due_date
@@ -63,7 +66,7 @@ class Loan(models.Model):
                 cache.set(cache_key, is_defaulted, timeout=timeout)
             else:
                 cache.set(cache_key, is_defaulted)
-            
+        
         return is_defaulted
 
     def save(self, *args, **kwargs):

@@ -153,6 +153,10 @@ def dashboard(request):
     is_admin = user.groups.filter(name='Admin').exists()
     is_manager = user.groups.filter(name='Manager').exists()
     is_employee = user.groups.filter(name='Staff').exists()
+
+    approvals = 0
+    open_tickets = 0
+    
     if is_admin:
         approvals = Approval.objects.filter(approved=False,rejected=False).count()
         journal_entry_approvals = JournalEntry.objects.filter(approved=False,rejected=False).count()
