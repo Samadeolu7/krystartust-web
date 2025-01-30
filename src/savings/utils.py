@@ -96,7 +96,7 @@ def setup_monthly_contributions(client_contribution, month, year,user):
     amount = client_contribution.amount
     transaction = Transaction(description=f'Daily Contribution for {client_contribution.client.name}')
     transaction.save(prefix='DC')
-    create_income_payment(bank=bank, income=income, description='Daily Contribution', amount=amount, payment_date=current_date,transaction=transaction,user=user)
+    create_income_payment(bank=bank, income=income, description=f'DC income for {client_contribution.client.name}', amount=amount, payment_date=current_date,transaction=transaction,user=user)
     current_date += timedelta(days=1)
     contributions = []
     while current_date <= last_day:

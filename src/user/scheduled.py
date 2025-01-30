@@ -34,7 +34,7 @@ def record_salary_expense(user):
     if last_payment:
         raise ValueError("Salary expense for this month has already been recorded.")
       
-    tran = Transaction(description="Salary Payment")
+    tran = Transaction(description=f"Salary Payment for {user.username}")
     bank = get_bank_account()
     tran.save(prefix='EXP') 
     expense_payment = ExpensePayment.objects.create(expense=expense, amount=salary, description=description, payment_date=timezone.now(), transaction=tran, created_by=user, balance=expense.balance, bank=bank)
