@@ -31,7 +31,6 @@ class Command(BaseCommand):
                 date = today + timedelta(days=4)
                 duration = 21
                 amount_due = balance / duration
-                print(amount_due)
                 remainder = balance
                 for i in range(duration):   
                     due_date = date + ((i) * time_increment)
@@ -39,10 +38,9 @@ class Command(BaseCommand):
                         amount_due = remainder
                     LoanRepaymentSchedule.objects.create(loan=loan, due_date=due_date, amount_due=amount_due)
                     remainder -= amount_due
-                    print(remainder)
                 
                 verify_trial_balance()
                     
         except Exception as e:
             print(e)
-            print("Done")
+            raise e

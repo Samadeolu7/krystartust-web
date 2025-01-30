@@ -59,9 +59,7 @@ def approve(request, pk):
         elif approval.type == Approval.Salary:
 
             approve_expense(approval, request.user)
-            print("Generating payslip")
             generate_payslip(approval.user)
-            print("Payslip generated")
             return redirect('approvals')
         approval.approved = True
         approval.approved_by = request.user

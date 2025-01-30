@@ -23,11 +23,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         self.save_salary_expense()
-        print('Done')
+
                 
     def save_salary_expense(self):
         users = User.objects.all()
         for user in users:
             record_salary_expense(user)
-            print(f'Salary expense recorded for {user.username}')
         return True

@@ -75,7 +75,6 @@ from django.db.models import Q
 
 
 @login_required
-@allowed_users(allowed_roles=['Admin', 'Manager'])
 def list_clients(request):
     """View to list paginated and optimized clients based on search query."""
     
@@ -87,7 +86,6 @@ def list_clients(request):
 
     # Initialize an empty queryset
     clients_queryset = Client.objects.none()
-    print(query)
     if query:
         # Use select_related to fetch 'group' and prefetch_related for 'savings_set' and 'loan_set'
         clients_queryset = Client.objects.select_related('group').prefetch_related('savings_set', 'loan_set').filter(

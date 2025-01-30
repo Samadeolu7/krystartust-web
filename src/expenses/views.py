@@ -122,8 +122,7 @@ def create_expense_payment_batch(request):
                 
                 return redirect('dashboard')
         else:
-            print(batch_form.errors)
-            print(formset.errors)
+            messages.error(request, 'Please correct the errors below')
     else:
         batch_form = ExpensePaymentBatchForm()
         formset = ExpensePaymentBatchItemFormSet()

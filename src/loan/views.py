@@ -179,7 +179,6 @@ def loan_detail(request, id):
     loan_payments = LoanPayment.objects.filter(loan=loan)
     loan_repayment_schedules = LoanRepaymentSchedule.objects.filter(loan=loan)
     loan_interest_amount = Decimal(loan.interest) * Decimal(loan.amount) / Decimal(100)
-    print(loan.guarantor)
     context = {
         'loan': loan,
         'loan_payments': loan_payments,

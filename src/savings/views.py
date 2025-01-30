@@ -194,13 +194,10 @@ def setup_monthly_contributions_view(request):
 @login_required
 def toggle_daily_contribution_view(request):
     if request.method == 'POST':
-        print(3)
         form = ToggleDailyContributionForm(request.POST)
 
         if form.is_valid():
-            print(4)
             with transaction.atomic():
-                print(5)
                 form.save(request.user)
                 verify_trial_balance()
             return redirect('dashboard')
