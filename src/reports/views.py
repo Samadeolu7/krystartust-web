@@ -294,10 +294,12 @@ def balance_sheet_report(request):
     banks = Bank.objects.filter(year=year)
     liability = Liability.objects.filter(year=year)
     share_capital = liability.filter(name='Paid Up Capital').first().balance
+    retain_earning = liability.filter(name='Retain Earning').first().balance
     # all liabilities are loans except for paid up capital, union contribution and union pulse
     liability_l = liability.exclude(name='Paid Up Capital')
     liability_l = liability_l.exclude(name='Union Contribution')
     liability_l= liability_l.exclude(name='Union Pulse')
+    liability_l = liability_l.exclude(name='Retain Earning')
     total_loan_liability = liability_l.aggregate(total=Sum('balance')).get('total', 0) or 0
 
     total_union_contribution = Liability.objects.filter(name='Union Contribution').first().balance + Liability.objects.filter(name='Union Pulse').first().balance
@@ -328,7 +330,7 @@ def balance_sheet_report(request):
     total_credit = total_incomes + total_savings + total_liability
     total_debit = total_expenses + total_loans + total_banks
     total_current_assets = total_loans + total_banks
-    total_equity = share_capital
+    total_equity = share_capital + retain_earning
     total_current_liabilities = total_loan_liability + total_union_contribution + total_savings
     total_equity_and_liability = total_equity + total_current_liabilities
 
@@ -352,6 +354,7 @@ def balance_sheet_report(request):
         'expenses': expenses,
         'liabilities': liability,
         'share_capital': share_capital,
+        'retain_earning': retain_earning,
         'total_loan_liability': total_loan_liability,
         "total_union_contribution": total_union_contribution,
         'total_current_assets': total_current_assets,

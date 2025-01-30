@@ -23,7 +23,7 @@ from main.utils import close_balance_sheet, close_bank, close_liability, close_l
 from savings.models import Savings, SavingsPayment
 from user.models import User
 
-from .models import ClientGroup as Group, JournalEntry
+from .models import ClientGroup as Group, JournalEntry, Year
 from .forms import GroupForm, JVForm
 from django.core.cache import cache
 from django.db.models.functions import ExtractWeek
@@ -420,13 +420,19 @@ def search(request):
     }
     return render(request, 'search_result.html', context)
 
+@login_required
+@allowed_users(allowed_roles=['Admin'])
 def close_year_view(request):
-    # Close the year
-    with transaction.atomic():
-        
-        close_year()
+    today = timezone.now().date()
+    system_year = Year.current_year()
+    if today.year == system_year+1:
+        with transaction.atomic():
+            
+            close_year()
 
-        verify_trial_balance()
-        raise Exception("Test exception")
+            verify_trial_balance()
 
-    return redirect('dashboard')
+        return redirect('dashboard')
+    else:
+        messages.error(request, 'You can only close the year after the current year has ended.')
+        return JsonResponse({'error': 'You can only close the year after the current year has ended.'})

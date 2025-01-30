@@ -159,7 +159,7 @@ class Tickets(models.Model):
     closed = models.BooleanField(default=False)
     closed_at = models.DateTimeField(null=True, blank=True)
     closed_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='closed_tickets', null=True, blank=True)
-    repayment_schedule = models.ForeignKey('loan.LoanRepaymentSchedule', on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets')
+    repayment_schedule = models.OneToOneField('loan.LoanRepaymentSchedule', on_delete=models.SET_NULL, null=True, blank=True, related_name='ticket')
 
     def close(self, user):
         self.closed = True

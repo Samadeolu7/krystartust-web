@@ -58,7 +58,7 @@ class ExpensePayment(models.Model):
         created_at = models.DateTimeField(auto_now_add=True)
         updated_at = models.DateTimeField(auto_now=True)
         created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expense_payments', null=True, blank=True)
-        transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='expense_payments')
+        transaction = models.OneToOneField('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='expense_payments')
         approved = models.BooleanField(default=False)
     
         def save(self, *args, **kwargs):
@@ -85,7 +85,7 @@ class ExpensePaymentBatch(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expense_payment_batches')
     bank = models.ForeignKey('bank.Bank', on_delete=models.CASCADE)
-    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='expense_payment_batches')
+    transaction = models.OneToOneField('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='expense_payment_batches')
     approved = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
     payment_date = models.DateField()

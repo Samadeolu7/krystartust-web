@@ -42,7 +42,7 @@ class LiabilityPayment(models.Model):
     payment_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='liability_payments')
+    transaction = models.OneToOneField('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='liability_payments')
     created_by = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='liability_payments', null=True, blank=True)
 
     def __str__(self):
@@ -50,9 +50,7 @@ class LiabilityPayment(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.pk:  
-            balance = self.liability.balance
-
-            self.balance = balance + self.amount
+            self.balance = self.liability.balance + self.amount
             self.liability.balance = self.balance
             self.liability.save()
 

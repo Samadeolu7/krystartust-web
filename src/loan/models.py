@@ -44,7 +44,7 @@ class Loan(models.Model):
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
     objects = LoanManager()
-    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='loans')
+    transaction = models.OneToOneField('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='loans')
     approved = models.BooleanField(default=False)
 
     def is_approved(self):
@@ -116,7 +116,7 @@ class LoanPayment(models.Model):
     payment_date = models.DateField(db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
-    transaction = models.ForeignKey('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='loan_payments')
+    transaction = models.OneToOneField('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='loan_payments')
     created_by = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='loan_payments', db_index=True, null=True, blank=True)
 
     def save(self, *args, **kwargs):

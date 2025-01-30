@@ -1,15 +1,16 @@
-from bank.models import Bank
+from bank.models import Bank, BankPayment
 from expenses.models import Expense, ExpensePayment
 from income.models import Income, IncomePayment
 from liability.models import Liability, LiabilityPayment
 from loan.models import Loan, LoanPayment
 from main.models import Year, YearEndEntry
 from savings.models import Savings, SavingsPayment
+from django.db import transaction
 
 from django.db.models import Sum
 
 
-def verify_trial_balance(incomes=None, expenses=None, savings=None, loans=None, banks=None, liabilities=None,credit=None, debit=None):
+def verify_trial_balance():
     year = Year.current_year()
     # Aggregate sums in a single query for each model
     total_incomes = Income.objects.filter(year=year).aggregate(total=Sum('balance')).get('total', 0) or 0
@@ -18,7 +19,6 @@ def verify_trial_balance(incomes=None, expenses=None, savings=None, loans=None, 
     total_loans = Loan.objects.filter(approved=True).aggregate(total=Sum('balance')).get('total', 0) or 0
     total_banks = Bank.objects.filter(year=year).aggregate(total=Sum('balance')).get('total', 0) or 0
     total_liability = Liability.objects.filter(year=year).aggregate(total=Sum('balance')).get('total', 0) or 0
-
     # Calculate total credit and debit
     total_credit = total_incomes + total_savings + total_liability
     total_debit = total_expenses + total_loans + total_banks 
@@ -27,14 +27,8 @@ def verify_trial_balance(incomes=None, expenses=None, savings=None, loans=None, 
         return True
     else:
         raise ValueError(
-            f'Trial balance does not match. Credit: {total_credit} {credit}, '
-            f'Debit: {total_debit} {debit}, '
-            f'Incomes: {total_incomes} {incomes}, '
-            f'Expenses: {total_expenses} {expenses}, '
-            f'Savings: {total_savings} {savings}, '
-            f'Loans: {total_loans} {loans}, '
-            f'Banks: {total_banks} {banks}, '
-            f'Liability: {total_liability} {liabilities}, '
+            f'Trial balance does not match. Credit: {total_credit}, '
+            f'Debit: {total_debit}, '
             f'Difference: {total_credit - total_debit}'
         )
 
@@ -47,11 +41,11 @@ def close_balance_sheet(year):
 
 def close_profit_and_loss(year):
 
-    incomes_by_month = IncomePayment.objects.filter(created_at__year=year).values(
+    incomes_by_month = IncomePayment.objects.filter(created_at__year=year-1).values(
         'payment_date__month', 'income__name'
     ).annotate(monthly_total=Sum('amount'))
 
-    expenses_by_month = ExpensePayment.objects.filter(payment_date__year=year).values(
+    expenses_by_month = ExpensePayment.objects.filter(payment_date__year=year-1).values(
         'payment_date__month', 'expense__name', 'expense__expense_type__name'
     ).annotate(monthly_total=Sum('amount'))
 
@@ -72,9 +66,9 @@ def close_profit_and_loss(year):
 
     Liability.objects.create(
         name='Retain Earning',
-        description=f'Retain earning for year {year}',
+        description=f'Retain earning for year {year-1}',
         balance=retain_earning,
-        year=year+1
+        year=year
     )
 
     return retain_earning
@@ -102,7 +96,7 @@ def close_expense(year):
             name=expense.name,
             expense_type=expense.expense_type,
             description=expense.description,
-            balance=expense.balance,
+            balance=0,
             balance_bf=expense.balance,
             year=year
         )
@@ -120,11 +114,16 @@ def close_expense(year):
         for payment in expense_payments:
             payment.expense = expense_mapping[expense.name]
             expense_payment_updates.append(payment)
+            expense.balance -= payment.amount
+            expense.save()
+            expense_1 = expense_mapping[expense.name]
+            expense_1.balance += payment.amount
+            expense_1.save()
 
     # Bulk update expense payments
     ExpensePayment.objects.bulk_update(expense_payment_updates, ['expense'])
 
-     
+
 def close_income(year):
     incomes = Income.objects.all()
     new_incomes = []
@@ -137,7 +136,7 @@ def close_income(year):
         new_income = Income(
             name=income.name,
             description=income.description,
-            balance=income.balance,
+            balance=0,
             balance_bf=income.balance,
             year=year
         )
@@ -153,15 +152,23 @@ def close_income(year):
         for payment in income_payments:
             payment.income = income_mapping[income.id]
             income_payments_updates.append(payment)
+            income.balance -= payment.amount
+            income.save()
+            income_1 = income_mapping[income.id]
+            income_1.balance += payment.amount
+            income_1.save()
+
 
     # Bulk update income payments
     IncomePayment.objects.bulk_update(income_payments_updates, ['income'])
+
 
 def close_liability(year):
     liabilities = Liability.objects.all()
     new_liabilities = []
     liability_payments_updates = []
 
+    # Create a mapping of old liability to new liability
     liability_mapping = {}
 
     for liability in liabilities:
@@ -175,72 +182,98 @@ def close_liability(year):
         new_liabilities.append(new_liability)
         liability_mapping[liability.id] = new_liability
 
-    # Bulk create new liabilities
-    Liability.objects.bulk_create(new_liabilities)
+    # Use transaction to ensure atomicity
+    with transaction.atomic():
+        # Bulk create new liabilities if there are any
+        if new_liabilities:
+            Liability.objects.bulk_create(new_liabilities)
 
-    # Refresh the new_liabilities list to get the IDs assigned by the database
-    new_liabilities = Liability.objects.filter(year=year)
-    difference = 0
-    # Update the mapping with the newly created liabilities
-    for new_liability in new_liabilities:
-        old_liability = liabilities.get(name=new_liability.name, description=new_liability.description, year=year)
-        liability_mapping[old_liability.id] = new_liability
+        # Collect all liability payments that need to be updated
+        for liability in liabilities:
+            liability_payments = LiabilityPayment.objects.filter(liability=liability, payment_date__year=year)
+            liability.balance -= liability_payments.aggregate(total=Sum('amount')).get('total', 0) or 0
+            liability.save()
+            new_liabilities_1 = liability_mapping[liability.id]
+            new_liabilities_1.balance_bf = liability.balance
+            new_liabilities_1.balance = liability.balance
+            for payment in liability_payments:
+                payment.liability = liability_mapping[liability.id]
+                liability_payments_updates.append(payment)
+                new_liabilities_1.balance += payment.amount
+                new_liabilities_1.save()
 
-    # Collect all liability payments that need to be updated
-    for liability in liabilities:
-        liability_payments = LiabilityPayment.objects.filter(liability=liability, payment_date__year=year)
-        for payment in liability_payments:
-            payment.liability = liability_mapping[liability.id]
-            liability_payments_updates.append(payment)
-            difference += payment.amount
-        liability.balance -= difference
-        liability.save()
-
-    # Bulk update liability payments
-    LiabilityPayment.objects.bulk_update(liability_payments_updates, ['liability'])
-
+        # Bulk update liability payments if there are any
+        if liability_payments_updates:
+            LiabilityPayment.objects.bulk_update(liability_payments_updates, ['liability'])
+        for liability in new_liabilities:
+            print(liability.balance)
+                  
 def close_bank(year):
-    # create all the currents bank again with new year and balance bf
 
-    # get all the banks
     banks = Bank.objects.all()
+    new_banks = []
+    bank_payments_updates = []
+
+    bank_mapping = {}
+
     for bank in banks:
         # create a new bank with the same name and balance bf
-        new_bank =  Bank.objects.create(
+        new_bank =  Bank(
             name=bank.name,
             balance=bank.balance,
             balance_bf=bank.balance,
+            description=bank.description,
             year=year
         )
+        new_banks.append(new_bank)
+        bank_mapping[bank.id] = new_bank
 
-        # close the current bank
-        bank.save()
+    # Use transaction to ensure atomicity
+    with transaction.atomic():
+        # Bulk create new banks if there are any
+        if new_banks:
+            Bank.objects.bulk_create(new_banks)
+
+        # Collect all bank payments that need to be updated
+        for bank in banks:
+            bank_payments = BankPayment.objects.filter(bank=bank, payment_date__year=year)
+            bank.balance -= bank_payments.aggregate(total=Sum('amount')).get('total', 0) or 0
+            bank.save()
+            new_bank = bank_mapping[bank.id]
+            new_bank.balance_bf = bank.balance
+            new_bank.balance = bank.balance
+            for payment in bank_payments:
+                payment.bank = bank_mapping[bank.id]
+                bank_payments_updates.append(payment)
+                new_bank.balance += payment.amount
+                new_bank.save()
+
+        # Bulk update bank payments if there are any
+        if bank_payments_updates:
+            BankPayment.objects.bulk_update(bank_payments_updates, ['bank'])
+        print('new banks')
+        for bank in new_banks:
+            print(bank.balance)
 
 def close_year():
-    total_incomes = Income.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
-    total_expenses = Expense.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
-    total_savings = Savings.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
-    total_loans = Loan.objects.filter(approved=True).aggregate(total=Sum('balance')).get('total', 0) or 0
-    total_banks = Bank.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
-    total_liability = Liability.objects.aggregate(total=Sum('balance')).get('total', 0) or 0
 
-    # Calculate total credit and debit
-    total_credit = total_incomes + total_savings + total_liability
-    total_debit = total_expenses + total_loans + total_banks 
     new_year = Year.current_year() + 1
     new_year_model = Year.objects.create(year=new_year)
     close_bank(year=new_year)
 
     loan = close_loan_repayment(year=new_year)
     savings = close_savings(year=new_year)
-    retained_earnings = close_profit_and_loss(year=new_year)
-    year_end_entry = YearEndEntry.objects.create(year=new_year_model, retained_earnings=retained_earnings, total_loans=loan, total_savings=savings)
-    year_end_entry.save()
+    
 
     close_expense(year=new_year)
     close_income(year=new_year)
     close_liability(year=new_year)
-    verify_trial_balance(total_incomes, total_expenses, total_savings, total_loans, total_banks, total_liability, total_credit, total_debit)
+    retained_earnings = close_profit_and_loss(year=new_year)
+    print(retained_earnings)
+    year_end_entry = YearEndEntry.objects.create(year=new_year_model, retained_earnings=retained_earnings, total_loans=loan, total_savings=savings)
+    year_end_entry.save()
+
+    verify_trial_balance()
 
     return year_end_entry
 
