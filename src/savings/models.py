@@ -91,7 +91,7 @@ class ClientContribution(models.Model):
 
 
 class DailyContribution(models.Model):
-    client_contribution = models.ForeignKey('ClientContribution', on_delete=models.CASCADE)
+    client_contribution = models.ForeignKey(ClientContribution, on_delete=models.CASCADE, related_name='daily_contributions')
     date = models.DateField()
     payment_made = models.BooleanField(default=False)
     payment = models.ForeignKey(SavingsPayment, on_delete=models.SET_NULL, null=True, blank=True)

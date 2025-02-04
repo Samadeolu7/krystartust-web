@@ -31,6 +31,9 @@ class Year(models.Model):
         else:
             return 2024
         
+    class Meta:
+        ordering = ['-year']
+        
 
 class JournalEntry(models.Model):
     credit_account = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='credit_entries')
@@ -54,4 +57,6 @@ class YearEndEntry(models.Model):
     total_savings = models.DecimalField(max_digits=10, decimal_places=2)
     total_loans = models.DecimalField(max_digits=10, decimal_places=2)
     retained_earnings = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    
+
+    class Meta:
+        ordering = ['-year']

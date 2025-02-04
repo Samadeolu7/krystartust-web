@@ -74,14 +74,20 @@ def close_profit_and_loss(year):
     return retain_earning
 
 def close_loan_repayment(year):
-    total = Loan.objects.filter(approved=True, start_date__year=year).aggregate(total=Sum('balance')).get('total', 0) or 0
-    total_paid = LoanPayment.objects.filter(payment_date__year=year+1).aggregate(total=Sum('amount')).get('total', 0) or 0
-    total = total - total_paid
+    loans = Loan.objects.filter(start_date__year=year-1)
+    total = 0
+    for loan in loans:
+        total_balance = loan.amount + (loan.amount * loan.interest / 100)
+        total += total_balance
+        loan_payments = LoanPayment.objects.filter(loan=loan, payment_date__year=year-1).aggregate(total=Sum('amount')).get('total', 0) or 0
+        total -= loan_payments
+
     return total
+
 
 def close_savings(year):
     # Get total savings for the year using aggregation
-    total_amount = SavingsPayment.objects.filter(payment_date__year=year).aggregate(total_amount=Sum('amount'))['total_amount']
+    total_amount = SavingsPayment.objects.filter(payment_date__year=year-1).aggregate(total_amount=Sum('amount'))['total_amount']
     
     return total_amount if total_amount else 0
 
@@ -97,7 +103,7 @@ def close_expense(year):
             expense_type=expense.expense_type,
             description=expense.description,
             balance=0,
-            balance_bf=expense.balance,
+            balance_bf=0,
             year=year
         )
         new_expenses.append(new_expense)
@@ -137,7 +143,7 @@ def close_income(year):
             name=income.name,
             description=income.description,
             balance=0,
-            balance_bf=income.balance,
+            balance_bf=0,
             year=year
         )
         new_incomes.append(new_income)
@@ -269,7 +275,6 @@ def close_year():
     close_income(year=new_year)
     close_liability(year=new_year)
     retained_earnings = close_profit_and_loss(year=new_year)
-    print(retained_earnings)
     year_end_entry = YearEndEntry.objects.create(year=new_year_model, retained_earnings=retained_earnings, total_loans=loan, total_savings=savings)
     year_end_entry.save()
 

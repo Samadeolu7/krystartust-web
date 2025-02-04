@@ -172,6 +172,12 @@ def dashboard(request):
         open_tickets = Tickets.objects.filter(closed=False, users__in=[user]).count()
 
     notifications = Notification.objects.filter(user=request.user, is_read=False)
+
+    system_year = Year.current_year().year
+    date_year = today.year
+    close_year = False
+    if date_year > system_year:
+        close_year = True
     
     context = {
         'user': user,
@@ -195,6 +201,7 @@ def dashboard(request):
         'approvals': approvals,
         'notifications': notifications,
         'open_tickets': open_tickets,
+        'close_year': close_year,
     }
 
     return render(request, 'dash.html', context)

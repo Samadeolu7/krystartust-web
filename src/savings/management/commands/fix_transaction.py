@@ -10,7 +10,7 @@ from expenses.models import Expense, ExpensePayment
 from income.models import Income, IncomePayment
 from loan.models import Loan, LoanPayment
 from main.utils import verify_trial_balance
-from savings.models import Savings, SavingsPayment
+from savings.models import ClientContribution, DailyContribution, Savings, SavingsPayment
 from liability.models import Liability, LiabilityPayment
 from django.db import transaction
 
@@ -18,32 +18,22 @@ from income.utils import create_loan_registration_fee_income_payment
 from income.models import RegistrationFee
 
 class Command(BaseCommand):
-    help = 'Find all loan payments with a transaction reference number that starts with "COM"'
+    help = 'Find all daily contributions that have does not have a corresponding income payment'
 
     def handle(self, *args, **kwargs):
         # Get all the loan payments
-        trans = Transaction.objects.filter(reference_number__startswith='COM')
-        loan_payments = LoanPayment.objects.filter(transaction__in=trans)
-        for loan_payment in loan_payments:
-
-            if loan_payment.amount!=loan_payment.loan.emi:
-                with transaction.atomic():
-                    print(f'Loan Payment: {loan_payment.client.name} - {loan_payment.amount} - {loan_payment.payment_date} - {loan_payment.loan.emi} ')
-                    tran = loan_payment.transaction
-                    savings = SavingsPayment.objects.filter(transaction=tran).first()
-                    #take out the balance for the emi fron the savings account
-                    balance = loan_payment.loan.emi - loan_payment.amount
-                    savings.amount -= balance
-                    savings.save()
-                    loan_payment.amount = loan_payment.loan.emi
-                    loan_payment.save()
-                    savings.savings.balance -= balance
-                    savings.savings.save()
-                    loan_payment.loan.balance -= balance
-                    loan_payment.loan.save()
-                    verify_trial_balance()
-                    print(f'Loan Payment: {loan_payment.client.name} - {loan_payment.amount} - {loan_payment.payment_date} - {loan_payment.loan.emi} ')
-                    print('fixing done')
-        print('Done')
+        client = ClientContribution.objects.all()
+        for contribution in client:
+            # Get the income payment for the loan payment
+            income = Income.objects.get(name='Client Contribution')
+            income_payment = IncomePayment.objects.filter(income=income, payment_date=contribution.payment_date, amount=contribution.amount).first()
+            if not income_payment:
+                print(f'No income payment for {contribution.client} on {contribution.payment_date} of {contribution.amount}')
+                # Create the income payment
+        #         income = Income.objects.get(name='Client Contribution')
+        #         income_payment = IncomePayment(client=contribution.client, income=income, amount=contribution.amount, payment_date=contribution.payment_date)
+        #         income_payment.save()
+        #         print(f'Income payment created for {contribution.client} on {contribution.payment_date} of {contribution.amount}')
+        # #
         
                 

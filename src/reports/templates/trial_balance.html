@@ -11,9 +11,11 @@
                 <tr>
                     <th>Account Type</th>
                     <th>Account Name</th>
-                    <th>Previous Balance</th>
+                    <th>opening Balance</th>
                     <th>Debit</th>
                     <th>Credit</th>
+                    <th colspan="2">Closing Balance</th>
+
 
                 </tr>
             </thead>
@@ -24,6 +26,8 @@
                     <td>Savings</td>
                     <td>{{ total_previous_savings |naira }}</td>
                     <td></td>
+                    <td>{{ total_savings|subtract:total_previous_savings |naira }}</td>
+                    <td></td>
                     <td>{{ total_savings |naira }}</td>
                 </tr>
 
@@ -32,6 +36,8 @@
                     <td>Loans</td>
                     <td>Total Debtors</td>
                     <td>{{ total_previous_loans |naira }}</td>
+                    <td>{{ total_loans|subtract:total_previous_loans |naira }}</td>
+                    <td></td>
                     <td>{{ total_loans |naira }}</td>
                     <td></td>
                 </tr>
@@ -42,6 +48,8 @@
                     <td>Banks</td>
                     <td>{{ bank.name }}</td>
                     <td>{{ bank.balance_bf |naira }}</td>
+                    <td>{{ bank.balance|subtract:bank.balance_bf |naira }}</td>
+                    <td></td>
                     <td>{{ bank.balance |naira }}</td>
                     <td></td>
                 </tr>
@@ -53,6 +61,8 @@
                     <td>Incomes</td>
                     <td>{{ income.name }}</td>
                     <td> {{ income.balance_bf |naira }}</td>
+                    <td></td>
+                    <td>{{ income.balance |naira }}</td>
                     <td></td>
                     <td>{{ income.balance |naira }}</td>
 
@@ -67,6 +77,8 @@
                     <td>{{ expense.balance_bf |naira }}</td>
                     <td>{{ expense.balance |naira }}</td>
                     <td></td>
+                    <td>{{ expense.balance |naira }}</td>
+                    <td></td>
                 </tr>
                 {% endfor %}
 
@@ -77,15 +89,19 @@
                     <td>{{ liability.name }}</td>
                     <td>{{ liability.balance_bf |naira }}</td>
                     <td></td>
-                    <td>{{ liability.balance |naira }} </td>
+                    <td>{{ liability.balance|subtract:liability.balance_bf |naira }}</td>
+                    <td></td>
+                    <td>{{ liability.balance |naira }}</td>
                 </tr>    
                     {% endfor %}
                     <tr>
                         <td><strong>Total</strong></td>
                         <td></td>
                         <td></td>
-                        <td><strong>{{ total_debit |naira }}</strong></td>
-                        <td><strong>{{ total_credit |naira }}</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td><strong>{{ total_debit|naira }}</strong></td>
+                        <td><strong>{{ total_credit|naira }}</strong></td>
     
                     </tr>
             </tbody>

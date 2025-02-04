@@ -87,3 +87,20 @@ class BankPayment(models.Model):
             models.Index(fields=['created_by'], name='idx_created_by'),
         ]
 
+
+class PendingCashTransfer(models.Model):
+    source_bank = models.ForeignKey(Bank, related_name='source_transfers', on_delete=models.CASCADE)
+    destination_bank = models.ForeignKey(Bank, related_name='destination_transfers', on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField()
+    payment_date = models.DateField()
+    transaction = models.OneToOneField('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    approved = models.BooleanField(default=False)
+    approved_by = models.ForeignKey(User, related_name='approved_transfers', on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Transfer from {self.source_bank} to {self.destination_bank} - {self.amount}"
+

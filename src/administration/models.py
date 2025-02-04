@@ -2,6 +2,7 @@ from datetime import datetime
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from bank.models import BankPayment
 from bank.utils import create_bank_payment, get_cash_in_hand
 from client.models import Client
 from user.models import User
@@ -43,12 +44,14 @@ class Approval(models.Model):
     Loan = 'loan'
     Withdrawal = 'withdrawal'
     Salary = 'salary'
+    Cash_Transfer = 'cash_transfer'
     TYPES = (
         ('Expenses', Expenses),
         ('Batch_Expense', Batch_Expense),
         ('Loan', Loan),
         ('Withdrawal', Withdrawal),
-        ('Salary', Salary)
+        ('Salary', Salary),
+        ('Cash_Transfer', Cash_Transfer)
     )
     type = models.CharField(max_length=100, choices=TYPES)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -79,10 +82,39 @@ class Approval(models.Model):
                         transaction=savings_payment.transaction,
                         created_by=savings_payment.created_by
                     )
-                
+                elif self.type == self.Cash_Transfer:
+                    pending_transfer = self.content_object
+                    tran = Transaction(description=f'Transfer to {pending_transfer.destination_bank.name}: {pending_transfer.description}')
+                    tran.save(prefix='TRF')
+                    pending_transfer.transaction = tran
+                    pending_transfer.approved = True
+                    pending_transfer.approved_by = self.user
+                    pending_transfer.save()
+
+                    # Create BankPayment for source bank (debit)
+                    BankPayment.objects.create(
+                        bank=pending_transfer.source_bank,
+                        description=f"Transfer to {pending_transfer.destination_bank.name}: {pending_transfer.description}",
+                        amount=-pending_transfer.amount,
+                        bank_balance=pending_transfer.source_bank.balance - pending_transfer.amount,
+                        payment_date=pending_transfer.payment_date,
+                        transaction=tran
+                    )
+
+                    # Create BankPayment for destination bank (credit)
+                    BankPayment.objects.create(
+                        bank=pending_transfer.destination_bank,
+                        description=f"Transfer from {pending_transfer.source_bank.name}: {pending_transfer.description}",
+                        amount=pending_transfer.amount,
+                        bank_balance=pending_transfer.destination_bank.balance + pending_transfer.amount,
+                        payment_date=pending_transfer.payment_date,
+                        transaction=tran
+                    )
+
                 self.content_object.approved = True
                 self.content_object.save()
-                super().save(*args, **kwargs)
+                super().save(*args, **kwargs)   
+            
             elif self.rejected:
                 objmodel = self.content_object
                 if objmodel:

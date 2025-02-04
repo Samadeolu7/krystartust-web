@@ -231,16 +231,24 @@ def profit_and_loss_report(request):
 @allowed_users(allowed_roles=['Admin'])
 def trial_balance_report(request):
     # Fetch all objects
-    year = Year.current_year()
+    year_m = Year.objects.order_by('-year').first()
+    year = year_m.year
+    print(f"Current Year: {year}")
+    
     incomes = Income.objects.filter(year=year)
     expenses = Expense.objects.filter(year=year)
     banks = Bank.objects.filter(year=year)
-    liability = Liability.objects.filter(year=year)
-    previous_year_entry = YearEndEntry.objects.filter(year=year-1)
+    liabilities = Liability.objects.filter(year=year)
+    previous_year_entry = YearEndEntry.objects.filter(year=year_m)
+
     if previous_year_entry:
+        print("Previous Year Entry Exists")
+        print(f"Previous Year Entry: {previous_year_entry}")
         previous_year_entry = previous_year_entry.first()
         previous_total_savings = previous_year_entry.total_savings
+        print(f"Previous Total Savings: {previous_total_savings}")
         previous_total_loans = previous_year_entry.total_loans
+        print(f"Previous Total Loans: {previous_total_loans}")
     else:
         previous_total_savings = 0
         previous_total_loans = 0
@@ -254,12 +262,36 @@ def trial_balance_report(request):
     total_loans = Loan.objects.filter(approved=True).aggregate(total=Sum('balance')).get('total', 0) or 0
     total_banks = Bank.objects.filter(year=year).aggregate(total=Sum('balance')).get('total', 0) or 0
     total_previous_banks = Bank.objects.filter(year=year-1).aggregate(total=Sum('balance')).get('total', 0) or 0
-    total_liability = Liability.objects.filter(year=year).aggregate(total=Sum('balance')).get('total', 0) or 0
-    total_previous_liability = Liability.objects.filter(year=year-1).aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_liabilities = Liability.objects.filter(year=year).aggregate(total=Sum('balance')).get('total', 0) or 0
+    total_previous_liabilities = Liability.objects.filter(year=year-1).aggregate(total=Sum('balance')).get('total', 0) or 0
+
+    # Print intermediate results for debugging
+    print(f"Total Incomes: {total_incomes}")
+    print(f"Previous Total Incomes: {previous_total_incomes}")
+    print(f"Total Expenses: {total_expenses}")
+    print(f"Previous Total Expenses: {previous_total_expenses}")
+    print(f"Total Savings: {total_savings}")
+    print(f"Previous Total Savings: {previous_total_savings}")
+    print(f"Total Loans: {total_loans}")
+    print(f"Previous Total Loans: {previous_total_loans}")
+    print(f"Total Banks: {total_banks}")
+    print(f"Previous Total Banks: {total_previous_banks}")
+    print(f"Total Liabilities: {total_liabilities}")
+    print(f"Previous Total Liabilities: {total_previous_liabilities}")
 
     # Calculate total credit and debit
-    total_credit = total_incomes + total_savings + total_liability
-    total_debit = total_expenses + total_loans + total_banks 
+    total_credit = total_incomes + total_savings + total_liabilities
+    total_debit = total_expenses + total_loans + total_banks
+
+    new_savings = total_savings - previous_total_savings
+    new_loans = total_loans - previous_total_loans
+    new_incomes = total_incomes - previous_total_incomes
+    new_expenses = total_expenses - previous_total_expenses
+    new_liability = total_liabilities - total_previous_liabilities
+    new_banks = total_banks - total_previous_banks
+
+    total_new_credit = new_savings + new_incomes + new_liability
+    total_new_debit = new_expenses + new_loans + new_banks
 
     context = {
         'total_savings': total_savings,
@@ -272,14 +304,16 @@ def trial_balance_report(request):
         'total_previous_expenses': previous_total_expenses,
         'total_banks': total_banks,
         'total_previous_banks': total_previous_banks,
-        'total_liability': total_liability,
-        'total_previous_liability': total_previous_liability,
+        'total_liability': total_liabilities,
+        'total_previous_liability': total_previous_liabilities,
         'total_credit': total_credit,
         'total_debit': total_debit,
+        'total_new_credit': total_new_credit,
+        'total_new_debit': total_new_debit,
         'banks': banks,
         'incomes': incomes,
         'expenses': expenses,
-        'liabilities': liability,
+        'liabilities': liabilities,
     }
     return render(request, 'trial_balance.html', context)
 

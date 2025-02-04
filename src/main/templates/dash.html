@@ -277,6 +277,9 @@
                         {% if is_admin %}
                         <li class="sub-item"><a href="{% url 'reverse_payment' %}">Transaction Reversal</a></li>
                         <li class="sub-item"><a href="{% url 'manage_month_status' %}">Close Month</a></li>
+                        {% if close_year %}
+                        <li class="sub-item"><a href="{% url 'close_year' %}">Close Year</a></li>
+                        {% endif %}
                         {% endif %}
                     </ul>
                 </div>

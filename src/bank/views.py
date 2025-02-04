@@ -6,14 +6,16 @@ from django.utils import timezone
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.template.loader import render_to_string
+from django.contrib.contenttypes.models import ContentType
 
-from administration.models import Transaction
+
+from administration.models import Approval, Transaction
 from administration.utils import validate_month_status
 from loan.models import LoanPayment
 from main.utils import verify_trial_balance
 from savings.models import SavingsPayment
 from .forms import BankForm, BankPaymentForm, CashTransferForm, DateRangeForm, ReversePaymentForm
-from .models import Bank, BankPayment
+from .models import Bank, BankPayment, PendingCashTransfer
 from administration.decorators import allowed_users
 from .excel_utils import bank_to_excel
 # Create your views here.
@@ -102,30 +104,25 @@ def cash_transfer(request):
                 amount = form.cleaned_data['amount']
                 description = form.cleaned_data['description']
 
-                # Create BankPayment for source bank (debit)
-
-                tran = Transaction(description=f'Transfer to {destination_bank.name}: {description}')
-                tran.save(prefix='TRF')
-
-                BankPayment.objects.create(
-                    bank=source_bank,
-                    description=f"Transfer to {destination_bank.name}: {description}",
-                    amount=-amount,
-                    bank_balance=source_bank.balance - amount,
-                    payment_date=payment_date,
-                    transaction=tran
-                )
-
-                # Create BankPayment for destination bank (credit)
-                BankPayment.objects.create(
-                    bank=destination_bank,
-                    description=f"Transfer from {source_bank.name}: {description}",
+                # Create a pending cash transfer
+                pending_transfer = PendingCashTransfer.objects.create(
+                    source_bank=source_bank,
+                    destination_bank=destination_bank,
                     amount=amount,
-                    bank_balance=destination_bank.balance + amount,
+                    description=description,
                     payment_date=payment_date,
-                    transaction=tran
+                    created_by=request.user
                 )
-                verify_trial_balance()
+
+                # Create an approval request
+                Approval.objects.create(
+                    type=Approval.Cash_Transfer,
+                    user=request.user,
+                    content_object=pending_transfer,
+                    content_type=ContentType.objects.get_for_model(PendingCashTransfer),
+                    object_id=pending_transfer.id,
+                    comment=f"Cash transfer from {source_bank.name} to {destination_bank.name} - {amount}"
+                )
 
             return redirect('dashboard')
     else:
