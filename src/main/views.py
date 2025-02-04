@@ -273,15 +273,16 @@ def group_report(request, pk):
 
 
 def get_accounts(request):
+    year = Year.current_year()
     type_value = request.GET.get('type')
     if type_value == 'Income':
-        accounts = Income.objects.all()
+        accounts = Income.objects.filter(year=year)
     elif type_value == 'Expense':
-        accounts = Expense.objects.all()
+        accounts = Expense.objects.filter(year=year)
     elif type_value == 'Liability':
-        accounts = Liability.objects.all()
+        accounts = Liability.objects.filter(year=year)
     elif type_value == 'Bank':
-        accounts = Bank.objects.all()
+        accounts = Bank.objects.filter(year=year)
     else:
         accounts = []
 

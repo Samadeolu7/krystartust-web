@@ -2,7 +2,10 @@ from django.forms import ModelForm
 from django import forms
 
 from administration.utils import validate_month_status
+from main.models import Year
 from .models import Bank, BankPayment
+
+year = Year.current_year()
 
 class BankForm(ModelForm):
     class Meta:
@@ -15,8 +18,9 @@ class BankPaymentForm(ModelForm):
         fields = ['bank', 'payment_date', 'amount', 'description']
 
 class CashTransferForm(forms.Form):
-    source_bank = forms.ModelChoiceField(queryset=Bank.objects.all(), label="Source Bank")
-    destination_bank = forms.ModelChoiceField(queryset=Bank.objects.all(), label="Destination Bank")
+
+    source_bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=year), label="Source Bank")
+    destination_bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=year), label="Destination Bank")
     amount = forms.DecimalField(max_digits=10, decimal_places=2)
     description = forms.CharField(widget=forms.Textarea, required=False)
     payment_date = forms.DateField(widget=forms.SelectDateWidget(years=range(2000, 2030)))
@@ -30,7 +34,7 @@ class DateRangeForm(forms.Form):
 
 class ReversePaymentForm(forms.Form):
     type = forms.ChoiceField(choices=(('SVS','Savings'), ('LOA','Loan'), ('COM','Combined')), label='Type')
-    bank = forms.ModelChoiceField(queryset=Bank.objects.all())
+    bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=year), label='Bank')
     payment_date = forms.DateField(widget=forms.SelectDateWidget(years=range(2000, 2030)))
     payment = forms.ModelChoiceField(queryset=BankPayment.objects.none())
     reversal_date = forms.DateField(widget=forms.SelectDateWidget(years=range(2000, 2030)))

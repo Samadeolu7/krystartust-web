@@ -112,12 +112,7 @@ def get_income_balance_by_month(year, month):
         income_balance += income.balance_bf + total_income_payment
     return income_balance
 
-def get_total_income_balance():
-    incomes = Income.objects.all()
-    income_balance = 0
-    for income in incomes:
-        income_balance += get_income_balance(income.id)
-    return income_balance
+
 
 def get_total_income_balance_by_year(year):
     incomes = Income.objects.filter(year=year)

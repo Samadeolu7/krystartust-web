@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib import messages
 
 from administration.utils import validate_month_status
+from main.models import Year
 from main.utils import verify_trial_balance
 from .forms import ExpenseForm, ExpensePaymentBatchForm, ExpensePaymentForm, ExpenseTypeForm, ExpensePaymentBatchItemFormSet
 from .models import Expense, ExpensePayment, ExpensePaymentBatch, ExpenseType
@@ -74,8 +75,15 @@ def expense_payment(request):
 @login_required
 @allowed_users(allowed_roles=['Admin'])
 def expense_list(request):
-    expense = Expense.objects.all()
-    return render(request, 'expense_list.html', {'expense': expense})
+    year = Year.current_year()
+    expense = Expense.objects.filter(year=year).all()
+    has_previous_expense = Expense.objects.filter(year__lt=year).exists
+
+    context = {
+        'expense': expense,
+        'has_previous_expense': has_previous_expense
+    }
+    return render(request, 'expense_list.html', context)
 
 
 @login_required

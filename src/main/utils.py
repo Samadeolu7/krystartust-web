@@ -93,7 +93,7 @@ def close_savings(year):
 
 
 def close_expense(year):
-    expenses = Expense.objects.all()
+    expenses = Expense.objects.filter(year=year-1)
     new_expenses = []
     expense_payment_updates = []
 
@@ -131,7 +131,7 @@ def close_expense(year):
 
 
 def close_income(year):
-    incomes = Income.objects.all()
+    incomes = Income.objects.filter(year=year-1)
     new_incomes = []
     income_payments_updates = []
 
@@ -170,7 +170,7 @@ def close_income(year):
 
 
 def close_liability(year):
-    liabilities = Liability.objects.all()
+    liabilities = Liability.objects.filter(year=year-1)
     new_liabilities = []
     liability_payments_updates = []
 
@@ -216,7 +216,7 @@ def close_liability(year):
                   
 def close_bank(year):
 
-    banks = Bank.objects.all()
+    banks = Bank.objects.filter(year=year-1)
     new_banks = []
     bank_payments_updates = []
 

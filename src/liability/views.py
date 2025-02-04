@@ -10,6 +10,7 @@ from administration.decorators import allowed_users
 
 from administration.models import Transaction
 from administration.utils import validate_month_status
+from main.models import Year
 from main.utils import verify_trial_balance
 from .forms import LiabilityForm, LiabilityPaymentForm
 from .models import Liability, LiabilityPayment
@@ -59,8 +60,15 @@ def liability_payment(request):
 @login_required
 @allowed_users(allowed_roles=['Admin'])
 def liability_list(request):
-    liability = Liability.objects.all()
-    return render(request, 'liability_list.html', {'liability': liability})
+    year = Year.current_year()
+    liability = Liability.objects.filter(year=year).all()
+    has_previous_liability = Liability.objects.filter(year__lt=year).exists()
+
+    context = {
+        'liability': liability,
+        'has_previous_liability': has_previous_liability
+    }
+    return render(request, 'liability_list.html', context)
 
 
 @login_required

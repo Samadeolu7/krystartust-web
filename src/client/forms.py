@@ -1,9 +1,13 @@
 from datetime import datetime
 from django import forms
+
+from main.models import Year
 from .models import Client
 from income.models import RegistrationFee, IDFee
 from savings.models import CompulsorySavings
 from bank.models import Bank
+
+year = Year.current_year()
 
 class ClientForm(forms.ModelForm):
     compulsory_savings = forms.DecimalField(
@@ -18,7 +22,7 @@ class ClientForm(forms.ModelForm):
         label='ID Fee',
         required=False
     )
-    bank = forms.ModelChoiceField(queryset=Bank.objects.all(), required=False)
+    bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=year), label='Bank')
 
     date = forms.DateField(
         label='Date',

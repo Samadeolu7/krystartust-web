@@ -1,11 +1,12 @@
 from bank.models import Bank
+from main.models import Year
 from .models import Loan, LoanPayment, LoanRepaymentSchedule as PaymentSchedule, Guarantor
 from income.models import LoanRegistrationFee, RiskPremium, UnionContribution, LoanServiceFee
 from django_select2.forms import Select2Widget
 
 from django import forms
 
-
+year = Year.current_year()
 class GuarantorForm(forms.ModelForm):
     class Meta:
         model = Guarantor
@@ -15,7 +16,7 @@ class LoanPaymentForm(forms.ModelForm):
     payment_date = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'})
     )
-    bank = forms.ModelChoiceField(queryset=Bank.objects.all())
+    bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=year), label='Bank')
     payment_schedule = forms.ModelChoiceField(queryset=PaymentSchedule.objects.none())
 
     class Meta:
@@ -60,7 +61,7 @@ class LoanRegistrationForm(forms.ModelForm):
         label='SMS Fees',
         required=False
     )
-    bank = forms.ModelChoiceField(queryset=Bank.objects.all())
+    bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=year), label='Bank')
     start_date = forms.DateField(
         label='Start Date',
         widget=forms.DateInput(attrs={'type': 'date'})

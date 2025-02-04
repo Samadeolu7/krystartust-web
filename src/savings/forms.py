@@ -2,6 +2,7 @@ from typing import Any
 from administration.models import Transaction
 from bank.models import Bank
 from loan.models import Loan, LoanPayment
+from main.models import Year
 from savings.utils import create_dc_payment, setup_monthly_contributions
 from .models import SavingsPayment, CompulsorySavings, Savings, DailyContribution, ClientContribution
 from loan.models import LoanRepaymentSchedule as PaymentSchedule
@@ -10,6 +11,7 @@ from django.utils import timezone
 
 from django import forms
 
+YEAR = Year.current_year()
 class CompulsorySavingsForm(forms.ModelForm):
     class Meta:
         model = CompulsorySavings
@@ -28,7 +30,7 @@ class DCForm(forms.Form):
     
 class WithdrawalForm(forms.ModelForm):
 
-    bank = forms.ModelChoiceField(queryset=Bank.objects.all(), required=False)
+    bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=YEAR), required=False)
     class Meta:
         model = SavingsPayment
         fields = ['savings', 'amount', 'payment_date', 'transaction_type', 'description', 'bank']
@@ -81,7 +83,7 @@ class SavingsForm(forms.ModelForm):
 
 class CombinedPaymentForm(forms.ModelForm):
 
-    bank = forms.ModelChoiceField(queryset=Bank.objects.all(), required=False)
+    bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=YEAR), required=False)
     payment_schedule = forms.ModelChoiceField(queryset=PaymentSchedule.objects.none(), required=False)
     amount = forms.DecimalField(required=False)
 

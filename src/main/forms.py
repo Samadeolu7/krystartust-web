@@ -1,6 +1,6 @@
 # forms.py
 from django import forms
-from .models import ClientGroup as Group
+from .models import ClientGroup as Group, Year
 from expenses.models import Expense
 from income.models import Income
 from bank.models import Bank
@@ -8,6 +8,8 @@ from liability.models import Liability
 from bank.models import BankPayment
 from django.forms import ModelForm
 
+
+year = Year.current_year()
 
 class GroupForm(forms.ModelForm):
     class Meta:
@@ -37,10 +39,10 @@ class JVForm(forms.Form):
     def _update_account_queryset(self, type_field, account_field):
         type_value = self.data.get(type_field)
         if type_value == 'Income':
-            self.fields[account_field].queryset = Income.objects.all()
+            self.fields[account_field].queryset = Income.objects.filter(year=year)
         elif type_value == 'Expense':
-            self.fields[account_field].queryset = Expense.objects.all()
+            self.fields[account_field].queryset = Expense.objects.filter(year=year)
         elif type_value == 'Liability':
-            self.fields[account_field].queryset = Liability.objects.all()
+            self.fields[account_field].queryset = Liability.objects.filter(year=year)
         elif type_value == 'Bank':
-            self.fields[account_field].queryset = Bank.objects.all() 
+            self.fields[account_field].queryset = Bank.objects.filter(year=year)
