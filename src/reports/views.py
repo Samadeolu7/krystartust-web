@@ -231,24 +231,20 @@ def profit_and_loss_report(request):
 @allowed_users(allowed_roles=['Admin'])
 def trial_balance_report(request):
     # Fetch all objects
-    year_m = Year.objects.order_by('-year').first()
-    year = year_m.year
-    print(f"Current Year: {year}")
-    
+    year = Year.current_year() 
     incomes = Income.objects.filter(year=year)
     expenses = Expense.objects.filter(year=year)
     banks = Bank.objects.filter(year=year)
     liabilities = Liability.objects.filter(year=year)
-    previous_year_entry = YearEndEntry.objects.filter(year=year_m)
+    year_m = Year.objects.order_by('-year').first()
+    if year_m:
+        previous_year_entry = YearEndEntry.objects.filter(year=year_m)
 
-    if previous_year_entry:
-        print("Previous Year Entry Exists")
-        print(f"Previous Year Entry: {previous_year_entry}")
-        previous_year_entry = previous_year_entry.first()
-        previous_total_savings = previous_year_entry.total_savings
-        print(f"Previous Total Savings: {previous_total_savings}")
-        previous_total_loans = previous_year_entry.total_loans
-        print(f"Previous Total Loans: {previous_total_loans}")
+        if previous_year_entry:
+            previous_year_entry = previous_year_entry.first()
+            previous_total_savings = previous_year_entry.total_savings
+            previous_total_loans = previous_year_entry.total_loans
+
     else:
         previous_total_savings = 0
         previous_total_loans = 0
