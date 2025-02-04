@@ -15,7 +15,7 @@ from loan.models import LoanPayment
 from main.models import Year
 from main.utils import verify_trial_balance
 from savings.models import SavingsPayment
-from .forms import BankForm, BankPaymentForm, CashTransferForm, DateRangeForm, ReversePaymentForm
+from .forms import BankForm, CashTransferForm, DateRangeForm, ReversePaymentForm
 from .models import Bank, BankPayment, PendingCashTransfer
 from administration.decorators import allowed_users
 from .excel_utils import bank_to_excel
