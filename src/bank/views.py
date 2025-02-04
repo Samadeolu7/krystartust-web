@@ -33,19 +33,6 @@ def create_bank(request):
 
 
 @login_required
-@allowed_users(allowed_roles=['Admin'])
-def create_bank_payment(request):
-    form = BankPaymentForm()
-    
-    if request.method == 'POST':
-        form = BankPaymentForm(request.POST)
-        if form.is_valid():
-
-            form.save()
-    return render(request, 'create_bank_payment.html', {'form': form})
-
-
-@login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def bank_list(request):
     current_year = Year.current_year()

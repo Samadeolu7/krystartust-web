@@ -12,10 +12,6 @@ class BankForm(ModelForm):
         model = Bank
         fields = ['name','description','balance_bf']
 
-class BankPaymentForm(ModelForm):
-    class Meta:
-        model = BankPayment
-        fields = ['bank', 'payment_date', 'amount', 'description']
 
 class CashTransferForm(forms.Form):
 

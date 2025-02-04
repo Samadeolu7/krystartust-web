@@ -2,15 +2,19 @@ from django import forms
 from django.forms import ModelForm, inlineformset_factory
 
 from bank.models import Bank
+from main.models import Year
 from .models import Expense, ExpensePayment, ExpensePaymentBatch, ExpensePaymentBatchItem, ExpenseType
 
+year = Year.current_year()
 class ExpenseForm(ModelForm):
+
     class Meta:
         model = Expense
         fields = ['name','description','balance_bf','expense_type']
 
 class ExpensePaymentForm(ModelForm):
-
+    bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=year), label='Bank')
+    expense = forms.ModelChoiceField(queryset=Expense.objects.filter(year=year), label='Expense')
     class Meta:
         model = ExpensePayment
         fields = ['expense', 'amount','payment_date','description','bank']
@@ -25,6 +29,8 @@ class ExpenseTypeForm(ModelForm):
 
 
 class ExpensePaymentBatchForm(forms.ModelForm):
+
+    bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=year), label='Bank')
     class Meta:
         model = ExpensePaymentBatch
         fields = ['bank', 'description', 'payment_date']
@@ -34,6 +40,8 @@ class ExpensePaymentBatchForm(forms.ModelForm):
         }
 
 class ExpensePaymentBatchItemForm(forms.ModelForm):
+
+    expense = forms.ModelChoiceField(queryset=Expense.objects.filter(year=year), label='Expense')
     class Meta:
         model = ExpensePaymentBatchItem
         fields = ['expense', 'amount', 'description']
