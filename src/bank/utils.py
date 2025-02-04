@@ -1,5 +1,9 @@
 from decimal import Decimal
+
+from main.models import Year
 from .models import Bank, BankPayment
+
+year = Year.current_year()
 
 def create_bank_payment(bank, description, amount, payment_date, transaction, created_by):
     bank_payment = BankPayment.objects.create(bank=bank, description=description, amount=amount, payment_date=payment_date, transaction=transaction, created_by=created_by)
@@ -7,19 +11,19 @@ def create_bank_payment(bank, description, amount, payment_date, transaction, cr
     return bank_payment
 
 def get_cash_in_hand():
-    bank,created = Bank.objects.get_or_create(name='Cash in Hand')
+    bank,created = Bank.objects.get_or_create(name='Cash in Hand', year=year)
     return bank
 
 def get_cash_in_hand_dc():
-    bank,created = Bank.objects.get_or_create(name='Cash in Hand (DC)')
+    bank,created = Bank.objects.get_or_create(name='Cash in Hand (DC)', year=year)
     return bank
 
 def get_bank_account():
-    bank,created = Bank.objects.get_or_create(name='MoniePoint')
+    bank,created = Bank.objects.get_or_create(name='MoniePoint', year=year)
     return bank
 
 def get_union_pulse():
-    bank,created = Bank.objects.get_or_create(name='Union Pulse')
+    bank,created = Bank.objects.get_or_create(name='Union Pulse', year=year)
     return bank
 
 

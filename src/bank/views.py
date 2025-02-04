@@ -12,6 +12,7 @@ from django.contrib.contenttypes.models import ContentType
 from administration.models import Approval, Transaction
 from administration.utils import validate_month_status
 from loan.models import LoanPayment
+from main.models import Year
 from main.utils import verify_trial_balance
 from savings.models import SavingsPayment
 from .forms import BankForm, BankPaymentForm, CashTransferForm, DateRangeForm, ReversePaymentForm
@@ -47,8 +48,22 @@ def create_bank_payment(request):
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def bank_list(request):
-    bank = Bank.objects.all()
-    return render(request, 'bank_list.html', {'bank': bank})
+    current_year = Year.current_year()
+    banks = Bank.objects.filter(year=current_year).all()
+    has_previous_years_banks = Bank.objects.filter(year__lt=current_year).exists()
+    context = {
+        'banks': banks,
+        'current_year': current_year,
+        'has_previous_years_banks': has_previous_years_banks
+    }
+    return render(request, 'bank_list.html', context)
+
+@login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
+def previous_years_banks(request):
+    current_year = Year.current_year()
+    previous_years_banks = Bank.objects.filter(year__lt=current_year).all()
+    return render(request, 'bank_list.html', {'banks': previous_years_banks})
 
 
 @login_required

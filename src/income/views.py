@@ -1,5 +1,7 @@
 from django.shortcuts import redirect, render
 
+from main.models import Year
+
 from .forms import RegistrationFeeForm, IDFeeForm, LoanRegistrationFeeForm, RiskPremiumForm, UnionContributionForm, LoanServiceFeeForm
 from .models import Income, IncomePayment
 from django.contrib.auth.decorators import login_required
@@ -10,8 +12,19 @@ from administration.decorators import allowed_users
 @login_required
 @allowed_users(allowed_roles=['Admin'])
 def income_list(request):
-    incomes = Income.objects.all()
-    return render(request, 'income_list.html', {'incomes': incomes})
+    current_year = Year.current_year()
+    incomes = Income.objects.filter(year=current_year)
+    has_previous_income = Income.objects.filter(year__lt=current_year).exists()
+
+    context={
+        'incomes': incomes,
+        'has_previous_income': has_previous_income
+    }
+    return render(request, 'income_list.html', context)
+
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+
 
 
 @login_required
