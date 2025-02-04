@@ -173,7 +173,7 @@ def dashboard(request):
 
     notifications = Notification.objects.filter(user=request.user, is_read=False)
 
-    system_year = Year.current_year().year
+    system_year = Year.current_year()
     date_year = today.year
     close_year = False
     if date_year > system_year:
