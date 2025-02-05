@@ -96,6 +96,10 @@ def approval_detail(request, pk):
         context['salary'] = approval.content_object
     elif approval.type == Approval.Expenses:
         context['expense'] = approval.content_object
+    elif approval.type == Approval.Batch_Expense:
+        context['batch'] = approval.content_object
+    elif approval.type == Approval.Cash_Transfer:
+        context['transfer'] = approval.content_object
 
     return render(request, 'approval_detail.html', context)
 

@@ -8,6 +8,7 @@ from income.models import SingletonModel
 
 from django.db import models
 from client.models import Client
+from django.core.exceptions import ValidationError
 
 class Savings(models.Model):
     NORMAL = 'N'
@@ -27,6 +28,14 @@ class Savings(models.Model):
             return str(self.client) + ' - ' + str(self.balance)
         else:
             return str(self.client) + ' - ' + str(self.balance) + ' -DC'
+
+    def clean(self):
+        if self.balance < 0:
+            raise ValidationError('Balance cannot be negative.')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # This will call the clean method
+        super(Savings, self).save(*args, **kwargs)
 
     class Meta:
         unique_together = ('client', 'type')

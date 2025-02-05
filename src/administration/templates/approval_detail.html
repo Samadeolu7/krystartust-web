@@ -181,6 +181,42 @@
         </div>
     {% endif %}
 
+    {% if approval.transfer %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2>Transfer Details</h2>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>From:</th>
+                        <td>{{ transfer.source_bank }}</td>
+                    </tr>
+                    <tr>
+                        <th>To:</th>
+                        <td>{{ transfer.destination_bank }}</td>
+                    </tr>
+                    <tr>
+                        <th>Amount:</th>
+                        <td>{{ transfer.amount }}</td>
+                    </tr>
+                    <tr>
+                        <th>Description:</th>
+                        <td>{{ transfer.description }}</td>
+                    </tr>
+                    <tr>
+                        <th>Payment Date:</th>
+                        <td>{{ transfer.payment_date }}</td>
+                    </tr>
+                    <tr>
+                        <th>Created by </th>
+                        <td>{{ transfer.created_by }}</td>
+                    </tr>
+                    
+                </table>
+            </div>
+        </div>
+    {% endif %}
     <div class="d-flex justify-content-between">
         <form action="{% url 'approve' approval.pk %}" method="post" style="display:inline;">
             {% csrf_token %}
