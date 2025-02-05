@@ -291,6 +291,7 @@ def daily_contribution_report(request):
     }
     return render(request, 'test.html', context)
 
+
 @login_required
 def daily_contribution_spreadsheet(request):
     if request.method == 'POST':
@@ -303,27 +304,24 @@ def daily_contribution_spreadsheet(request):
         month = datetime.date.today().month
         year = datetime.date.today().year
 
-    clients = ClientContribution.objects.values_list('id', 'client__name')
+    clients = ClientContribution.objects.values_list('id', 'client__name', 'client__phone', 'amount')
     days_in_month = (datetime.date(year, month, 28) + datetime.timedelta(days=4)).replace(day=1) - datetime.timedelta(days=1)
     days = [datetime.date(year, month, day).strftime('%Y-%m-%d') for day in range(1, days_in_month.day + 1)]
     
-    contributions = {client_name: {day: False for day in days} for _, client_name in clients}
+    contributions = {client_name: {'phone': phone, 'amount': amount, 'balance': 0, 'days': {day: False for day in days}} for client_id, client_name, phone, amount in clients}
     daily_contributions = DailyContribution.objects.filter(
-        client_contribution__in=[client_id for client_id, _ in clients],
+        client_contribution__in=[client_id for client_id, _, _, _ in clients],
         date__month=month,
         date__year=year
-    ).values_list('client_contribution__client__name', 'client_contribution__client__phone', 'client_contribution__amount', 'date', 'payment_made', 'payment__savings__balance')
+    ).values_list('client_contribution__client__name', 'date', 'payment_made', 'payment__savings__balance')
 
-    for client_name, client_phone, amount, date, payment_made, balance in daily_contributions:
+    for client_name, date, payment_made, balance in daily_contributions:
         if payment_made:
-            contributions[client_name][date.strftime('%Y-%m-%d')] = True
-            contributions[client_name]['phone'] = client_phone
-            contributions[client_name]['amount'] = amount
+            contributions[client_name]['days'][date.strftime('%Y-%m-%d')] = True
             contributions[client_name]['balance'] = balance
 
     context = {
         'form': form,
-        'clients': clients,
         'days': days,
         'contributions': contributions
     }
