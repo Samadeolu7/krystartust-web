@@ -18,22 +18,20 @@ from income.utils import create_loan_registration_fee_income_payment
 from income.models import RegistrationFee
 
 class Command(BaseCommand):
-    help = 'Find all daily contributions that have does not have a corresponding income payment'
+    help = 'Find all reversed loan payment and reset the repayment schedule'
 
     def handle(self, *args, **kwargs):
-        # Get all the loan payments
-        client = ClientContribution.objects.all()
-        for contribution in client:
-            # Get the income payment for the loan payment
-            income = Income.objects.get(name='Client Contribution')
-            income_payment = IncomePayment.objects.filter(income=income, payment_date=contribution.payment_date, amount=contribution.amount).first()
-            if not income_payment:
-                print(f'No income payment for {contribution.client} on {contribution.payment_date} of {contribution.amount}')
-                # Create the income payment
-        #         income = Income.objects.get(name='Client Contribution')
-        #         income_payment = IncomePayment(client=contribution.client, income=income, amount=contribution.amount, payment_date=contribution.payment_date)
-        #         income_payment.save()
-        #         print(f'Income payment created for {contribution.client} on {contribution.payment_date} of {contribution.amount}')
-        # #
+        # Get all the loan payments that have been reversed
+        reversed_loan_payments = LoanPayment.objects.filter(transaction__reference_number__startswith='REV').all()
+        for payment in reversed_loan_payments:
+            print(f'Processing {payment.client.name}')
+            repayment = payment.payment_schedule
+            # Reset the payment schedule
+            if repayment:
+                repayment.is_paid = False
+                repayment.payment_date = None
+                repayment.save()
+                print(f'Reset repayment schedule for {payment.client.name}')
+            
         
                 

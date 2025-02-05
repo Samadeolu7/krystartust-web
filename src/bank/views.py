@@ -209,6 +209,11 @@ def payment_reversal(request):
                     )
                 elif type == 'LOA':
                     loan_payment = LoanPayment.objects.get(transaction=payment.transaction)
+                    repayment_schedule = loan_payment.payment_schedule
+                    repayment_schedule.is_paid = False
+                    repayment_schedule.payment_date = None
+                    repayment_schedule.save()
+                    
                     LoanPayment.objects.create(
                         client=loan_payment.client,
                         loan=loan_payment.loan,

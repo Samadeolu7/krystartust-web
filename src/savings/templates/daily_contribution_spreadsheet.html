@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% block title %}Daily Contribution Spreadsheet{% endblock %}
+{% block content %}
+<h2>Daily Contribution Spreadsheet</h2>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="..." crossorigin="anonymous">
+<style>
+    .tick {
+        color: green;
+        font-size: 1.2em; /* adjust as needed */
+    }
+</style>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">View Report</button>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Client</th>
+            {% for day in days %}
+                {# Assuming the string is in 'YYYY-MM-DD', slice to get the day portion #}
+                <th>{{ day|slice:"-2:" }}</th>
+                <script>
+                    var day = "{{ day }}";
+                    console.log(day);
+                </script>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for client, client_contributions in contributions.items %}
+            <tr>
+                <td>{{ client }}</td>
+                {% for day in days %}
+                    {% with value=client_contributions|get_item:day %}
+                        <td>
+                            {% if value %}
+                                <i class="fas fa-check-circle tick"></i>
+                            {% endif %}
+                        </td>
+                    {% endwith %}
+                {% endfor %}
+            </tr>
+        {% endfor %}
+
+    </tbody>
+</table>
+{% endblock %}

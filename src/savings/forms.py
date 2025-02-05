@@ -1,3 +1,4 @@
+import datetime
 from typing import Any
 from administration.models import Transaction
 from bank.models import Bank
@@ -219,3 +220,7 @@ class ToggleDailyContributionForm(forms.Form):
             instance.save()
 
         return instance
+
+class MonthYearForm(forms.Form):
+    month = forms.IntegerField(min_value=1, max_value=12, initial=datetime.date.today().month, label='Month')
+    year = forms.IntegerField(min_value=2000, max_value=datetime.date.today().year, initial=datetime.date.today().year, label='Year')

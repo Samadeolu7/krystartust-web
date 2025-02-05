@@ -19,6 +19,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
+from .forms import MonthYearForm  # Import the new form
 
 
 @login_required
@@ -289,4 +290,38 @@ def daily_contribution_report(request):
         'monthly_totals': monthly_totals
     }
     return render(request, 'test.html', context)
+
+@login_required
+def daily_contribution_spreadsheet(request):
+    if request.method == 'POST':
+        form = MonthYearForm(request.POST)
+        if form.is_valid():
+            month = form.cleaned_data['month']
+            year = form.cleaned_data['year']
+    else:
+        form = MonthYearForm()
+        month = datetime.date.today().month
+        year = datetime.date.today().year
+
+    clients = ClientContribution.objects.values_list('id', 'client__name')
+    days_in_month = (datetime.date(year, month, 28) + datetime.timedelta(days=4)).replace(day=1) - datetime.timedelta(days=1)
+    days = [datetime.date(year, month, day).strftime('%Y-%m-%d') for day in range(1, days_in_month.day + 1)]
     
+    contributions = {client_name: {day: False for day in days} for _, client_name in clients}
+    daily_contributions = DailyContribution.objects.filter(
+        client_contribution__in=[client_id for client_id, _ in clients],
+        date__month=month,
+        date__year=year
+    ).values_list('client_contribution__client__name', 'date', 'payment_made')
+
+    for client_name, date, payment_made in daily_contributions:
+        if payment_made:
+            contributions[client_name][date.strftime('%Y-%m-%d')] = True
+
+    context = {
+        'form': form,
+        'clients': clients,
+        'days': days,
+        'contributions': contributions
+    }
+    return render(request, 'daily_contribution_spreadsheet.html', context)
