@@ -21,6 +21,9 @@
     <thead>
         <tr>
             <th>Client</th>
+            <th>Phone Number</th>
+            <th>Amount</th>
+            <th>Balance</th>
             {% for day in days %}
                 {# Assuming the string is in 'YYYY-MM-DD', slice to get the day portion #}
                 <th>{{ day|slice:"-2:" }}</th>
@@ -32,11 +35,14 @@
         </tr>
     </thead>
     <tbody>
-        {% for client, client_contributions in contributions.items %}
+        {% for client, client_data in contributions.items %}
             <tr>
                 <td>{{ client }}</td>
+                <td>{{ client_data.phone }}</td>
+                <td>{{ client_data.amount }}</td>
+                <td>{{ client_data.balance }}</td>
                 {% for day in days %}
-                    {% with value=client_contributions|get_item:day %}
+                    {% with value=client_data|get_item:day %}
                         <td>
                             {% if value %}
                                 <i class="fas fa-check-circle tick"></i>

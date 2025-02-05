@@ -312,11 +312,14 @@ def daily_contribution_spreadsheet(request):
         client_contribution__in=[client_id for client_id, _ in clients],
         date__month=month,
         date__year=year
-    ).values_list('client_contribution__client__name', 'date', 'payment_made')
+    ).values_list('client_contribution__client__name', 'client_contribution__client__phone', 'client_contribution__amount', 'date', 'payment_made', 'payment__savings__balance')
 
-    for client_name, date, payment_made in daily_contributions:
+    for client_name, client_phone, amount, date, payment_made, balance in daily_contributions:
         if payment_made:
             contributions[client_name][date.strftime('%Y-%m-%d')] = True
+            contributions[client_name]['phone'] = client_phone
+            contributions[client_name]['amount'] = amount
+            contributions[client_name]['balance'] = balance
 
     context = {
         'form': form,
