@@ -7,13 +7,13 @@ from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Count
 from django.utils import timezone
 from django.conf import settings
 
 from administration.decorators import allowed_users
 from administration.models import Approval, Notification, Tickets, Transaction
-from bank.models import Bank
+from bank.models import Bank, BankPayment
 from client.models import Client
 from expenses.models import Expense, ExpensePayment
 from income.models import Income, IncomePayment
@@ -444,3 +444,63 @@ def close_year_view(request):
     else:
         messages.error(request, 'You can only close the year after the current year has ended.')
         return JsonResponse({'error': 'You can only close the year after the current year has ended.'})
+    
+
+
+@login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
+def review_week(request):
+    today = timezone.now().date()
+    week_start = today - timedelta(days=today.weekday())
+    week_end = week_start + timedelta(days=6)
+    
+    errors = []
+    
+# Loan payments
+    loan_payments = LoanPayment.objects.filter(payment_date__range=[week_start, week_end])
+    loan_payment_counts = loan_payments.values('loan__id', 'client__name').annotate(count=Count('id')).filter(count__gt=1)
+    for loan_payment_count in loan_payment_counts:
+        errors.append({
+            'message': f'Client {loan_payment_count["client__name"]} has more than one loan payment in the week',
+            'link': f'/loan/detail/{loan_payment_count["loan__id"]}/'
+        })
+    
+    # Savings payments
+    savings_payments = SavingsPayment.objects.filter(payment_date__range=[week_start, week_end])
+    savings_payment_counts = savings_payments.values('client__id', 'client__name', 'payment_date', 'transaction_type').annotate(count=Count('id')).filter(count__gt=1)
+    for savings_payment_count in savings_payment_counts:
+        if savings_payment_count['transaction_type'] == SavingsPayment.WITHDRAWAL:
+            errors.append({
+                'message': f'Client {savings_payment_count["client__name"]} has more than one withdrawal on {savings_payment_count["payment_date"]}',
+                'link': f'/savings/savings_detail/{savings_payment_count["client__id"]}/'
+            })
+        else:
+            errors.append({
+                'message': f'Client {savings_payment_count["client__name"]} has more than one savings payment on {savings_payment_count["payment_date"]}',
+                'link': f'/savings/savings_detail/{savings_payment_count["client__id"]}/'
+            })
+    
+    # Expense payments
+    expense_payments = ExpensePayment.objects.filter(payment_date__range=[week_start, week_end])
+    expense_payment_counts = expense_payments.values('expense__id', 'expense__name', 'payment_date').annotate(count=Count('id')).filter(count__gt=1)
+    for expense_payment_count in expense_payment_counts:
+        errors.append({
+            'message': f'Expense {expense_payment_count["expense__name"]} has more than one payment on {expense_payment_count["payment_date"]}',
+            'link': f'/expenses/detail/{expense_payment_count["expense__id"]}/'
+        })
+    
+    # Liability payments
+    liability_payments = LiabilityPayment.objects.filter(payment_date__range=[week_start, week_end])
+    liability_payment_counts = liability_payments.values('liability__id', 'liability__name', 'payment_date').annotate(count=Count('id')).filter(count__gt=1)
+    for liability_payment_count in liability_payment_counts:
+        errors.append({
+            'message': f'Liability {liability_payment_count["liability__name"]} has more than one payment on {liability_payment_count["payment_date"]}',
+            'link': f'/liability/detail/{liability_payment_count["liability__id"]}/'
+        })
+    
+    context = {
+        'errors': errors,
+        'week_start': week_start,
+        'week_end': week_end,
+    }
+    return render(request, 'review_week.html', context)

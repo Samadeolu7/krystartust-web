@@ -1,5 +1,5 @@
-from .views import group_detail, group_create, dashboard, update_app, get_accounts, journal_entry, fake_dashboard, group_edit, test_html
-from .views import approve_journal_entry, disapprove_journal_entry, search, close_year_view
+from .views import group_detail, group_create, dashboard, update_app, get_accounts, journal_entry, group_edit, test_html
+from .views import approve_journal_entry, disapprove_journal_entry, search, close_year_view, review_week
 
 from django.urls import path
 
@@ -16,4 +16,5 @@ urlpatterns = [
     path('test-html/', test_html, name='test_html'),
     path('search/', search, name='search'),
     path('close-year/', close_year_view, name='close_year'),
+    path('review-week/', review_week, name='review_week'),
 ]

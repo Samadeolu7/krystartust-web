@@ -17,14 +17,23 @@ from income.utils import create_loan_registration_fee_income_payment
 from income.models import RegistrationFee
 
 class Command(BaseCommand):
-    help = 'Make all income payment for a savings of type DC carry the same decription as their corresponding transaction description'
+    help = 'Find all DC savings payments created in the last 24 hours and add them to csv'
 
     def handle(self, *args, **kwargs):
-        # Get all income payments for savings of type DC
-        income_payments = IncomePayment.objects.filter(transaction__reference_number__startswith='DC')
-        for income_payment in income_payments:
-            with transaction.atomic():
-                income_payment.description = income_payment.transaction.description
-                income_payment.save()
-                print(f'Updated {income_payment} description to {income_payment.transaction.description}')
+        # Get all savings payments created in the last 24 hours
+        now = timezone.now()
+        start = now - timezone.timedelta(days=1)
+        end = now
+        savings_payments = SavingsPayment.objects.filter(created_at__range=(start, end), transaction_type='C')
+        if not savings_payments:
+            print('No DC payments found')
+            return
+        # Create csv file
+        file_name = 'dc_payments.csv'
+        with open(file_name, 'w') as file:
+            file.write('Client,Amount,Date,Payment Date,Created At\n')
+            for payment in savings_payments:
+                file.write(f'{payment.client},{payment.amount},{payment.payment_date},{payment.created_at}\n')
+        print('DC payments added to csv')
+        
                 

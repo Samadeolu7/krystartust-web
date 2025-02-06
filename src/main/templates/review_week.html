@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Weekly Review{% endblock %}
+
+{% block content %}
+    <h1 class="text-center mb-4">Weekly Review</h1>
+    <p class="text-center">Reviewing the week from {{ week_start }} to {{ week_end }}</p>
+
+    {% if errors %}
+        <div class="alert alert-danger">
+            <h4>Possible Errors:</h4>
+            <div class="row">
+                {% for error in errors %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <p class="card-text">{{ error.message }}</p>
+                                <a href="{{ error.link }}" class="btn btn-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-success">
+            <h4>No errors found for the week.</h4>
+        </div>
+    {% endif %}
+{% endblock %}
