@@ -58,6 +58,8 @@ class WithdrawalForm(forms.ModelForm):
 
 
 class SavingsForm(forms.ModelForm):
+
+    bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=YEAR), required=False)
     
     class Meta:
         model = SavingsPayment
