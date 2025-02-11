@@ -33,7 +33,7 @@ production = env('PRODUCTION', default=False)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = not production
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'krystartust-web.onrender.com', 'krystartrust.ng','192.168.0.140','krystar.ddns.net']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'krystartust-web.onrender.com', 'krystartrust.ng','192.168.0.140','krystar.ddns.net','krystartust-web-1.onrender.com']
 
 # Application definition
 
