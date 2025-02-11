@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import OperationalError, models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
@@ -31,7 +31,7 @@ class Year(models.Model):
                 return last_year_instance.year
             else:
                 return 2024
-        except cls.DoesNotExist:
+        except (cls.DoesNotExist, OperationalError):
             return 2024
         
         
