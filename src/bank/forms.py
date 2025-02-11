@@ -5,7 +5,7 @@ from administration.utils import validate_month_status
 from main.models import Year
 from .models import Bank, BankPayment
 
-year = Year.current_year()
+
 
 class BankForm(ModelForm):
     class Meta:
@@ -15,6 +15,7 @@ class BankForm(ModelForm):
 
 class CashTransferForm(forms.Form):
 
+    year = Year.current_year()
     source_bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=year), label="Source Bank")
     destination_bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=year), label="Destination Bank")
     amount = forms.DecimalField(max_digits=10, decimal_places=2)
@@ -29,6 +30,7 @@ class DateRangeForm(forms.Form):
 
 
 class ReversePaymentForm(forms.Form):
+    year = Year.current_year()
     type = forms.ChoiceField(choices=(('SVS','Savings'), ('LOA','Loan'), ('COM','Combined')), label='Type')
     bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=year), label='Bank')
     payment_date = forms.DateField(widget=forms.SelectDateWidget(years=range(2000, 2030)))

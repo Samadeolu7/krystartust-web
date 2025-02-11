@@ -9,7 +9,7 @@ from bank.models import BankPayment
 from django.forms import ModelForm
 
 
-year = Year.current_year()
+
 
 class GroupForm(forms.ModelForm):
     class Meta:
@@ -17,6 +17,7 @@ class GroupForm(forms.ModelForm):
         fields = '__all__'
     
 class JVForm(forms.Form):
+    
     choices = [('Income', 'Income'), ('Expense', 'Expense'), ('Liability', 'Liability'), ('Bank', 'Bank')]
     jv_credit = forms.ChoiceField(choices=choices, label="Credit Type")
     jv_credit_account = forms.ModelChoiceField(queryset=Expense.objects.none(), label="Credit Account")
@@ -37,6 +38,7 @@ class JVForm(forms.Form):
             self._update_account_queryset('jv_debit', 'jv_debit_account')
 
     def _update_account_queryset(self, type_field, account_field):
+        year = Year.current_year()
         type_value = self.data.get(type_field)
         if type_value == 'Income':
             self.fields[account_field].queryset = Income.objects.filter(year=year)

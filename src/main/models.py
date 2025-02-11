@@ -25,11 +25,15 @@ class Year(models.Model):
     
     @classmethod
     def current_year(cls):
-        last_year_instance = cls.objects.order_by('-year').first()
-        if last_year_instance:
-            return last_year_instance.year
-        else:
+        try:
+            last_year_instance = cls.objects.order_by('-year').first()
+            if last_year_instance:
+                return last_year_instance.year
+            else:
+                return 2024
+        except cls.DoesNotExist:
             return 2024
+        
         
     class Meta:
         ordering = ['-year']
