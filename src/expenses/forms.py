@@ -5,14 +5,16 @@ from bank.models import Bank
 from main.models import Year
 from .models import Expense, ExpensePayment, ExpensePaymentBatch, ExpensePaymentBatchItem, ExpenseType
 
-year = Year.current_year()
+
 class ExpenseForm(ModelForm):
 
+    year = Year.current_year()
     class Meta:
         model = Expense
         fields = ['name','description','balance_bf','expense_type']
 
 class ExpensePaymentForm(ModelForm):
+    year = Year.current_year()
     bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=year), label='Bank')
     expense = forms.ModelChoiceField(queryset=Expense.objects.filter(year=year), label='Expense')
     class Meta:
@@ -29,6 +31,7 @@ class ExpenseTypeForm(ModelForm):
 
 
 class ExpensePaymentBatchForm(forms.ModelForm):
+    year = Year.current_year()
 
     bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=year), label='Bank')
     class Meta:
@@ -40,7 +43,7 @@ class ExpensePaymentBatchForm(forms.ModelForm):
         }
 
 class ExpensePaymentBatchItemForm(forms.ModelForm):
-
+    year = Year.current_year()
     expense = forms.ModelChoiceField(queryset=Expense.objects.filter(year=year), label='Expense')
     class Meta:
         model = ExpensePaymentBatchItem

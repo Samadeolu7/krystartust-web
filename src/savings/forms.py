@@ -12,7 +12,7 @@ from django.utils import timezone
 
 from django import forms
 
-YEAR = Year.current_year()
+
 class CompulsorySavingsForm(forms.ModelForm):
     class Meta:
         model = CompulsorySavings
@@ -30,6 +30,7 @@ class DCForm(forms.Form):
 
     
 class WithdrawalForm(forms.ModelForm):
+    YEAR = Year.current_year()
 
     bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=YEAR), required=False)
     class Meta:
@@ -59,6 +60,7 @@ class WithdrawalForm(forms.ModelForm):
 
 class SavingsForm(forms.ModelForm):
 
+    YEAR = Year.current_year()
     bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=YEAR), required=False)
     
     class Meta:
@@ -86,6 +88,7 @@ class SavingsForm(forms.ModelForm):
 
 class CombinedPaymentForm(forms.ModelForm):
 
+    YEAR = Year.current_year()
     bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=YEAR), required=False)
     payment_schedule = forms.ModelChoiceField(queryset=PaymentSchedule.objects.none(), required=False)
     amount = forms.DecimalField(required=False)

@@ -7,9 +7,10 @@ from income.models import RegistrationFee, IDFee
 from savings.models import CompulsorySavings
 from bank.models import Bank
 
-year = Year.current_year()
+
 
 class ClientForm(forms.ModelForm):
+    year = Year.current_year()
     compulsory_savings = forms.DecimalField(
         label='Compulsory Savings',
         required=False

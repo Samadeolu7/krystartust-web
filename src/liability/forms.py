@@ -4,14 +4,14 @@ from django.forms import ModelForm
 from main.models import Year
 from .models import Liability, LiabilityPayment
 
-year = Year.current_year()
+
 class LiabilityForm(ModelForm):
     class Meta:
         model = Liability
         fields = ['name','description','balance_bf']
 
 class LiabilityPaymentForm(ModelForm):
-
+    year = Year.current_year()
     liability = forms.ModelChoiceField(queryset=Liability.objects.filter(year=year), label='Liability')
     class Meta:
         model = LiabilityPayment

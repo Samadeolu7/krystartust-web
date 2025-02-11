@@ -6,13 +6,14 @@ from django_select2.forms import Select2Widget
 
 from django import forms
 
-year = Year.current_year()
+
 class GuarantorForm(forms.ModelForm):
     class Meta:
         model = Guarantor
         fields = '__all__'
 
 class LoanPaymentForm(forms.ModelForm):
+    year = Year.current_year()
     payment_date = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'})
     )
@@ -36,7 +37,7 @@ class LoanPaymentForm(forms.ModelForm):
             self.fields['payment_schedule'].queryset = self.instance.loan.client.paymentschedule_set.order_by('due_date')
 
 class LoanRegistrationForm(forms.ModelForm):
-
+    year = Year.current_year()
     registration_fee = forms.DecimalField(
         label='Registration Fee',
         required=False
