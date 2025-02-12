@@ -39,7 +39,7 @@ class LoanPaymentForm(forms.ModelForm):
 class LoanRegistrationForm(forms.ModelForm):
     year = Year.current_year()
     registration_fee = forms.DecimalField(
-        label='Registration Fee',
+        label='Loan Form Fee',
         required=False
     )
     risk_premium = forms.DecimalField(
