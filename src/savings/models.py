@@ -29,13 +29,13 @@ class Savings(models.Model):
         else:
             return str(self.client) + ' - ' + str(self.balance) + ' -DC'
 
-    def clean(self):
-        if self.balance < 0:
-            raise ValidationError('Balance cannot be negative.')
+    # def clean(self):
+    #     if self.balance < 0:
+    #         raise ValidationError('Balance cannot be negative.')
 
-    def save(self, *args, **kwargs):
-        self.full_clean()  # This will call the clean method
-        super(Savings, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     self.full_clean()  # This will call the clean method
+    #     super(Savings, self).save(*args, **kwargs)
 
     class Meta:
         unique_together = ('client', 'type')
