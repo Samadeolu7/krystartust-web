@@ -76,6 +76,9 @@ class Loan(models.Model):
             if orig.balance != self.balance:
                 cache_key = f"loan_{self.id}_is_defaulted"
                 cache.delete(cache_key)
+        #if loan is paid off, set status to closed 
+        if self.balance == 0:
+            self.status = 'Closed'
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
