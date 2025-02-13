@@ -45,7 +45,7 @@ def send_for_approval(form, user):
             loan.balance = 0
             # Check for existing active loan
             existing_loan = Loan.objects.filter(client=client, status='Active').first()
-            if existing_loan and not existing_loan.is_defaulted:
+            if existing_loan and not existing_loan.is_defaulted and existing_loan.loan_type == loan.loan_type:
                 # Update the balance of the new loan
                 loan.balance += existing_loan.balance
 
@@ -128,6 +128,7 @@ def approve_loan(approval, user):
         loan.save()
 
         existing_loan = Loan.objects.filter(client=client, status='Active').exclude(id=loan.id).first()
+        print(existing_loan)
         if existing_loan and loan.loan_type == existing_loan.loan_type:
             existing_loan.status = 'Closed'
             existing_loan.balance = 0
