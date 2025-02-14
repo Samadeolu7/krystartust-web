@@ -261,20 +261,6 @@ def trial_balance_report(request):
     total_liabilities = Liability.objects.filter(year=year).aggregate(total=Sum('balance')).get('total', 0) or 0
     total_previous_liabilities = Liability.objects.filter(year=year-1).aggregate(total=Sum('balance')).get('total', 0) or 0
 
-    # Print intermediate results for debugging
-    print(f"Total Incomes: {total_incomes}")
-    print(f"Previous Total Incomes: {previous_total_incomes}")
-    print(f"Total Expenses: {total_expenses}")
-    print(f"Previous Total Expenses: {previous_total_expenses}")
-    print(f"Total Savings: {total_savings}")
-    print(f"Previous Total Savings: {previous_total_savings}")
-    print(f"Total Loans: {total_loans}")
-    print(f"Previous Total Loans: {previous_total_loans}")
-    print(f"Total Banks: {total_banks}")
-    print(f"Previous Total Banks: {total_previous_banks}")
-    print(f"Total Liabilities: {total_liabilities}")
-    print(f"Previous Total Liabilities: {total_previous_liabilities}")
-
     # Calculate total credit and debit
     total_credit = total_incomes + total_savings + total_liabilities
     total_debit = total_expenses + total_loans + total_banks

@@ -211,8 +211,6 @@ def close_liability(year):
         # Bulk update liability payments if there are any
         if liability_payments_updates:
             LiabilityPayment.objects.bulk_update(liability_payments_updates, ['liability'])
-        for liability in new_liabilities:
-            print(liability.balance)
                   
 def close_bank(year):
 
@@ -257,9 +255,7 @@ def close_bank(year):
         # Bulk update bank payments if there are any
         if bank_payments_updates:
             BankPayment.objects.bulk_update(bank_payments_updates, ['bank'])
-        print('new banks')
-        for bank in new_banks:
-            print(bank.balance)
+
 
 def close_year():
 

@@ -175,13 +175,13 @@ def payment_reversal(request):
                     # Create a new BankPayment for the reversal
                     
                     loan_payment = LoanPayment.objects.get(transaction=payment.transaction)
-                    print(loan_payment.loan)
-                    print(loan_payment.loan.balance)
+
                     schedule = loan_payment.payment_schedule
                     if schedule:
-                        loan_payment.payment_schedule.is_paid = False
-                        loan_payment.payment_schedule.payment_date = None
+                        schedule.is_paid = False
+                        schedule.payment_date = None
                         loan_payment.payment_schedule = None
+                        schedule.save()
                     loan_payment.save()
                     LoanPayment.objects.create(
                         client=loan_payment.client,
@@ -191,10 +191,7 @@ def payment_reversal(request):
                         payment_date=reversal_date,
                         transaction=tran
                     )
-                    print(loan_payment.amount)
-                    print(loan_payment.loan.balance)
                     savings_payment = SavingsPayment.objects.get(transaction=payment.transaction)
-                    print(savings_payment.savings.balance)
                     SavingsPayment.objects.create(
                         client=savings_payment.client,
                         savings=savings_payment.savings,
@@ -204,7 +201,6 @@ def payment_reversal(request):
                         payment_date=reversal_date,
                         transaction=tran
                     )
-                    print(savings_payment.savings.balance)
 
                 elif type == 'SVS':
                     savings_payment = SavingsPayment.objects.get(transaction=payment.transaction)
