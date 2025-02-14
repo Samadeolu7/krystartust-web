@@ -125,7 +125,7 @@ class LoanPayment(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:
             balance = self.loan.balance
-            if balance:
+            if balance != None:
                 self.balance = balance - self.amount
                 self.loan.balance = self.balance
                 self.loan.save()
