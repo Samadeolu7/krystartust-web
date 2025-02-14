@@ -174,7 +174,7 @@ def payment_reversal(request):
                 if type == 'COM':
                     # Create a new BankPayment for the reversal
                     loan_payment = LoanPayment.objects.get(transaction=payment.transaction)
-                    schedule = loan_payment.payment_schedule.is_paid
+                    schedule = loan_payment.payment_schedule
                     if schedule:
                         loan_payment.payment_schedule.is_paid = False
                         loan_payment.payment_schedule.payment_date = None
