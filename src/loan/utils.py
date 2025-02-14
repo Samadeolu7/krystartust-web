@@ -128,7 +128,6 @@ def approve_loan(approval, user):
         loan.save()
 
         existing_loan = Loan.objects.filter(client=client, status='Active').exclude(id=loan.id).first()
-        print(existing_loan)
         if existing_loan and loan.loan_type == existing_loan.loan_type:
             existing_loan.status = 'Closed'
             existing_loan.balance = 0

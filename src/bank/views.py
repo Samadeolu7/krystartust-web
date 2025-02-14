@@ -174,9 +174,11 @@ def payment_reversal(request):
                 if type == 'COM':
                     # Create a new BankPayment for the reversal
                     loan_payment = LoanPayment.objects.get(transaction=payment.transaction)
-                    loan_payment.payment_schedule.is_paid = False
-                    loan_payment.payment_schedule.payment_date = None
-                    loan_payment.payment_schedule = None
+                    schedule = loan_payment.payment_schedule.is_paid
+                    if schedule:
+                        loan_payment.payment_schedule.is_paid = False
+                        loan_payment.payment_schedule.payment_date = None
+                        loan_payment.payment_schedule = None
                     loan_payment.save()
                     LoanPayment.objects.create(
                         client=loan_payment.client,
@@ -210,9 +212,12 @@ def payment_reversal(request):
                 elif type == 'LOA':
                     loan_payment = LoanPayment.objects.get(transaction=payment.transaction)
                     repayment_schedule = loan_payment.payment_schedule
-                    repayment_schedule.is_paid = False
-                    repayment_schedule.payment_date = None
-                    repayment_schedule.save()
+                    if repayment_schedule:
+                        repayment_schedule.is_paid = False
+                        repayment_schedule.payment_date = None
+                        repayment_schedule.save()
+                        loan_payment.payment_schedule = None
+                    loan_payment.save()
                     
                     LoanPayment.objects.create(
                         client=loan_payment.client,
