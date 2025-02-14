@@ -18,20 +18,22 @@ from income.utils import create_loan_registration_fee_income_payment
 from income.models import RegistrationFee
 
 class Command(BaseCommand):
-    help = 'Find all reversed loan payment and reset the repayment schedule'
+    help = 'Find all reversed loan payment with reference number COM-54040012025 and see its details'
 
     def handle(self, *args, **kwargs):
-        # Get all the loan payments that have been reversed
-        reversed_loan_payments = LoanPayment.objects.filter(transaction__reference_number__startswith='REV').all()
-        for payment in reversed_loan_payments:
-            print(f'Processing {payment.client.name}')
-            repayment = payment.payment_schedule
-            # Reset the payment schedule
-            if repayment:
-                repayment.is_paid = False
-                repayment.payment_date = None
-                repayment.save()
-                print(f'Reset repayment schedule for {payment.client.name}')
+
+        loan_payment = LoanPayment.objects.filter(transaction__reference_number='COM-54040012025').first()
+        if loan_payment:
+            self.stdout.write(self.style.SUCCESS(f'Loan Payment found with reference number {loan_payment.transaction.reference_number}'))
+            self.stdout.write(self.style.SUCCESS(f'Loan Payment amount {loan_payment.amount}'))
+            self.stdout.write(self.style.SUCCESS(f'Loan Payment date {loan_payment.payment_date}'))
+            self.stdout.write(self.style.SUCCESS(f'Loan Payment client {loan_payment.client.name}'))
+            self.stdout.write(self.style.SUCCESS(f'Loan Payment loan {loan_payment.loan.client.name}'))
+            self.stdout.write(self.style.SUCCESS(f'Loan Payment schedule {loan_payment.payment_schedule}'))
+            self.stdout.write(self.style.SUCCESS(f'Loan Payment is paid {loan_payment.payment_schedule.is_paid}'))
+            self.stdout.write(self.style.SUCCESS(f'Loan Payment schedule payment amount {loan_payment.payment_schedule.amount_due}'))
+        else:
+            self.stdout.write(self.style.SUCCESS(f'No Loan Payment found with reference number COM-54040012025'))
             
         
                 
