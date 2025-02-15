@@ -33,16 +33,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 
 
-
-@login_required
-def update_app(request):
-    # Run the Docker commands to update the app
-    Popen(["docker-compose", "down"])
-    Popen(["git", "pull", "origin", "main"])
-    Popen(["docker-compose", "up", "--build", "-d"])
-    return HttpResponse("App is updating. Please wait...")
-
-
 @login_required
 def dashboard(request):
     """View to render the main dashboard."""
@@ -288,6 +278,7 @@ def get_accounts(request):
 
     html = render_to_string('account_options.html', {'accounts': accounts})
     return JsonResponse(html, safe=False)
+
 @login_required
 @allowed_users(allowed_roles=['Admin'])
 def journal_entry(request):

@@ -1,11 +1,10 @@
-from .views import group_detail, group_create, dashboard, update_app, get_accounts, journal_entry, group_edit, test_html
+from .views import group_detail, group_create, dashboard, get_accounts, journal_entry, group_edit, test_html
 from .views import approve_journal_entry, disapprove_journal_entry, search, close_year_view, review_week
 
 from django.urls import path
 
 urlpatterns = [
     path('', dashboard, name='dashboard'),
-    path('update/', update_app, name='update_app'),
     path('detail/<int:pk>/', group_detail, name='group_detail'),
     path('edit/<int:pk>/', group_edit, name='group_edit'),
     path('create_group/', group_create, name='group_create'),
