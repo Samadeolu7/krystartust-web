@@ -17,6 +17,7 @@
                         <th>Group Name</th>
                         <th>Description</th>
                         <th>Meeting Day</th>
+                        <th>Group Leader</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,6 +29,8 @@
                         </td>
                         <td>{{ group.description }}</td>
                         <td>{{ group.meeting_day }}</td>
+                        <td>{{ group.leader }}</td>
+
                     </tr>
                     {% endfor %}
                 </tbody>
