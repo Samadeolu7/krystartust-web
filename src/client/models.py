@@ -79,24 +79,29 @@ class Client(models.Model):
     
             if days_since_last_payment >= 60:
                 new_status = Client.DORMANT
+                new_status_description = 'Dormant'
             elif days_since_last_payment >= 30:
                 new_status = Client.LAPSE
+                new_status_description = 'Lapse'
             else:
                 new_status = Client.ACTIVE
+                new_status_description = 'Active'
     
         if new_status != self.account_status:
             old_status = self.account_status
+            old_status_description = dict(Client.ACCOUNT_STATUS_CHOICES)[old_status]
+
             self.account_status = new_status
             self.save(update_fields=['account_status'])
     
             if new_status in [Client.LAPSE, Client.DORMANT]:
                 ticket = Tickets.objects.create(
                     client=self,
-                    title=f"Account status changed to {new_status} for {self.name}",
+                    title=f"Account status changed to {new_status_description} for {self.name}",
                     description=(
                         f"Client {self.name} has been inactive for "
                         f"{days_since_last_payment if last_payment else 'N/A'} days. "
-                        f"Status updated from {old_status} to {new_status}."
+                        f"Status updated from {old_status_description} to {new_status_description}."
                     ),
                     priority='n',
                     closed=False,
