@@ -70,26 +70,26 @@ class Client(models.Model):
         - Lapse: Inactive for 30+ days with loan balance zero.
         - Dormant: Inactive for 60+ days.
         """
-        last_payment = self.loan_set.filter(payment__isnull=False,status='Closed').order_by('-payment__payment_date').first()
+        last_payment = self.loan_set.filter(payment__isnull=False).order_by('-payment__payment_date').first()
         if not last_payment:
-            new_status = 'Active'
+            new_status = Client.ACTIVE
         else:
-            last_payment_date = last_payment.payment_set.order_by('-payment_date').first().payment_date
+            last_payment_date = last_payment.payment.order_by('-payment_date').first().payment_date
             days_since_last_payment = (date.today() - last_payment_date).days
-
+    
             if days_since_last_payment >= 60:
-                new_status = 'Dormant'
+                new_status = Client.DORMANT
             elif days_since_last_payment >= 30:
-                new_status = 'Lapse'
+                new_status = Client.LAPSE
             else:
-                new_status = 'Active'
-        
+                new_status = Client.ACTIVE
+    
         if new_status != self.account_status:
             old_status = self.account_status
             self.account_status = new_status
             self.save(update_fields=['account_status'])
-            
-            if new_status in ['Lapse', 'Dormant']:
+    
+            if new_status in [Client.LAPSE, Client.DORMANT]:
                 ticket = Tickets.objects.create(
                     client=self,
                     title=f"Account status changed to {new_status} for {self.name}",
