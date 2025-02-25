@@ -1,12 +1,20 @@
-# client/models.py
-from datetime import datetime
+from datetime import datetime, date
 from functools import cached_property
 from django.db import models, IntegrityError
 from django.apps import apps
 from django.db import transaction
-
+from administration.models import Tickets
+from user.models import User
 
 class Client(models.Model):
+    ACTIVE = 'A'
+    LAPSE = 'L'
+    DORMANT = 'D'
+    ACCOUNT_STATUS_CHOICES = [
+        (ACTIVE, 'Active'),
+        (LAPSE, 'Lapse'),
+        (DORMANT, 'Dormant'),
+    ]
     CLIENT_TYPE_CHOICES = [
         ('WL', 'Weekly Loan'),
         ('ML', 'Monthly Loan'),
@@ -28,9 +36,12 @@ class Client(models.Model):
     client_type = models.CharField(max_length=2, choices=CLIENT_TYPE_CHOICES, default='WL')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    account_status = models.CharField(
+        max_length=1, choices=ACCOUNT_STATUS_CHOICES, default=ACTIVE
+    )
 
     def __str__(self):
-        return f"{self.name}-{self.client_id}"  
+        return f"{self.name}-{self.client_id}"
 
     @cached_property
     def savings(self):
@@ -52,6 +63,48 @@ class Client(models.Model):
             except IntegrityError:
                 self.client_id = generate_client_id(self.client_type)
 
+    def update_account_status(self):
+        """
+        Update the client's account status based on their loan activity.
+        - Active: New loan after previous closed loan or less than 30 days of inactivity.
+        - Lapse: Inactive for 30+ days with loan balance zero.
+        - Dormant: Inactive for 60+ days.
+        """
+        last_payment = self.loan_set.filter(payment__isnull=False,status='Closed').order_by('-payment__payment_date').first()
+        if not last_payment:
+            new_status = 'Active'
+        else:
+            last_payment_date = last_payment.payment_set.order_by('-payment_date').first().payment_date
+            days_since_last_payment = (date.today() - last_payment_date).days
+
+            if days_since_last_payment >= 60:
+                new_status = 'Dormant'
+            elif days_since_last_payment >= 30:
+                new_status = 'Lapse'
+            else:
+                new_status = 'Active'
+        
+        if new_status != self.account_status:
+            old_status = self.account_status
+            self.account_status = new_status
+            self.save(update_fields=['account_status'])
+            
+            if new_status in ['Lapse', 'Dormant']:
+                ticket = Tickets.objects.create(
+                    client=self,
+                    title=f"Account status changed to {new_status} for {self.name}",
+                    description=(
+                        f"Client {self.name} has been inactive for "
+                        f"{days_since_last_payment if last_payment else 'N/A'} days. "
+                        f"Status updated from {old_status} to {new_status}."
+                    ),
+                    priority='n',
+                    closed=False,
+                    created_by=User.objects.filter(is_superuser=True).first()
+                )
+                ticket.users.set(User.objects.all())
+                ticket.save()
+
 def generate_client_id(client_type):
     """Generate a unique client ID based on the client type."""
     prefix = {
@@ -67,7 +120,6 @@ def generate_client_id(client_type):
     try:
         last_id = int(last_client.client_id[len(prefix):])
     except ValueError:
-        # Handle cases where the client_id does not follow the expected format
         last_id = 0
     
     new_id = last_id + 1

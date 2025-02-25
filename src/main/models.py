@@ -2,8 +2,6 @@ from django.db import OperationalError, models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
-
-from client.models import Client
 from user.models import User    
 
 # Create your models here.
@@ -11,7 +9,7 @@ class ClientGroup(models.Model):
     name = models.CharField(max_length=100)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='client_groups')
     meeting_day = models.CharField(max_length=10, null=True, blank=True)
-    leader = models.ForeignKey(Client, on_delete=models.CASCADE, null=True, blank=True, related_name='client_groups')
+    leader = models.ForeignKey('client.Client', on_delete=models.CASCADE, null=True, blank=True, related_name='client_groups')
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

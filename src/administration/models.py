@@ -4,7 +4,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from bank.models import BankPayment
 from bank.utils import create_bank_payment, get_cash_in_hand
-from client.models import Client
 from user.models import User
 import uuid
 
@@ -182,7 +181,7 @@ class Tickets(models.Model):
     )
 
     users = models.ManyToManyField(User, related_name='tickets')
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='tickets')
+    client = models.ForeignKey('client.Client', on_delete=models.CASCADE, related_name='tickets')
     title = models.CharField(max_length=255)
     description = models.TextField()
     priority = models.CharField(max_length=1, choices=PRIORITY, default=NORMAL)

@@ -8,7 +8,6 @@ from administration.models import TicketUpdates, Tickets
 from client.models import Client
 from user.models import User
 
-
 class LoanManager(models.Manager):
     def with_is_defaulted(self):
         return self.annotate(
@@ -18,6 +17,7 @@ class LoanManager(models.Manager):
                 output_field=BooleanField()
             )
         )
+
 class Loan(models.Model):
     DAILY = 'Daily'
     WEEKLY = 'Weekly'
@@ -76,10 +76,14 @@ class Loan(models.Model):
             if orig.balance != self.balance:
                 cache_key = f"loan_{self.id}_is_defaulted"
                 cache.delete(cache_key)
-        #if loan is paid off, set status to closed 
+        # If loan is paid off, set status to closed
         if self.balance == 0:
             self.status = 'Closed'
         super().save(*args, **kwargs)
+        
+        # If the loan just closed, update the client's account status
+        if self.status == 'Closed':
+            self.client.update_account_status()
 
     def __str__(self) -> str:
         return f"{self.client.name} - {self.balance}"
