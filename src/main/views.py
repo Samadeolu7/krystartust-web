@@ -488,6 +488,15 @@ def review_week(request):
             'message': f'Liability {liability_payment_count["liability__name"]} has more than one payment on {liability_payment_count["payment_date"]}',
             'link': f'/liability/detail/{liability_payment_count["liability__id"]}/'
         })
+
+    # Bank payments
+    bank_payments = BankPayment.objects.filter(payment_date__range=[week_start, week_end], transaction__reference_number__startswith='TRF')
+    bank_payment_counts = bank_payments.values('description', 'payment_date').annotate(count=Count('id')).filter(count__gt=1)
+    for bank_payment_count in bank_payment_counts:
+        errors.append({
+            'message': f'Transfer {bank_payment_count["description"]} has more than one payment on {bank_payment_count["payment_date"]}',
+            'link': f'/bank/bank_payments/'
+        })
     
     context = {
         'errors': errors,

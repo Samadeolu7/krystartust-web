@@ -29,6 +29,7 @@
             <tr>
                 <th>Client ID</th>
                 <th>Name</th>
+                <th>Status</th>
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Group</th>
@@ -43,6 +44,7 @@
                 <td>
                     <a href="{% url 'individual_report' client.id %}">{{ client.name }}</a>
                 </td>
+                <td>{{ client.get_account_status_display }}</td>
                 <td>{{ client.email }}</td>
                 <td>{{ client.phone }}</td>
                 <td>{{ client.group }}</td>
