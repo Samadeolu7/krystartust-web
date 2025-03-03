@@ -23,12 +23,12 @@ def get_users_salary(user):
 def record_salary_expense(user):
     salary = get_users_salary(user)
     description = f'Salary Payment for {user.username}'
-    expense = Expense.objects.get(name="Payroll Related Expenses")
+    expense = Expense.objects.get(name="Payroll Related Expenses", year=timezone.now().year)
     last_payment = ExpensePayment.objects.filter(
         expense=expense,
         description=description,
         payment_date__year=timezone.now().year,
-        payment_date__month=timezone.now().month
+        payment_date__month=timezone.now().month -1
     ).exists()
     
     if last_payment:

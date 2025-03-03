@@ -1,4 +1,5 @@
 import datetime
+import json
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
@@ -10,9 +11,9 @@ from administration.models import Approval, Transaction
 from administration.utils import validate_month_status
 from main.models import ClientGroup
 from main.utils import verify_trial_balance
-from savings.utils import make_withdrawal
+from savings.utils import create_dc_payment, make_withdrawal, setup_monthly_contributions
 from .models import ClientContribution, DailyContribution, Savings, SavingsPayment
-from .forms import DCForm, SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm, CombinedPaymentForm, ToggleDailyContributionForm, SetupMonthlyContributionsForm, ClientContributionForm
+from .forms import DCForm, DailyContributionSpreadsheetForm, SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm, CombinedPaymentForm, ToggleDailyContributionForm, SetupMonthlyContributionsForm, ClientContributionForm
 from .excel_utils import savings_from_excel
 from bank.utils import create_bank_payment
 from django.contrib.auth.decorators import login_required
@@ -326,3 +327,53 @@ def daily_contribution_spreadsheet(request):
         'contributions': contributions
     }
     return render(request, 'daily_contribution_spreadsheet.html', context)
+
+
+@login_required
+def daily_contribution_spreadsheet_form(request):
+    today = datetime.date.today()
+    if request.method == 'POST':
+        form = DailyContributionSpreadsheetForm(request.POST)
+        if form.is_valid():
+            contributions_data = form.cleaned_data['contributions']
+            contributions = json.loads(contributions_data)
+
+            with transaction.atomic():
+                for client_id, payment_made in contributions.items():
+                    if not payment_made:
+                        continue
+                    client_contribution = ClientContribution.objects.get(id=client_id)
+                    try:
+                        daily_contribution = DailyContribution.objects.get(
+                            client_contribution=client_contribution,
+                            date=today
+                        )
+                    except DailyContribution.DoesNotExist:
+                        setup_monthly_contributions(client_contribution, today.month, today.year, request.user)
+                        continue  
+                    
+                    daily_contribution.payment_made = payment_made
+                    daily_contribution.save()
+                    if payment_made:
+                        create_dc_payment(daily_contribution, request.user)
+                verify_trial_balance()
+            return redirect('daily_contribution_spreadsheet')
+    else:
+        form = DailyContributionSpreadsheetForm()
+
+    clients = ClientContribution.objects.values_list('id', 'client__name', 'client__phone', 'amount')
+    contributions = {client_id: {'name': client_name, 'phone': phone, 'amount': amount, 'payment_made': False} for client_id, client_name, phone, amount in clients}
+    daily_contributions = DailyContribution.objects.filter(
+        client_contribution__in=[client_id for client_id, _, _, _ in clients],
+        date=today
+    ).values_list('client_contribution__id', 'payment_made')
+
+    for client_id, payment_made in daily_contributions:
+        contributions[client_id]['payment_made'] = payment_made
+
+    context = {
+        'form': form,
+        'today': today,
+        'contributions': contributions
+    }
+    return render(request, 'daily_contribution_spreadsheet_form.html', context)

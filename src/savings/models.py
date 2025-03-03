@@ -105,13 +105,6 @@ class DailyContribution(models.Model):
     payment_made = models.BooleanField(default=False)
     payment = models.ForeignKey(SavingsPayment, on_delete=models.SET_NULL, null=True, blank=True)
 
-    def save(self, *args, **kwargs):
-        # Toggle payment status only
-        if self.pk:  # Ensure it's an existing record
-            self.payment_made = not self.payment_made
-
-        super().save(*args, **kwargs)
-
     def __str__(self):
         status = "Paid" if self.payment_made else "Not Paid"
         return f"{self.client_contribution.client} - {self.date} - {self.client_contribution.amount} - {status}"

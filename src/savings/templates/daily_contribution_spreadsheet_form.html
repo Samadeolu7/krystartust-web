@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% block title %}Daily Contribution Spreadsheet{% endblock %}
+{% block content %}
+<h2>Daily Contribution Spreadsheet for {{ today }}</h2>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="..." crossorigin="anonymous">
+<style>
+    .tick {
+        color: green;
+        font-size: 1.2em; /* adjust as needed */
+    }
+    .cross {
+        color: red;
+        font-size: 1.2em; /* adjust as needed */
+    }
+</style>
+
+<form method="post" id="contribution-form">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save Contributions</button>
+    <input type="hidden" name="contributions" id="contributions">
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Client</th>
+            <th>Phone Number</th>
+            <th>Amount</th>
+            <th>Contribution for {{ today|date:"d" }}</th>
+        </tr>
+    </thead>
+    <tbody id="contribution-table-body">
+        {% for client_id, client_data in contributions.items %}
+            <tr data-client-id="{{ client_id }}">
+                <td>{{ client_data.name }}</td>
+                <td>{{ client_data.phone }}</td>
+                <td>{{ client_data.amount }}</td>
+                <td>
+                    {% if client_data.payment_made %}
+                        <i class="fas fa-check-circle tick"></i>
+                    {% else %}
+                        <input type="checkbox" class="contribution-checkbox" data-client-id="{{ client_id }}" data-amount="{{ client_data.amount }}">
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkboxes = document.querySelectorAll('.contribution-checkbox');
+        const contributionTableBody = document.getElementById('contribution-table-body');
+        let totalAmount = 0;
+        let totalAmountRow = document.createElement('tr');
+        totalAmountRow.id = 'total-amount-row';
+        totalAmountRow.innerHTML = `
+            <td colspan="4" style="text-align: right; font-weight: bold;">
+                Total Amount: ₦<span id="total-amount">0.00</span>
+            </td>
+        `;
+        contributionTableBody.appendChild(totalAmountRow);
+
+        checkboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                const amount = parseFloat(checkbox.getAttribute('data-amount'));
+                if (checkbox.checked) {
+                    totalAmount += amount;
+                } else {
+                    totalAmount -= amount;
+                }
+                document.getElementById('total-amount').textContent = totalAmount.toFixed(2);
+
+                // Move the total amount row under the last ticked row
+                const lastCheckedRow = checkbox.closest('tr');
+                contributionTableBody.insertBefore(totalAmountRow, lastCheckedRow.nextSibling);
+            });
+        });
+
+        document.getElementById('contribution-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const contributions = {};
+            checkboxes.forEach(function(checkbox) {
+                const clientId = checkbox.getAttribute('data-client-id');
+                contributions[clientId] = checkbox.checked;
+            });
+            document.getElementById('contributions').value = JSON.stringify(contributions);
+            this.submit();
+        });
+    });
+</script>
+{% endblock %}

@@ -226,6 +226,11 @@ class ToggleDailyContributionForm(forms.Form):
 
         return instance
 
+class DailyContributionSpreadsheetForm(forms.Form):
+    month = forms.IntegerField(min_value=1, max_value=12, initial=datetime.date.today().month, label='Month')
+    year = forms.IntegerField(min_value=2000, max_value=datetime.date.today().year, initial=datetime.date.today().year, label='Year')
+    contributions = forms.CharField(widget=forms.HiddenInput(), required=False)
+
 class MonthYearForm(forms.Form):
     month = forms.IntegerField(min_value=1, max_value=12, initial=datetime.date.today().month, label='Month')
     year = forms.IntegerField(min_value=2000, max_value=datetime.date.today().year, initial=datetime.date.today().year, label='Year')
