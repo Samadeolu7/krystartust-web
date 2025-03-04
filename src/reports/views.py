@@ -56,6 +56,7 @@ def individual_group_report(request, group_id):
     loans = Loan.objects.filter(client__in=clients)
     
     savings = Savings.objects.filter(client__in=clients)
+    
     total_loans = loans.aggregate(total=Sum('amount')).get('total', 0) or 0
     total_loans_balance = loans.aggregate(total=Sum('balance')).get('total', 0) or 0
     total_savings = savings.aggregate(total=Sum('balance')).get('total', 0) or 0

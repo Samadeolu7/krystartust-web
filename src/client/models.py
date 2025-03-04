@@ -45,6 +45,8 @@ class Client(models.Model):
 
     @cached_property
     def savings(self):
+        if self.group.name == 'Ajo':
+            return self.savings_set.filter(type='D').first()
         return self.savings_set.first()
 
     @cached_property

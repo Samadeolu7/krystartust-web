@@ -4,12 +4,14 @@ from administration.models import Transaction
 from bank.models import Bank
 from loan.models import Loan, LoanPayment
 from main.models import Year
+from main.utils import verify_trial_balance
 from savings.utils import create_dc_payment, setup_monthly_contributions
 from .models import SavingsPayment, CompulsorySavings, Savings, DailyContribution, ClientContribution
 from loan.models import LoanRepaymentSchedule as PaymentSchedule
+
 from django_select2.forms import Select2Widget
 from django.utils import timezone
-
+from django.db import transaction
 from django import forms
 
 
@@ -225,6 +227,45 @@ class ToggleDailyContributionForm(forms.Form):
             instance.save()
 
         return instance
+    
+class MultiDayContributionForm(forms.Form):
+    client_contribution = forms.ModelChoiceField(queryset=ClientContribution.objects.all(), widget=Select2Widget)
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    days = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'client_contribution' in self.data and 'start_date' in self.data and 'end_date' in self.data:
+            try:
+                client_contribution_id = int(self.data.get('client_contribution'))
+                start_date = datetime.datetime.strptime(self.data.get('start_date'), '%Y-%m-%d').date()
+                end_date = datetime.datetime.strptime(self.data.get('end_date'), '%Y-%m-%d').date()
+                self.fields['days'].choices = [
+                    (single_date.strftime('%Y-%m-%d'), single_date.strftime('%Y-%m-%d'))
+                    for single_date in (start_date + datetime.timedelta(n) for n in range((end_date - start_date).days + 1))
+                ]
+            except (ValueError, TypeError):
+                pass
+
+    def save(self, user, commit=True):
+        client_contribution = self.cleaned_data['client_contribution']
+        days = self.cleaned_data['days']
+        payment_made = True
+
+        with transaction.atomic():
+            for day in days:
+                date = datetime.datetime.strptime(day, '%Y-%m-%d').date()
+                daily_contribution, created = DailyContribution.objects.get_or_create(
+                    client_contribution=client_contribution,
+                    date=date
+                )
+                daily_contribution.payment_made = payment_made
+                daily_contribution.save()
+                if payment_made:
+                    create_dc_payment(daily_contribution, user)
+            verify_trial_balance()
+        return True
 
 class DailyContributionSpreadsheetForm(forms.Form):
     month = forms.IntegerField(min_value=1, max_value=12, initial=datetime.date.today().month, label='Month')

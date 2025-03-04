@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% block title %}Multi-Day Contribution{% endblock %}
+{% block content %}
+<h2>Multi-Day Contribution</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save Contributions</button>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Amount</th>
+        </tr>
+    </thead>
+    <tbody id="contribution-table-body">
+        {% for day in form.days %}
+            <tr>
+                <td>{{ day }}</td>
+                <td>{{ form.client_contribution.amount }}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="2" id="total-amount-row" style="text-align: right; font-weight: bold;">
+                Total Amount: ₦<span id="total-amount">0.00</span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkboxes = document.querySelectorAll('input[name="days"]');
+        const totalAmountElement = document.getElementById('total-amount');
+        const amountPerDay = parseFloat('{{ form.client_contribution.amount }}');
+        let totalAmount = 0;
+
+        checkboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                if (checkbox.checked) {
+                    totalAmount += amountPerDay;
+                } else {
+                    totalAmount -= amountPerDay;
+                }
+                totalAmountElement.textContent = totalAmount.toFixed(2);
+            });
+        });
+    });
+</script>
+{% endblock %}

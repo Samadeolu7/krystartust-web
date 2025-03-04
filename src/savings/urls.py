@@ -1,6 +1,7 @@
 from .views import register_savings, record_withdrawal, compulsory_savings, setup_monthly_contributions_view, toggle_daily_contribution_view, upload_savings, savings_detail, register_payment, record_client_contribution
-from .views import daily_contribution_report
+from .views import daily_contribution_report, multi_day_contribution_view
 from .views import daily_contribution_spreadsheet, daily_contribution_spreadsheet_form
+
 from django.urls import path
 
 urlpatterns = [
@@ -16,4 +17,5 @@ urlpatterns = [
     path('daily-contribution-report/', daily_contribution_report, name='daily_contribution_report'),
     path('daily-contribution-spreadsheet/', daily_contribution_spreadsheet, name='daily_contribution_spreadsheet'),
     path('daily-contribution-spreadsheet-form/', daily_contribution_spreadsheet_form, name='daily_contribution_spreadsheet_form'),
+    path('multi-day-contribution/', multi_day_contribution_view, name='multi_day_contribution'),
 ]

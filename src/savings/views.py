@@ -13,7 +13,7 @@ from main.models import ClientGroup
 from main.utils import verify_trial_balance
 from savings.utils import create_dc_payment, make_withdrawal, setup_monthly_contributions
 from .models import ClientContribution, DailyContribution, Savings, SavingsPayment
-from .forms import DCForm, DailyContributionSpreadsheetForm, SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm, CombinedPaymentForm, ToggleDailyContributionForm, SetupMonthlyContributionsForm, ClientContributionForm
+from .forms import DCForm, DailyContributionSpreadsheetForm, MultiDayContributionForm, SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm, CombinedPaymentForm, ToggleDailyContributionForm, SetupMonthlyContributionsForm, ClientContributionForm
 from .excel_utils import savings_from_excel
 from bank.utils import create_bank_payment
 from django.contrib.auth.decorators import login_required
@@ -218,6 +218,20 @@ def record_client_contribution(request):
         form = ClientContributionForm()
     return render(request, 'record_client_contribution.html', {'form': form})
 
+@login_required
+def multi_day_contribution_view(request):
+    if request.method == 'POST':
+        form = MultiDayContributionForm(request.POST)
+        if form.is_valid():
+            form.save(request.user)
+            return redirect('daily_contribution_spreadsheet')
+    else:
+        form = MultiDayContributionForm()
+
+    context = {
+        'form': form
+    }
+    return render(request, 'multi_day_contribution.html', context)
 
 def calculate_monthly_totals(client_contribution):
     savings = Savings.objects.filter(client=client_contribution.client, type=Savings.DC).first()
