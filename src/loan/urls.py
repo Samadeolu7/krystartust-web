@@ -1,4 +1,7 @@
-from .views import  extend_loan, group_report, load_payment_schedules, loan_upload_view, transaction_history, loan_payment, loan_registration, loan_detail, loan_schedule, loan_defaulters_report, loan_upload, load_payment_schedules_com, guarantor_for_loan
+from .views import  extend_loan, group_report, load_payment_schedules, loan_upload_view
+from .views import transaction_history, loan_payment, loan_registration, loan_detail, loan_schedule
+from .views import loan_defaulters_report, loan_upload, load_payment_schedules_com, guarantor_for_loan
+from .views import load_loans, load_savings_balance, loan_payment_from_savings_view
 
 from django.urls import path
 
@@ -15,5 +18,9 @@ urlpatterns = [
     path('ajax/load-payment-schedules/', load_payment_schedules, name='load_payment_schedules'),
     path('ajax/load-payment-schedules-com/', load_payment_schedules_com, name='load_payment_schedules_com'),
     path('guarantor-for-loan/<int:loan_id>/', guarantor_for_loan, name='guarantor_for_loan'),
+    path('load-loans/', load_loans, name='load_loans'),
+    path('load-savings-balance/', load_savings_balance, name='load_savings_balance'),
+    path('loan-payment-from-savings/', loan_payment_from_savings_view, name='loan_payment_from_savings'),
+
     path('extend-loan/', extend_loan, name='extend_loan'),
 ]

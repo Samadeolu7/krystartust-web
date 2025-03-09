@@ -1,5 +1,7 @@
 from bank.models import Bank
+from client.models import Client
 from main.models import Year
+from savings.models import Savings
 from .models import Loan, LoanPayment, LoanRepaymentSchedule as PaymentSchedule, Guarantor
 from income.models import LoanRegistrationFee, RiskPremium, UnionContribution, LoanServiceFee
 from django_select2.forms import Select2Widget
@@ -87,3 +89,26 @@ class LoanExcelForm(forms.Form):
 
 class LoanUploadForm(forms.Form):
     file = forms.FileField(label='Select an Excel file')
+
+class LoanPaymentFromSavingsForm(forms.Form):
+    client = forms.ModelChoiceField(queryset=Client.objects.all(), widget=Select2Widget)
+    loan = forms.ModelChoiceField(queryset=Loan.objects.none(), widget=Select2Widget)
+    payment_schedule = forms.ModelChoiceField(queryset=PaymentSchedule.objects.none(), widget=Select2Widget)
+    amount = forms.DecimalField(max_digits=10, decimal_places=2, required=False, disabled=True)
+    savings_balance = forms.DecimalField(max_digits=10, decimal_places=2, required=False, disabled=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'client' in self.data:
+            try:
+                client_id = int(self.data.get('client'))
+                self.fields['loan'].queryset = Loan.objects.filter(client_id=client_id)
+                self.fields['savings_balance'].initial = Savings.objects.get(client_id=client_id).balance
+            except (ValueError, TypeError, Savings.DoesNotExist):
+                pass
+        if 'loan' in self.data:
+            try:
+                loan_id = int(self.data.get('loan'))
+                self.fields['payment_schedule'].queryset = PaymentSchedule.objects.filter(loan_id=loan_id, is_paid=False)
+            except (ValueError, TypeError):
+                pass

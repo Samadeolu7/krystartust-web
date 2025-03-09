@@ -1,0 +1,74 @@
+<!-- filepath: /d:/Users/User/Desktop/krystartust web/src/loan/templates/loan_payment_from_savings_form.html -->
+{% extends 'base_form.html' %}
+{% load custom_filters %}
+{% block title %}Loan Payment from Savings{% endblock %}
+{% block form_content %}
+<h1 class="mb-4">Loan Payment from Savings</h1>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Submit Payment</button>
+</form>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#id_client').change(function() {
+            var clientId = $(this).val();
+            $.ajax({
+                url: '{% url "load_loans" %}',
+                data: {
+                    'client_id': clientId
+                },
+                success: function(data) {
+                    var $loan = $('#id_loan');
+                    $loan.empty();
+                    $.each(data, function(key, value) {
+                        $loan.append('<option value="' + value.id + '">' + value.loan_type + '</option>');
+                    });
+                    // Trigger change event for #id_loan
+                    $loan.trigger('change');
+                },
+            });
+            $.ajax({
+                url: '{% url "load_savings_balance" %}',
+                data: {
+                    'client_id': clientId
+                },
+                success: function(data) {
+                    $('#id_savings_balance').val(data.balance);
+                },
+            });
+        });
+
+        $('#id_loan').on('change', function() {
+            var loanId = $(this).val();
+            $.ajax({
+                url: '{% url "load_payment_schedules" %}',
+                data: {
+                    'loan_id': loanId
+                },
+                success: function(data) {
+                    var $paymentSchedule = $('#id_payment_schedule');
+                    $paymentSchedule.empty();
+                    $.each(data, function(key, value) {
+                        $paymentSchedule.append('<option value="' + value.id + '">' + value.due_date + ' - ' + value.amount_due + '</option>');
+                    });
+                    // Trigger change event for #id_payment_schedule
+                    $paymentSchedule.trigger('change');
+                },
+            });
+        });
+
+        $('#id_payment_schedule').on('change', function() {
+            var amountDue = $(this).find('option:selected').text().split(' - ')[1];
+            $('#id_amount').val(amountDue);
+        });
+
+        // Trigger change event for #id_loan if it has a value on page load
+        if ($('#id_loan').val()) {
+            $('#id_loan').trigger('change');
+        }
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

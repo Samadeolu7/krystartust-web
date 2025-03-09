@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.utils import timezone
 
 from datetime import date, timedelta
 from decimal import Decimal
@@ -19,7 +20,7 @@ from loan.utils import send_for_approval
 from savings.models import Savings, SavingsPayment
 from main.models import ClientGroup as Group
 from .models import Loan, LoanPayment, LoanRepaymentSchedule
-from .forms import GuarantorForm, LoanRegistrationForm, LoanPaymentForm, LoanExcelForm, LoanUploadForm
+from .forms import GuarantorForm, LoanPaymentFromSavingsForm, LoanRegistrationForm, LoanPaymentForm, LoanExcelForm, LoanUploadForm
 from bank.utils import create_bank_payment
 from main.utils import verify_trial_balance
 
@@ -263,6 +264,7 @@ def loan_upload(request):
 
 @login_required
 @csrf_exempt
+@allowed_users(allowed_roles=['Admin'])
 def extend_loan(request):
     if request.method == 'POST':
         loan_id = request.POST.get('loan_id')
@@ -278,3 +280,61 @@ def extend_loan(request):
         except Loan.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Loan not found'})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+@login_required
+def loan_payment_from_savings_view(request):
+    if request.method == 'POST':
+        form = LoanPaymentFromSavingsForm(request.POST)
+        if form.is_valid():
+            client = form.cleaned_data['client']
+            loan = form.cleaned_data['loan']
+            payment_schedule = form.cleaned_data['payment_schedule']
+            amount = payment_schedule.amount_due
+            savings = Savings.objects.get(client=client)
+
+            if savings.balance < amount:
+                messages.error(request, "Insufficient savings balance.")
+                return render(request, 'loan_payment_from_savings_form.html', {'form': form})
+
+            with transaction.atomic():
+                savings.balance -= amount
+                savings.save()
+
+                payment_schedule.is_paid = True
+                payment_schedule.payment_date = timezone.now()
+                payment_schedule.save()
+
+                loan.balance -= amount
+                loan.save()
+
+                LoanPayment.objects.create(
+                    loan=loan,
+                    amount=amount,
+                    payment_date=timezone.now(),
+                    created_by=request.user
+                )
+
+                messages.success(request, "Loan payment processed successfully.")
+                return redirect('dashboard')
+    else:
+        form = LoanPaymentFromSavingsForm()
+
+    return render(request, 'loan_payment_from_savings_form.html', {'form': form})
+
+@login_required
+def load_loans(request):
+    client_id = request.GET.get('client_id')
+    try:
+        loans = Loan.objects.filter(client_id=client_id).order_by('-created_at')
+        return JsonResponse(list(loans.values('id', 'loan_type')), safe=False)
+    except Loan.DoesNotExist:
+        return JsonResponse({'error': 'Loans not found'}, status=404)
+
+@login_required
+def load_savings_balance(request):
+    client_id = request.GET.get('client_id')
+    try:
+        savings = Savings.objects.get(client_id=client_id)
+        return JsonResponse({'balance': savings.balance}, safe=False)
+    except Savings.DoesNotExist:
+        return JsonResponse({'error': 'Savings not found'}, status=404)
