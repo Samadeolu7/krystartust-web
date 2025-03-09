@@ -313,9 +313,9 @@ def loan_payment_from_savings_view(request):
                     payment_date=timezone.now(),
                     created_by=request.user
                 )
-
-                messages.success(request, "Loan payment processed successfully.")
-                return redirect('dashboard')
+                verify_trial_balance()
+            messages.success(request, "Loan payment processed successfully.")
+            return redirect('dashboard')
     else:
         form = LoanPaymentFromSavingsForm()
 
