@@ -181,12 +181,12 @@ class LoanRepaymentSchedule(models.Model):
     
         if ticket:
             if self.is_paid:
-                if self.payment_date and self.payment_date <= self.due_date:
+                if self.payment_date and self.payment_date.date() <= self.due_date:
                     ticket.title = f"False Loan Default Alert for {self.loan.client.name}"
                     ticket.description += f"\nNo issue!!!\n Payment made on {self.payment_date} but uploaded on {self.payment_date}"
                     ticket.closed = True
                     ticket.save()
-                elif self.payment_date and self.payment_date > self.due_date:
+                elif self.payment_date and self.payment_date.date() > self.due_date:
                     ticket.title = f"Loan Default Alert for {self.loan.client.name}"
                     ticket.description += f"\n Payment made on {self.payment_date} and uploaded on {self.payment_date}"
                     ticket.closed = True

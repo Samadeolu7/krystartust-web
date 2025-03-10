@@ -16,9 +16,10 @@ from administration.utils import validate_month_status
 from client.models import Client
 from income.models import IncomePayment
 from loan.excel_utils import bulk_create_loans_from_excel, loan_from_excel
-from loan.utils import send_for_approval
+from loan.utils import create_loan_payment, send_for_approval
 from savings.models import Savings, SavingsPayment
 from main.models import ClientGroup as Group
+from savings.utils import create_savings_payment
 from .models import Loan, LoanPayment, LoanRepaymentSchedule
 from .forms import GuarantorForm, LoanPaymentFromSavingsForm, LoanRegistrationForm, LoanPaymentForm, LoanExcelForm, LoanUploadForm
 from bank.utils import create_bank_payment
@@ -68,7 +69,7 @@ def loan_payment(request):
                 # Save the payment after modifying the balance and schedule
                 # include client in the payment
                 loan_payment.client = loan.client
-                tran = Transaction.objects.create(f'Loan payment from {loan.client.name}')
+                tran = Transaction(description=f'Loan payment from {loan.client.name}')
                 tran.save(prefix='LP')
                 loan_payment.transaction = tran
                 loan_payment.created_by = request.user
@@ -290,6 +291,7 @@ def loan_payment_from_savings_view(request):
             loan = form.cleaned_data['loan']
             payment_schedule = form.cleaned_data['payment_schedule']
             amount = payment_schedule.amount_due
+            
             savings = Savings.objects.get(client=client)
 
             if savings.balance < amount:
@@ -297,22 +299,41 @@ def loan_payment_from_savings_view(request):
                 return render(request, 'loan_payment_from_savings_form.html', {'form': form})
 
             with transaction.atomic():
-                savings.balance -= amount
-                savings.save()
+                # savings.balance -= amount
+                # savings.save()
 
+                # payment_schedule.is_paid = True
+                # payment_schedule.payment_date = timezone.now()
+                # payment_schedule.save()
+
+                # loan.balance -= amount
+                # loan.save()
+                tran=Transaction(description=f'Loan payment from {client.name} savings')
+                tran.save(prefix='S2L')
                 payment_schedule.is_paid = True
                 payment_schedule.payment_date = timezone.now()
                 payment_schedule.save()
-
-                loan.balance -= amount
-                loan.save()
-
-                LoanPayment.objects.create(
+                savings_payment = SavingsPayment.objects.create(
+                    client=client,
+                    savings=savings,
+                    amount=-amount,
+                    balance=savings.balance - amount,
+                    payment_date=timezone.now(),
+                    transaction=tran,
+                    created_by=request.user,
+                    description=f'Loan payment to {loan.client.name}',
+                    transaction_type=SavingsPayment.WITHDRAWAL
+                )
+                loan_payment = LoanPayment.objects.create(
+                    client=client,
                     loan=loan,
                     amount=amount,
                     payment_date=timezone.now(),
-                    created_by=request.user
+                    payment_schedule=payment_schedule,
+                    transaction=tran,
+                    created_by=request.user,
                 )
+                
                 verify_trial_balance()
             messages.success(request, "Loan payment processed successfully.")
             return redirect('dashboard')
