@@ -196,7 +196,6 @@ def loan_schedule(request, loan_id):
 
 
 @login_required
-@allowed_users(allowed_roles=['Admin', 'Manager'])
 def loan_defaulters_report(request):
     today = date.today()
 
