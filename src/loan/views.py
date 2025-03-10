@@ -298,15 +298,7 @@ def loan_payment_from_savings_view(request):
                 return render(request, 'loan_payment_from_savings_form.html', {'form': form})
 
             with transaction.atomic():
-                # savings.balance -= amount
-                # savings.save()
-
-                # payment_schedule.is_paid = True
-                # payment_schedule.payment_date = timezone.now()
-                # payment_schedule.save()
-
-                # loan.balance -= amount
-                # loan.save()
+                
                 tran=Transaction(description=f'Loan payment from {client.name} savings')
                 tran.save(prefix='S2L')
                 payment_schedule.is_paid = True
@@ -321,7 +313,8 @@ def loan_payment_from_savings_view(request):
                     transaction=tran,
                     created_by=request.user,
                     description=f'Loan payment to {loan.client.name}',
-                    transaction_type=SavingsPayment.WITHDRAWAL
+                    transaction_type=SavingsPayment.WITHDRAWAL,
+                    approved=True
                 )
                 loan_payment = LoanPayment.objects.create(
                     client=client,
