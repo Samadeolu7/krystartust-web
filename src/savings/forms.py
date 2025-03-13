@@ -1,3 +1,4 @@
+import calendar
 import datetime
 from typing import Any
 from administration.models import Transaction
@@ -230,29 +231,13 @@ class ToggleDailyContributionForm(forms.Form):
     
 class MultiDayContributionForm(forms.Form):
     client_contribution = forms.ModelChoiceField(queryset=ClientContribution.objects.all(), widget=Select2Widget)
-    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     days = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, required=False)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if 'client_contribution' in self.data and 'start_date' in self.data and 'end_date' in self.data:
-            try:
-                client_contribution_id = int(self.data.get('client_contribution'))
-                start_date = datetime.datetime.strptime(self.data.get('start_date'), '%Y-%m-%d').date()
-                end_date = datetime.datetime.strptime(self.data.get('end_date'), '%Y-%m-%d').date()
-                self.fields['days'].choices = [
-                    (single_date.strftime('%Y-%m-%d'), single_date.strftime('%Y-%m-%d'))
-                    for single_date in (start_date + datetime.timedelta(n) for n in range((end_date - start_date).days + 1))
-                ]
-            except (ValueError, TypeError):
-                pass
 
     def save(self, user, commit=True):
         client_contribution = self.cleaned_data['client_contribution']
-        days = self.cleaned_data['days']
         payment_made = True
-
+        days = self.cleaned_data['days']
+        print(days)
         with transaction.atomic():
             for day in days:
                 date = datetime.datetime.strptime(day, '%Y-%m-%d').date()

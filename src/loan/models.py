@@ -1,4 +1,5 @@
 from datetime import date
+import datetime
 from django.core.cache import cache
 from django.db import models
 from django.db.models import Case, When, BooleanField
@@ -176,17 +177,23 @@ class LoanRepaymentSchedule(models.Model):
         super().save(*args, **kwargs)
         self.handle_ticket()
 
+    from datetime import datetime
+    
     def handle_ticket(self):
         ticket = Tickets.objects.filter(repayment_schedule=self, closed=False).first()
     
         if ticket:
             if self.is_paid:
-                if self.payment_date and self.payment_date.date() <= self.due_date:
+                payment_date = self.payment_date
+                if isinstance(payment_date, datetime):
+                    payment_date = payment_date.date()
+    
+                if payment_date and payment_date <= self.due_date:
                     ticket.title = f"False Loan Default Alert for {self.loan.client.name}"
                     ticket.description += f"\nNo issue!!!\n Payment made on {self.payment_date} but uploaded on {self.payment_date}"
                     ticket.closed = True
                     ticket.save()
-                elif self.payment_date and self.payment_date.date() > self.due_date:
+                elif payment_date and payment_date > self.due_date:
                     ticket.title = f"Loan Default Alert for {self.loan.client.name}"
                     ticket.description += f"\n Payment made on {self.payment_date} and uploaded on {self.payment_date}"
                     ticket.closed = True
@@ -217,7 +224,6 @@ class LoanRepaymentSchedule(models.Model):
             )
             new_ticket.users.set(User.objects.all())
             new_ticket.save()
-
     class Meta:
         ordering = ['due_date']
         indexes = [

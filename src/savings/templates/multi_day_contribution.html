@@ -3,51 +3,78 @@
 {% block title %}Multi-Day Contribution{% endblock %}
 {% block content %}
 <h2>Multi-Day Contribution</h2>
-<form method="post">
+<form method="post" id="contribution-form" action="{% url 'multi_day_contribution' %}">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save Contributions</button>
+    {{ form.client_contribution }}
+    <button type="button" id="fetch-contributions">Fetch Contributions</button>
+    <div id="contribution-details" style="display: none;">
+        <table class="table table-bordered" id="contribution-table">
+            <thead>
+                <tr id="contribution-table-header">
+                    <!-- Headers will be populated by JavaScript -->
+                </tr>
+            </thead> 
+            <tbody>
+                <tr id="contribution-table-row">
+                    <!-- Row will be populated by JavaScript -->
+                </tr>
+            </tbody>
+        </table>
+        <button type="submit">Save Contributions</button>
+    </div>
 </form>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Amount</th>
-        </tr>
-    </thead>
-    <tbody id="contribution-table-body">
-        {% for day in form.days %}
-            <tr>
-                <td>{{ day }}</td>
-                <td>{{ form.client_contribution.amount }}</td>
-            </tr>
-        {% endfor %}
-        <tr>
-            <td colspan="2" id="total-amount-row" style="text-align: right; font-weight: bold;">
-                Total Amount: ₦<span id="total-amount">0.00</span>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const checkboxes = document.querySelectorAll('input[name="days"]');
-        const totalAmountElement = document.getElementById('total-amount');
-        const amountPerDay = parseFloat('{{ form.client_contribution.amount }}');
-        let totalAmount = 0;
+    document.getElementById('fetch-contributions').addEventListener('click', function() {
+        const clientContributionId = document.querySelector('select[name="client_contribution"]').value;
+        if (clientContributionId) {
+            fetch(`/savings/fetch-contributions/${clientContributionId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    const tableHeader = document.getElementById('contribution-table-header');
+                    const tableRow = document.getElementById('contribution-table-row');
+                    tableHeader.innerHTML = '';
+                    tableRow.innerHTML = '';
 
-        checkboxes.forEach(function(checkbox) {
-            checkbox.addEventListener('change', function() {
-                if (checkbox.checked) {
-                    totalAmount += amountPerDay;
-                } else {
-                    totalAmount -= amountPerDay;
-                }
-                totalAmountElement.textContent = totalAmount.toFixed(2);
-            });
-        });
+                    // Get the current month and year
+                    const today = new Date();
+                    const year = today.getFullYear();
+                    const month = today.getMonth() + 1;
+
+                    // Get the number of days in the current month
+                    const daysInMonth = new Date(year, month, 0).getDate();
+
+                    // Populate the table headers and row
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        const date = new Date(year, month - 1, day);
+                        const dateString = date.toISOString().split('T')[0];
+
+                        // Create table header
+                        const th = document.createElement('th');
+                        th.textContent = day;
+                        tableHeader.appendChild(th);
+
+                        // Create table cell with checkbox
+                        const td = document.createElement('td');
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.name = 'days';
+                        checkbox.value = dateString;
+
+                        // Check if the payment has been made for this day
+                        const contribution = data.contributions.find(c => c.date === dateString);
+                        if (contribution && contribution.payment_made) {
+                            checkbox.checked = true;
+                        }
+
+                        td.appendChild(checkbox);
+                        tableRow.appendChild(td);
+                    }
+
+                    document.getElementById('contribution-table').style.display = 'table';
+                    document.getElementById('contribution-details').style.display = 'block';
+                });
+        }
     });
 </script>
 {% endblock %}

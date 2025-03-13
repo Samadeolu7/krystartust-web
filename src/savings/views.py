@@ -1,6 +1,6 @@
 import datetime
 import json
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
 # Create your views here.
@@ -232,6 +232,25 @@ def multi_day_contribution_view(request):
         'form': form
     }
     return render(request, 'multi_day_contribution.html', context)
+
+
+@login_required
+def fetch_contributions(request, client_contribution_id):
+    client_contribution = get_object_or_404(ClientContribution, id=client_contribution_id)
+    today = datetime.date.today()
+    month = today.month
+    year = today.year
+    daily_contributions = DailyContribution.objects.filter(client_contribution=client_contribution, date__month=month, date__year=year)
+    contributions = [
+        {
+            'date': contribution.date.strftime('%Y-%m-%d'),
+            'amount': contribution.client_contribution.amount,
+            'payment_made': contribution.payment_made
+        }
+        for contribution in daily_contributions
+    ]
+    return JsonResponse({'contributions': contributions})
+
 
 def calculate_monthly_totals(client_contribution):
     savings = Savings.objects.filter(client=client_contribution.client, type=Savings.DC).first()

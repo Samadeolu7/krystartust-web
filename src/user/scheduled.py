@@ -28,7 +28,7 @@ def record_salary_expense(user):
         expense=expense,
         description=description,
         payment_date__year=timezone.now().year,
-        payment_date__month=timezone.now().month -1
+        payment_date__month=timezone.now().month
     ).exists()
     
     if last_payment:
