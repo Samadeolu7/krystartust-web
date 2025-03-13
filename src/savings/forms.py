@@ -233,14 +233,29 @@ class MultiDayContributionForm(forms.Form):
     client_contribution = forms.ModelChoiceField(queryset=ClientContribution.objects.all(), widget=Select2Widget)
     days = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, required=False)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        today = datetime.date.today()
+        year = today.year
+        month = today.month
+        days_in_month = calendar.monthrange(year, month)[1]
+        choices = [
+            (
+                datetime.date(year, month, day).strftime('%Y-%m-%d'),
+                datetime.date(year, month, day).strftime('%Y-%m-%d')
+            )
+            for day in range(1, days_in_month + 1)
+        ]
+        self.fields['days'].choices = choices
+
     def save(self, user, commit=True):
         client_contribution = self.cleaned_data['client_contribution']
         payment_made = True
         days = self.cleaned_data['days']
-        print(days)
         with transaction.atomic():
             for day in days:
                 date = datetime.datetime.strptime(day, '%Y-%m-%d').date()
+                
                 daily_contribution, created = DailyContribution.objects.get_or_create(
                     client_contribution=client_contribution,
                     date=date

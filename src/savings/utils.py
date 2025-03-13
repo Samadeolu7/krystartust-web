@@ -48,10 +48,22 @@ def create_dc_payment(daily_contribution, user):
     Create a SavingsPayment record based on a DailyContribution entry.
     """
     if daily_contribution.payment_made:
+        dc_month = DailyContribution.objects.filter(client_contribution=daily_contribution.client_contribution, date__month=daily_contribution.date.month, date__year=daily_contribution.date.year, payment_made=True).count()
+        print(dc_month)
+        if dc_month == 1:
+            transaction = Transaction(description=f'Daily Contribution for {daily_contribution.date} from {daily_contribution.client_contribution.client.name}')
+            transaction.save(prefix='DC')
+            income = get_dc_income()
+            bank = get_cash_in_hand_dc()
+            amount = daily_contribution.client_contribution.amount
+            create_income_payment(bank=bank, income=income, description=f'DC income for {daily_contribution.client_contribution.client.name}', amount=amount, payment_date=daily_contribution.date,transaction=transaction,user=user)
+            return
+ 
         savings_record = Savings.objects.get(
             client=daily_contribution.client_contribution.client, 
             type=Savings.DC
         )
+        #remove income if first payment of the month
         transaction = Transaction(description=f'Daily contribution for {daily_contribution.date} from {daily_contribution.client_contribution.client.name}')
         transaction.save(prefix='DC')
         savings_payment = SavingsPayment.objects.create(

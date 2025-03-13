@@ -3,6 +3,28 @@
 {% block title %}Multi-Day Contribution{% endblock %}
 {% block content %}
 <h2>Multi-Day Contribution</h2>
+{% if form.errors %}
+  <div class="alert alert-danger">
+    <ul>
+      {% for field in form %}
+        {% if field.errors %}
+          <li><strong>{{ field.label }}:</strong>
+            <ul>
+              {% for error in field.errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          </li>
+        {% endif %}
+      {% endfor %}
+      {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      {% endif %}
+    </ul>
+  </div>
+{% endif %}
 <form method="post" id="contribution-form" action="{% url 'multi_day_contribution' %}">
     {% csrf_token %}
     {{ form.client_contribution }}
@@ -47,7 +69,10 @@
                     // Populate the table headers and row
                     for (let day = 1; day <= daysInMonth; day++) {
                         const date = new Date(year, month - 1, day);
-                        const dateString = date.toISOString().split('T')[0];
+                        // Manually format the date to YYYY-MM-DD (local date)
+                        const dateString = date.getFullYear() + '-' +
+                            ('0' + (date.getMonth() + 1)).slice(-2) + '-' +
+                            ('0' + date.getDate()).slice(-2);
 
                         // Create table header
                         const th = document.createElement('th');
@@ -65,6 +90,9 @@
                         const contribution = data.contributions.find(c => c.date === dateString);
                         if (contribution && contribution.payment_made) {
                             checkbox.checked = true;
+                            checkbox.disabled = true;
+                            checkbox.style.backgroundColor = 'green';
+                            checkbox.removeAttribute('name'); // Remove name attribute to exclude from form submission
                         }
 
                         td.appendChild(checkbox);
