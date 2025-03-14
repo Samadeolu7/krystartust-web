@@ -176,8 +176,6 @@ class LoanRepaymentSchedule(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.handle_ticket()
-
-    from datetime import datetime
     
     def handle_ticket(self):
         ticket = Tickets.objects.filter(repayment_schedule=self, closed=False).first()
@@ -185,7 +183,7 @@ class LoanRepaymentSchedule(models.Model):
         if ticket:
             if self.is_paid:
                 payment_date = self.payment_date
-                if isinstance(payment_date, datetime):
+                if isinstance(payment_date, datetime.datetime):
                     payment_date = payment_date.date()
     
                 if payment_date and payment_date <= self.due_date:
