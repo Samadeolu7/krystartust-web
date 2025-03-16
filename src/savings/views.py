@@ -226,7 +226,7 @@ def multi_day_contribution_view(request):
             form.save(request.user)
             return redirect('daily_contribution_spreadsheet')
         else:
-            print("Form errors:", form.errors)
+            messages.error(request, 'An error occurred while saving the contributions, invalid form data')
     else:
         form = MultiDayContributionForm()
 
