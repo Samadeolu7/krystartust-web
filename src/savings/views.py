@@ -200,7 +200,7 @@ def toggle_daily_contribution_view(request):
 
         if form.is_valid():
             with transaction.atomic():
-                form.save(request.user)
+                form.save(request)
                 verify_trial_balance()
             return redirect('dashboard')
     else:
@@ -223,7 +223,7 @@ def multi_day_contribution_view(request):
     if request.method == 'POST':
         form = MultiDayContributionForm(request.POST)
         if form.is_valid():
-            form.save(request.user)
+            form.save(request)
             return redirect('daily_contribution_spreadsheet')
         else:
             messages.error(request, 'An error occurred while saving the contributions, invalid form data')
@@ -394,7 +394,7 @@ def daily_contribution_spreadsheet_form(request):
                     daily_contribution.payment_made = payment_made
                     daily_contribution.save()
                     if payment_made:
-                        create_dc_payment(daily_contribution, request.user)
+                        create_dc_payment(daily_contribution, request)
                 verify_trial_balance()
             return redirect('daily_contribution_spreadsheet')
     else:

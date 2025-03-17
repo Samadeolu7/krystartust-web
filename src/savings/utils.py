@@ -45,10 +45,11 @@ def create_savings_payment(client, amount, payment_date, transaction, user):
     
 from django.contrib import messages
 
-def create_dc_payment(daily_contribution, user, request):
+def create_dc_payment(daily_contribution, request):
     """
     Create a SavingsPayment record based on a DailyContribution entry.
     """
+    user = request.user
     if daily_contribution.payment_made:
         # Check if a payment has already been made for this day
         existing_payment = SavingsPayment.objects.filter(

@@ -203,7 +203,7 @@ class ToggleDailyContributionForm(forms.Form):
         self.instance = kwargs.pop('instance', None)
         super().__init__(*args, **kwargs)
 
-    def save(self, user, commit=True):
+    def save(self, request, commit=True):
         instance = self.instance
         try:
             instance = DailyContribution.objects.get(
@@ -220,7 +220,7 @@ class ToggleDailyContributionForm(forms.Form):
                     payment_made=self.cleaned_data['payment_made']
                 )
         if instance.payment_made:
-            create_dc_payment(instance, user)
+            create_dc_payment(instance, request)
         else:
             raise ValueError('Payment has already been made for the selected client and date.')
 
@@ -248,7 +248,7 @@ class MultiDayContributionForm(forms.Form):
         ]
         self.fields['days'].choices = choices
 
-    def save(self, user, commit=True):
+    def save(self, request, commit=True):
         client_contribution = self.cleaned_data['client_contribution']
         payment_made = True
         days = self.cleaned_data['days']
@@ -263,7 +263,7 @@ class MultiDayContributionForm(forms.Form):
                 daily_contribution.payment_made = payment_made
                 daily_contribution.save()
                 if payment_made:
-                    create_dc_payment(daily_contribution, user)
+                    create_dc_payment(daily_contribution, request)
             verify_trial_balance()
         return True
 
