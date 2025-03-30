@@ -1,8 +1,58 @@
 from django import forms
-
+from django.db import transaction
 
 from user.models import User
-from .models import Salary, Approval, Tickets, TicketUpdates
+from .models import Salary, Tickets, TicketUpdates
+from administration.utils import validate_month_status
+from main.utils import verify_trial_balance
+
+
+class PaymentDateValidationMixin(forms.Form):
+    def clean(self):
+        if 'clean' in self.__class__.__dict__:
+            raise RuntimeError("Do not override the `clean` method directly. Use `super().clean()` to extend functionality.")
+        cleaned_data = super().clean()
+        payment_date = cleaned_data.get('payment_date')
+        if payment_date:
+            try:
+                validate_month_status(payment_date)
+            except Exception as e:
+                self.add_error('payment_date', str(e))
+        return cleaned_data
+
+class VerifyTrialBalanceMixin:
+    def save(self, commit=True):
+        # Call the parent class's save method
+        instance = super().save(commit=commit)
+
+        # Call the post-save hook
+        if commit:
+            self._post_save_action()
+        print("Instance verified")
+
+        return instance
+
+    def _post_save_action(self):
+        """
+        Hook to perform actions after saving the instance.
+        Ensures trial balance verification is executed.
+        """
+        def safe_verify_trial_balance():
+            try:
+                verify_trial_balance()
+            except Exception as e:
+                # Log the exception for debugging purposes
+                print(f"Error during trial balance verification: {e}")
+                # Optionally, you can log this using Django's logging framework
+                # logger.error(f"Error during trial balance verification: {e}")
+    
+        transaction.on_commit(safe_verify_trial_balance)
+    
+class BaseValidatedForm(PaymentDateValidationMixin, VerifyTrialBalanceMixin, forms.ModelForm):
+    """
+    A base form that enforces payment date validation and trial balance verification.
+    """
+    pass
 
 
 class SalaryForm(forms.ModelForm):

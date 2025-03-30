@@ -50,6 +50,7 @@
                         <thead class="table-dark">
                             <tr>
                                 <th>#</th>
+                                <th>Schedule</th>
                                 <th>Date</th>
                                 <th>Ref No</th>
                                 <th>Description</th>
@@ -61,6 +62,7 @@
                         <tbody>
                             <tr>
                             <td>0</td>
+                            <td>{{ loan.payment_schedule.id }}</td>
                             <td>{{ loan.created_at }}</td>
                             <td>{{ loan.transaction.reference_number }}</td>
                             <td>Loan Disbursement</td>
@@ -79,6 +81,7 @@
                             {% for payment in loan_payments %}
                             <tr>
                                 <td>{{ forloop.counter|add:1 }}</td>
+                                <td>{{ payment.payment_schedule.id }}</td>
                                 <td>{{ payment.payment_date }}</td>
                                 <td>{{ payment.transaction.reference_number }}</td>
                                 <td>{{ payment.description }}</td>
