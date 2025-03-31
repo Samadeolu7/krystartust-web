@@ -1,0 +1,83 @@
+<!-- filepath: /d:/Users/User/Desktop/krystartust web/src/savings/templates/group_combined_payment_form.html -->
+{% extends "base.html" %}
+{% block title %}Group Combined Payment{% endblock %}
+{% block content %}
+{% load custom_filters %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Group Combined Payment</h2>
+    <form method="post" id="group-payment-form" class="needs-validation" novalidate>
+        {% csrf_token %}
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="id_group" class="form-label">{{ form.group.label }}</label>
+                {{ form.group|add_class:"form-select" }}
+            </div>
+            <div class="col-md-4">
+                <label for="id_payment_date" class="form-label">{{ form.payment_date.label }}</label>
+                {{ form.payment_date|add_class:"form-control" }}
+            </div>
+            <div class="col-md-4">
+                <label for="id_bank" class="form-label">{{ form.bank.label }}</label>
+                {{ form.bank|add_class:"form-select" }}
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table-report table-bordered table-striped" id="clients-table">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Client</th>
+                        <th>Next Payment Schedule Amount</th>
+                        <th>Next Payment Schedule Due Date</th>
+                        <th>Amount Paid</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows will be dynamically populated here -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const groupSelect = document.querySelector('#id_group'); // Django form field ID
+        const clientsTableBody = document.querySelector('#clients-table tbody');
+
+        groupSelect.addEventListener('change', function () {
+            const groupId = this.value;
+
+            // Clear the table
+            clientsTableBody.innerHTML = '';
+
+            if (groupId) {
+                // Fetch clients for the selected group
+                fetch(`/savings/get-group-clients/${groupId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.clients) {
+                            data.clients.forEach(client => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${client.name}</td>
+                                    <td>${client.next_payment_schedule.amount_due}</td>
+                                    <td>${client.next_payment_schedule.due_date}</td>
+                                    <td>
+                                        <input type="number" name="client_${client.id}_amount" class="form-control" min="0" step="0.01">
+                                    </td>
+                                `;
+                                clientsTableBody.appendChild(row);
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Error fetching clients:', error));
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -9,11 +9,12 @@ from django.shortcuts import render
 from administration.decorators import allowed_users
 from administration.models import Approval, Transaction
 from administration.utils import validate_month_status
+from loan.models import Loan, LoanPayment, LoanRepaymentSchedule
 from main.models import ClientGroup
 from main.utils import verify_trial_balance
 from savings.utils import create_dc_payment, make_withdrawal, setup_monthly_contributions
 from .models import ClientContribution, DailyContribution, Savings, SavingsPayment
-from .forms import DCForm, DailyContributionSpreadsheetForm, MultiDayContributionForm, SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm, CombinedPaymentForm, ToggleDailyContributionForm, SetupMonthlyContributionsForm, ClientContributionForm
+from .forms import DCForm, DailyContributionSpreadsheetForm, GroupCombinedPaymentForm, MultiDayContributionForm, SavingsForm, WithdrawalForm, CompulsorySavingsForm, SavingsExcelForm, CombinedPaymentForm, ToggleDailyContributionForm, SetupMonthlyContributionsForm, ClientContributionForm
 from .excel_utils import savings_from_excel
 from bank.utils import create_bank_payment
 from django.contrib.auth.decorators import login_required
@@ -88,6 +89,100 @@ def register_payment(request):
     else:
         form = CombinedPaymentForm()
     return render(request, 'combined_payment_form.html', {'form': form})
+
+
+@login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
+def group_combined_payment(request):
+    if request.method == 'POST':
+        form = GroupCombinedPaymentForm(request.POST)
+        group = ClientGroup.objects.get(id=request.POST.get('group'))  # Get the selected group
+        form.populate_clients(group)
+        if form.is_valid():
+            group = form.cleaned_data['group']
+            payment_date = form.cleaned_data['payment_date']
+            bank = form.cleaned_data['bank']
+            with transaction.atomic():
+                tran = Transaction(description=f'Group Combined Payment for {group.name}')
+                tran.save(prefix='GCOM')
+                total_amount = 0
+                for client in group.client_set.all():
+                    amount_paid = form.cleaned_data.get(f'client_{client.id}_amount', 0)
+                    if amount_paid and amount_paid > 0:
+                        # Process Loan Payment
+                        total_amount += amount_paid
+                        loan = Loan.objects.filter(client=client, loan_type = Loan.WEEKLY).first()
+                        if loan:
+                            payment_schedule = LoanRepaymentSchedule.objects.filter(loan=loan, is_paid=False).first()
+                            if payment_schedule:
+                                loan_payment = LoanPayment(
+                                    client=client,
+                                    loan=payment_schedule.loan,
+                                    payment_schedule=payment_schedule,
+                                    transaction=tran,
+                                    amount= payment_schedule.amount_due,
+                                    payment_date=payment_date,
+                                    created_by=request.user
+                                )
+                                loan_payment.save()
+                                payment_schedule.is_paid = True
+                                payment_schedule.payment_date = payment_date
+                                payment_schedule.save()
+                                amount_paid -= loan_payment.amount
+
+                        # Process Savings Payment
+                        if amount_paid != 0:
+                            savings = Savings.objects.filter(client=client).first()
+                            if savings:
+                                savings_payment = SavingsPayment(
+                                    client=client,
+                                    savings=savings,
+                                    transaction=tran,
+                                    amount=amount_paid,
+                                    payment_date=payment_date,
+                                    transaction_type=SavingsPayment.SAVINGS,
+                                    created_by=request.user
+                                )
+                                savings_payment.save()
+
+                create_bank_payment(
+                    bank=bank,
+                    description=f"Group Combined Payment for {group.name}",
+                    amount=total_amount,
+                    payment_date=payment_date,
+                    transaction=tran,
+                    created_by=request.user
+                )
+                verify_trial_balance()
+
+            messages.success(request, 'Group combined payment processed successfully.')
+            return redirect('dashboard')
+    else:
+        form = GroupCombinedPaymentForm()
+
+    return render(request, 'group_combined_payment_form.html', {'form': form})
+
+@login_required
+def get_group_clients(request, group_id):
+    group = ClientGroup.objects.filter(id=group_id).first()
+    if not group:
+        return JsonResponse({'error': 'Group not found'}, status=404)
+
+    clients_data = []
+    for client in group.client_set.all():
+        loan = Loan.objects.filter(client=client, balance__gt=0).first()
+        next_payment_schedule = LoanRepaymentSchedule.objects.filter(loan=loan, is_paid=False).first() if loan else None
+        clients_data.append({
+            'id': client.id,
+            'name': client.name,
+            'next_payment_schedule': {
+                'amount_due': next_payment_schedule.amount_due if next_payment_schedule else 0,
+                'due_date': next_payment_schedule.due_date.strftime('%Y-%m-%d') if next_payment_schedule else None
+            }
+        })
+
+
+    return JsonResponse({'clients': clients_data})
 
 
 @login_required

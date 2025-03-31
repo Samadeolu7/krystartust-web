@@ -1,10 +1,16 @@
-# reports/templatetags/custom_filters.py
-
 from django import template
 from django.utils.safestring import SafeString
 from decimal import Decimal, InvalidOperation
 
 register = template.Library()
+
+@register.filter
+def lookup(form, key):
+    return form.fields.get(key) and form[key] or ''
+
+@register.filter
+def add_class(field, css_class):
+    return field.as_widget(attrs={"class": css_class})
 
 @register.filter
 def get_item(dictionary, key):

@@ -4,7 +4,7 @@ from typing import Any
 from administration.models import Transaction
 from bank.models import Bank
 from loan.models import Loan, LoanPayment
-from main.models import Year
+from main.models import ClientGroup, Year
 from main.utils import verify_trial_balance
 from savings.utils import create_dc_payment, setup_monthly_contributions
 from .models import SavingsPayment, CompulsorySavings, Savings, DailyContribution, ClientContribution
@@ -163,6 +163,27 @@ class CombinedPaymentForm(forms.ModelForm):
                 savings_payment_instance.save()
 
         return loan_payment_instance, savings_payment_instance
+    
+
+from django.forms import modelformset_factory
+
+class GroupCombinedPaymentForm(forms.Form):
+    group = forms.ModelChoiceField(queryset=ClientGroup.objects.all(), label="Select Group")
+    payment_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), label="Payment Date")
+    bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=Year.current_year()), required=False, label="Bank")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.clients = []
+
+    def populate_clients(self, group):
+        self.clients = group.client_set.all()  # Assuming `clients` is a related field in `ClientGroup`
+        for client in self.clients:
+            self.fields[f'client_{client.id}_amount'] = forms.DecimalField(
+                required=False,
+                label=f"Amount Paid by {client.name}",
+                min_value=0
+            )
     
 class ClientContributionForm(forms.ModelForm):
     class Meta:
