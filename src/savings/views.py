@@ -92,7 +92,6 @@ def register_payment(request):
 
 
 @login_required
-@allowed_users(allowed_roles=['Admin', 'Manager'])
 def group_combined_payment(request):
     if request.method == 'POST':
         form = GroupCombinedPaymentForm(request.POST)
@@ -105,12 +104,10 @@ def group_combined_payment(request):
             with transaction.atomic():
                 tran = Transaction(description=f'Group Combined Payment for {group.name}')
                 tran.save(prefix='GCOM')
-                total_amount = 0
                 for client in group.client_set.all():
                     amount_paid = form.cleaned_data.get(f'client_{client.id}_amount', 0)
                     if amount_paid and amount_paid > 0:
                         # Process Loan Payment
-                        total_amount += amount_paid
                         loan = Loan.objects.filter(client=client, loan_type = Loan.WEEKLY).first()
                         if loan:
                             payment_schedule = LoanRepaymentSchedule.objects.filter(loan=loan, is_paid=False).first()
@@ -144,15 +141,16 @@ def group_combined_payment(request):
                                     created_by=request.user
                                 )
                                 savings_payment.save()
+                                create_bank_payment(
+                                    bank=bank,
+                                    description=f"Group Combined Payment for {client.name}",
+                                    amount=amount_paid,
+                                    payment_date=payment_date,
+                                    transaction=tran,
+                                    created_by=request.user
+                                )
 
-                create_bank_payment(
-                    bank=bank,
-                    description=f"Group Combined Payment for {group.name}",
-                    amount=total_amount,
-                    payment_date=payment_date,
-                    transaction=tran,
-                    created_by=request.user
-                )
+                
                 verify_trial_balance()
 
             messages.success(request, 'Group combined payment processed successfully.')

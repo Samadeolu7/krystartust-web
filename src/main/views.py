@@ -405,13 +405,14 @@ def search(request):
     query = request.GET.get('q')
     clients = Client.objects.filter(name__icontains=query)
     transactions = Transaction.objects.filter(reference_number__icontains=query)
+    bank_payments = BankPayment.objects.filter(transaction__in=transactions)
     savings_payment = SavingsPayment.objects.filter(transaction__in=transactions)
     loan_payment = LoanPayment.objects.filter(transaction__in=transactions)
     expense_payment = ExpensePayment.objects.filter(transaction__in=transactions)
     income_payment = IncomePayment.objects.filter(transaction__in=transactions)
     liability_payment = LiabilityPayment.objects.filter(transaction__in=transactions)
 
-    payments = list(savings_payment) + list(loan_payment) + list(expense_payment) + list(income_payment) + list(liability_payment)
+    payments = list(savings_payment) + list(loan_payment) + list(expense_payment) + list(income_payment) + list(liability_payment)+ list(bank_payments)
     context = {
         'clients': clients,
         'payments': payments,

@@ -4,6 +4,7 @@ from django.utils import timezone
 from datetime import datetime
 from administration.models import Transaction
 from bank.models import Bank, BankPayment
+from client.models import Client
 from expenses.models import Expense, ExpensePayment
 from income.models import Income, IncomePayment
 from loan.models import Loan, LoanPayment, LoanRepaymentSchedule
@@ -21,7 +22,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # Find all loans
-        loans = Loan.objects.all()
+        client = Client.objects.get(name='Modupe Mosunmola Oladokun')
+        loans = Loan.objects.filter(client=client)
         with transaction.atomic():
             for loan in loans:
                 # Get repayment schedules ordered by due_date
@@ -31,17 +33,23 @@ class Command(BaseCommand):
 
                 # Track the last unpaid schedule
                 last_unpaid_schedule = None
-
+                schedule= None
                 for schedule in repayment_schedules:
-                    if not schedule.is_paid:
-                        last_unpaid_schedule = schedule
-                    elif last_unpaid_schedule:
-                        # If we find a paid schedule after an unpaid one, adjust the status
-                        last_unpaid_schedule_id = last_unpaid_schedule.id
-                        schedule.is_paid = False
-                        schedule.save(update_fields=['is_paid'])
-                        last_unpaid_schedule.is_paid = True
-                        last_unpaid_schedule.save(update_fields=['is_paid'])
-                        last_unpaid_schedule = None
-                        print(f'Adjusted LoanRepaymentSchedule for loan {loan.id}: {schedule.id} -> unpaid, {last_unpaid_schedule_id} -> paid')
+                    schedule.is_paid = True
+                    schedule.save()
+                    # if not schedule.is_paid:
+                    #     last_unpaid_schedule = schedule
+                    # elif last_unpaid_schedule:
+                    #     # If we find a paid schedule after an unpaid one, adjust the status
+                    #     last_unpaid_schedule_id = last_unpaid_schedule.id
+                    #     schedule.is_paid = False
+                    #     schedule.save(update_fields=['is_paid'])
+                    #     last_unpaid_schedule.is_paid = True
+                    #     last_unpaid_schedule.save(update_fields=['is_paid'])
+                    #     last_unpaid_schedule = None
+                if schedule:
+                    schedule.is_paid=False
+                    schedule.payment_date = None
+                    schedule.save()
+                    print(f'Adjusted LoanRepaymentSchedule for loan {loan.id}: {schedule.id} -> unpaid, -> paid')
         print('Completed adjusting loan repayment schedules')
