@@ -23,6 +23,8 @@
         <div class="mt-5">
             <h3>income Payments</h3>
             {% if income_payment %}
+                {% with income_payment|first as first_payment %}
+                {% with first_payment.amount as running_balance %}
                 <table class="table-report">
                     <thead class="table-dark">
                         <tr>
@@ -32,12 +34,9 @@
                             <th>Description</th>
                             <th>Amount</th>
                             <th>Balance</th>
-                            
                         </tr>
                     </thead>
                     <tbody>
-                        
-                        {% with 0 as running_balance %}
                         {% for payment in income_payment %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
@@ -48,16 +47,12 @@
                             <td>{{ running_balance|naira }}</td>
                             {% update_variable running_balance|add:payment.amount as running_balance %}
                         </tr>
-                        
                         {% endfor %}
-                        {% endwith %}
-                        <td> 0 </td>
-                        <td> - </td>
-                        <td> Current Balance </td>
-                        <td> - </td>
-                        <td> {{ income.balance|naira }} </td>
+                        
                     </tbody>
                 </table>
+                {% endwith %}
+                {% endwith %}
             {% else %}
                 <p>No payments found for this income.</p>
             {% endif %}

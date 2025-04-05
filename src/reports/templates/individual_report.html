@@ -108,30 +108,41 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% with 0 as running_balance %}
-                    {% for payment in savings_payments %}
-                    <tr>
-                        
-                        <td>{{ payment.payment_date }}</td>    
-                        <td>{{ payment.transaction.reference_number }}</td>                 
-                        <td>{{ payment.get_transaction_type_display }}</td>
-                        <td>{{ payment.amount|naira }}</td>
-                        <td>{{ running_balance|naira }}</td>
-                            {% update_variable running_balance|add:payment.amount as running_balance %}
+                    {% with savings_payments|first as first_payment %}
+                        <!-- Display the first payment -->
+                        <tr>
+                            <td>{{ first_payment.payment_date }}</td>
+                            <td>{{ first_payment.transaction.reference_number }}</td>
+                            <td>{{ first_payment.get_transaction_type_display }}</td>
+                            <td>{{ first_payment.amount|naira }}</td>
+                            <td>{{ first_payment.amount|naira }}</td>
                         </tr>
-                        
-                        {% endfor %}
+                        {% with savings_payments|slice:"1:"|first as second_payment %}
+                            
+                        {% with first_payment.amount as first_balance %}
+                        {% with first_balance as running_balance %}
+                            <!-- Loop through the remaining payments -->
+                            {% for payment in savings_payments|slice:"1:" %}
+                                <tr>
+                                    {% update_variable running_balance|add:payment.amount as running_balance %}
+                                    <td>{{ payment.payment_date }}</td>
+                                    <td>{{ payment.transaction.reference_number }}</td>
+                                    <td>{{ payment.get_transaction_type_display }}</td>
+                                    <td>{{ payment.amount|naira }}</td>
+                                    <td>{{ running_balance|naira }}</td>
+                                </tr>
+                            {% endfor %}
                         {% endwith %}
-                        <td> 0 </td>
-                        <td> - </td>
-                        <td> Current Balance </td>
-                        <td> - </td>
-                        <td> {{ savings.balance|naira }} </td>
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+
                 </tbody>
             </table>
         {% else %}
             <p>No savings payments found for this client.</p>
         {% endif %}
+            </table>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
