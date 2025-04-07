@@ -179,6 +179,7 @@ def guarantor_for_loan(request, loan_id):
 def loan_detail(request, id):
     loan = Loan.objects.filter(id=id).first()
     loan_payments = LoanPayment.objects.filter(loan=loan)
+    print(loan_payments)
     loan_repayment_schedules = LoanRepaymentSchedule.objects.filter(loan=loan)
     loan_interest_amount = Decimal(loan.interest) * Decimal(loan.amount) / Decimal(100)
     context = {

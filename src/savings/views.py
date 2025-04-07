@@ -141,14 +141,14 @@ def group_combined_payment(request):
                                     created_by=request.user
                                 )
                                 savings_payment.save()
-                                create_bank_payment(
-                                    bank=bank,
-                                    description=f"Group Combined Payment for {client.name}",
-                                    amount=amount_paid,
-                                    payment_date=payment_date,
-                                    transaction=tran,
-                                    created_by=request.user
-                                )
+                        create_bank_payment(
+                            bank=bank,
+                            description=f"Group Combined Payment for {client.name}",
+                            amount=amount_paid,
+                            payment_date=payment_date,
+                            transaction=tran,
+                            created_by=request.user
+                        )
 
                 
                 verify_trial_balance()
