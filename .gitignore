@@ -12,3 +12,4 @@ src/savings/management/commands/test_sms.py
 src/savings/management/commands/contacts.py
 src/administration/bulk_sms.py
 src/loan/management/commands/fix_duplicates.py
+src/savings/management/commands/recon.py

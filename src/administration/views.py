@@ -46,6 +46,7 @@ def approvals(request):
 def approve(request, pk):
     approval = Approval.objects.get(pk=pk)
     with transaction.atomic():
+        approval = Approval.objects.select_for_update().get(pk=pk)
         if approval.type == Approval.Loan:
             approve_loan(approval, request.user)
         elif approval.type == Approval.Expenses:

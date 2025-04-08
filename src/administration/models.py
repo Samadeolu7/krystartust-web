@@ -69,7 +69,8 @@ class Approval(models.Model):
             self.comment = f"{self.user.username} requested approval for {self.type} for {self.content_object}"
             super().save(*args, **kwargs)
         else:
-            if self.approved:
+            original = Approval.objects.get(pk=self.pk)
+            if not original.approved and self.approved and not self.rejected:
                 if self.type == self.Withdrawal:
                     savings_payment = self.content_object
                     savings = savings_payment.savings

@@ -180,6 +180,7 @@
                     </a>
                     <ul class="collapse list-unstyled" id="customerManagementSubmenu" data-parent="#sidebarAccordion">
                         <li class="sub-item"><a href="{% url 'create_client' %}">Create Customer</a></li>
+                        <li class="sub-item"><a href="{% url 'create_prospect' %}">Create Prospect</a></li>
                         {% if is_admin or is_manager %}
                         <li class="sub-item"><a href="{% url 'group_create' %}">Create Group</a></li>
                         {% endif %}

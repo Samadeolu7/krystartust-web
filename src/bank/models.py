@@ -74,8 +74,15 @@ class BankPayment(models.Model):
         recalculate_balance_after_payment_date(self.bank.id, payment_date)
 
     def delete(self, *args, **kwargs):
+        # Adjust the bank's balance
         self.bank.balance -= self.amount
         self.bank.save()
+    
+        # Call the recalculation function for subsequent payments
+        payment_date = self.payment_date - timezone.timedelta(days=1)
+        recalculate_balance_after_payment_date(self.bank.id, payment_date)
+    
+        # Proceed with the deletion
         super(BankPayment, self).delete(*args, **kwargs)
     
     class Meta:

@@ -10,18 +10,21 @@ class Client(models.Model):
     ACTIVE = 'A'
     LAPSE = 'L'
     DORMANT = 'D'
+    PROSPECT = 'P'
     ACCOUNT_STATUS_CHOICES = [
         (ACTIVE, 'Active'),
         (LAPSE, 'Lapse'),
         (DORMANT, 'Dormant'),
+        (PROSPECT, 'Prospect'),
     ]
     CLIENT_TYPE_CHOICES = [
         ('WL', 'Weekly Loan'),
         ('ML', 'Monthly Loan'),
         ('DC', 'Daily Contribution'),
+        ('PR', 'Prospect'),
     ]
 
-    client_id = models.CharField(max_length=100, unique=True)
+    client_id = models.CharField(max_length=100, unique=True, db_index=True, default=None, blank=True, null=True)
     name = models.CharField(max_length=100)
     email = models.EmailField(null=True, blank=True)
     phone = models.CharField(max_length=15)
@@ -55,6 +58,8 @@ class Client(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.client_id:
+            self.client_id = generate_client_id(self.client_type)
+        elif self.client_id.startswith('PR') and self.client_type != 'PR':
             self.client_id = generate_client_id(self.client_type)
         
         while True:
@@ -117,7 +122,8 @@ def generate_client_id(client_type):
     prefix = {
         'WL': 'WL',
         'ML': 'ML',
-        'DC': 'DC'
+        'DC': 'DC',
+        'PR': 'PR',
     }.get(client_type, 'CLI')
 
     last_client = Client.objects.filter(client_type=client_type, client_id__startswith=prefix).order_by('client_id').last()

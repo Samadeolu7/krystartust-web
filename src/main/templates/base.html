@@ -196,6 +196,7 @@
                     <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Customer Master</a>
                     <div class="dropdown-menu">
                         <a href="{% url 'create_client' %}" class="dropdown-item">Create Customer</a>
+                        <a href="{% url 'create_prospect' %}" class="dropdown-item">Create Prospect</a>
                         {% if is_admin or is_manager %}
                         <a href="{% url 'group_create' %}" class="dropdown-item">Create Group</a>
                         {% endif %}

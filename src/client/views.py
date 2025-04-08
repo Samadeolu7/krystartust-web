@@ -14,7 +14,7 @@ from savings.models import Savings, SavingsPayment
 from savings.utils import register_savings
 from income.utils import create_income_payment, get_id_fee_income, get_registration_fee_income
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .forms import ClientForm
+from .forms import ClientForm, ProspectForm
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 
@@ -146,3 +146,20 @@ def generate_client_id_view(request):
     client_type = request.GET.get('client_type')
     client_id = generate_client_id(client_type)
     return JsonResponse({'client_id': client_id})
+
+
+@login_required
+def create_prospect(request):
+    """View to handle creating a new prospect."""
+    if request.method == 'POST':
+        form = ProspectForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Prospect added successfully.')
+            return redirect('list_clients')  # Redirect to the client list or relevant page
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ProspectForm()
+
+    return render(request, 'prospect_form.html', {'form': form})
