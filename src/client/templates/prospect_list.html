@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Prospect List{% endblock %}
+
+{% block content %}
+<h1>Prospect List</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Loan Amount</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for prospect in prospects %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ prospect.client.name }}</td>
+            <td>{{ prospect.client.phone }}</td>
+            <td>{{ prospect.loan_amount }}</td>
+            <td>{{ prospect.date }}</td>
+            <td>
+                <a href="{% url 'edit_client' prospect.client.id %}">Process</a>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No prospects found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<div class="pagination">
+    <span class="step-links">
+        {% if prospects.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ prospects.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ prospects.number }} of {{ prospects.paginator.num_pages }}.
+        </span>
+
+        {% if prospects.has_next %}
+            <a href="?page={{ prospects.next_page_number }}">next</a>
+            <a href="?page={{ prospects.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+{% endblock %}

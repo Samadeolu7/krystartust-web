@@ -61,6 +61,8 @@ class Client(models.Model):
             self.client_id = generate_client_id(self.client_type)
         elif self.client_id.startswith('PR') and self.client_type != 'PR':
             self.client_id = generate_client_id(self.client_type)
+            self.prospect.is_activated = True
+            self.prospect.save()
         
         while True:
             try:
@@ -116,6 +118,24 @@ class Client(models.Model):
                 )
                 ticket.users.set(User.objects.all())
                 ticket.save()
+
+
+class Prospect(models.Model):
+    LOAN_CHOICES = [
+        ('WL', 'Weekly Loan'),
+        ('ML', 'Monthly Loan'),
+        ('BL', 'Business Loan'),
+    ]
+    client = models.OneToOneField(Client, on_delete=models.CASCADE, related_name='prospect')
+    loan_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    loan_type = models.CharField(max_length=100, null=True, blank=True)
+    date = models.DateField(default=datetime.now)
+    is_activated = models.BooleanField(default=False)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Prospect: {self.client.name}"
 
 def generate_client_id(client_type):
     """Generate a unique client ID based on the client type."""

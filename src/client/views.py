@@ -7,7 +7,7 @@ from django.utils.timezone import now
 from administration.models import Transaction
 from bank.utils import get_cash_in_hand
 from client.excel_utils import create_clients_from_excel
-from client.models import Client, generate_client_id
+from client.models import Client, Prospect, generate_client_id
 from loan.models import Loan, LoanPayment
 from main.utils import verify_trial_balance
 from savings.models import Savings, SavingsPayment
@@ -154,7 +154,7 @@ def create_prospect(request):
     if request.method == 'POST':
         form = ProspectForm(request.POST)
         if form.is_valid():
-            form.save()
+            form.save(request.user)
             messages.success(request, 'Prospect added successfully.')
             return redirect('list_clients')  # Redirect to the client list or relevant page
         else:
@@ -163,3 +163,21 @@ def create_prospect(request):
         form = ProspectForm()
 
     return render(request, 'prospect_form.html', {'form': form})
+@login_required
+def view_prospects(request):
+    """View to list all prospects sorted by loan amount in ascending order."""
+    prospects = Prospect.objects.filter(is_activated=False).order_by('loan_amount')  # Sort by loan amount (ascending)
+    paginator = Paginator(prospects, 20)  # Paginate with 20 prospects per page
+    page = request.GET.get('page')
+    try:
+        prospects = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver the first page.
+        prospects = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range, deliver the last page of results.
+        prospects = paginator.page(paginator.num_pages)
+    context = {
+        'prospects': prospects,
+    }
+    return render(request, 'prospect_list.html', context)

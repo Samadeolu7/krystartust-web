@@ -14,7 +14,7 @@ from django.conf import settings
 from administration.decorators import allowed_users
 from administration.models import Approval, Notification, Tickets, Transaction
 from bank.models import Bank, BankPayment
-from client.models import Client
+from client.models import Client, Prospect
 from expenses.models import Expense, ExpensePayment
 from income.models import Income, IncomePayment
 from liability.models import Liability, LiabilityPayment
@@ -162,6 +162,7 @@ def dashboard(request):
         open_tickets = Tickets.objects.filter(closed=False, users__in=[user]).count()
 
     notifications = Notification.objects.filter(user=request.user, is_read=False)
+    pending_prospects = Prospect.objects.filter(is_activated=False).count()
 
     system_year = Year.current_year()
     date_year = today.year
@@ -192,6 +193,7 @@ def dashboard(request):
         'notifications': notifications,
         'open_tickets': open_tickets,
         'close_year': close_year,
+        'pending_prospects': pending_prospects,
     }
 
     return render(request, 'dash.html', context)
