@@ -136,7 +136,17 @@ def dashboard(request):
                 clients = Client.objects.filter(group=group)
                 group_clients[user.username.split()[0]] += clients.count()
 
-    
+    staff_prospect_counts = (
+        Prospect.objects.select_related('client', 'created_by')
+        .values('created_by__username')
+        .annotate(prospect_count=Count('id'))
+    )
+
+    # Prepare data for the chart
+    staff_labels = [entry['created_by__username'] for entry in staff_prospect_counts]
+    prospect_counts = [entry['prospect_count'] for entry in staff_prospect_counts]
+    print(staff_labels, prospect_counts)
+
 
     # Determine user role for template context
     user = request.user
@@ -194,6 +204,9 @@ def dashboard(request):
         'open_tickets': open_tickets,
         'close_year': close_year,
         'pending_prospects': pending_prospects,
+        'staff_labels': staff_labels,
+        'prospect_counts': prospect_counts,
+        'system_year': system_year,
     }
 
     return render(request, 'dash.html', context)
