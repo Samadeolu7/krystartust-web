@@ -175,7 +175,7 @@ class LoanRepaymentSchedule(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        self.handle_ticket()
+    #   self.handle_ticket()
     
     # def handle_ticket(self):
     #     ticket = Tickets.objects.filter(repayment_schedule=self, closed=False).first()
