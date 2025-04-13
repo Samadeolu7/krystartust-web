@@ -277,11 +277,11 @@
                     </ul>
 
                     <a href="#officeSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
-                        <i class="fas fa-briefcase"></i> OFFICE MANAGEMENT
+                        <i class="fas fa-briefcase"></i> OFFICE SPACE
                     </a>
                     <ul class="collapse list-unstyled" id="officeSubmenu" data-parent="#sidebarAccordion">
-                        <li class="sub-item"><a href="{% url 'check_in' %}">Check In</a></li>
-                        <li class="sub-item"><a href="{% url 'check_out' %}">Check Out</a></li>
+                        <li class="sub-item"><a href="{% url 'check_in' %}" id="checkInLink">Check In</a></li>
+                        <li class="sub-item"><a href="{% url 'check_out' %}" id="checkOutLink">Check Out</a></li>
                         {% comment %} <li class="sub-item"><a href="{% url 'generate_payslip' %}">Generate Payslip</a></li> {% endcomment %}
                     </ul>
                     
