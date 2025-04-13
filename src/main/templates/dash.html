@@ -367,6 +367,7 @@
                             {% csrf_token %}
                             <button type="submit" class="btn btn-dark ml-2">LOG OUT</button>
                         </form>
+                        <img src="{% static 'images/phoenix_logo.jpg' %}" alt="Phoenix Logo" class="rounded-circle" style="width: 80px; height: 80px; margin-left: 20px;">
                     </div>
                 </div>
 
@@ -495,8 +496,8 @@
     {{ due_dates|json_script:"due_dates" }}
     {{ payment_dates|json_script:"payment_dates" }}
     {{ group_clients|json_script:"group_clients" }}
-    {{ staff_labels|json_script:"staff_labels" }};
-    {{ staff_prospect_data|json_script:"prospect_counts" }};
+    {{ staff_labels|json_script:"staff_labels" }}
+    {{ staff_prospect_data|json_script:"prospect_counts" }}
 
     <script>
         // Parse data from JSON Script Tags
