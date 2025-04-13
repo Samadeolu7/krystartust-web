@@ -145,7 +145,6 @@ def dashboard(request):
     # Prepare data for the chart
     staff_labels = [entry['created_by__username'] for entry in staff_prospect_counts]
     prospect_counts = [entry['prospect_count'] for entry in staff_prospect_counts]
-    print(staff_labels, prospect_counts)
 
 
     # Determine user role for template context

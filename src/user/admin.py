@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
-from .models import User
+from .models import Attendance, User
 from django.utils.translation import gettext_lazy as _
 
 class UserAdmin(DefaultUserAdmin):
@@ -19,3 +19,9 @@ class UserAdmin(DefaultUserAdmin):
     )
 
 admin.site.register(User, UserAdmin)
+
+@admin.register(Attendance)
+class AttendanceAdmin(admin.ModelAdmin):
+    list_display = ('user', 'date', 'check_in', 'check_out', 'location')
+    list_filter = ('date',)
+    search_fields = ('user__username', 'location')

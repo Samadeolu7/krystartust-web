@@ -1,5 +1,8 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, Group, Permission
 from django.db import models
+from django.utils import timezone
+from django.core.exceptions import ValidationError
+from django.utils.timezone import localtime
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, username, password=None, **extra_fields):
@@ -42,3 +45,34 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+    
+
+# from django.contrib.gis.db import models as gis_models
+
+class Attendance(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateField(default=timezone.now)
+    check_in = models.DateTimeField(null=True, blank=True)
+    check_out = models.DateTimeField(null=True, blank=True)
+    location = models.CharField(max_length=255, null=True, blank=True)  # Store as WKT (Well-Known Text) format
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'date')
+    
+    def __str__(self):
+        local_check_in = localtime(self.check_in) if self.check_in else "N/A"
+        local_check_out = localtime(self.check_out) if self.check_out else "N/A"
+        return f"Attendance for {self.user} on {self.date} (Check-in: {local_check_in}, Check-out: {local_check_out})"
+
+    @property
+    def duration(self):
+        if self.check_in and self.check_out:
+            return self.check_out - self.check_in
+        return None
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.check_out and self.check_in and self.check_out < self.check_in:
+            raise ValidationError("Check-out time cannot be earlier than check-in time.")

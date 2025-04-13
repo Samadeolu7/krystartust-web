@@ -121,6 +121,9 @@
                 
                 <label for="id_password">Password</label>
                 <input type="password" id="id_password" name="password" required>
+
+                <input type="hidden" id="id_latitude" name="latitude">
+                <input type="hidden" id="id_longitude" name="longitude">
                 
                 <input type="submit" value="Log In">
             </form>
@@ -134,5 +137,26 @@
             {% endif %}
         </div>
     </div>
+        <!-- In your login or check-in page -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+    
+            // Set the latitude and longitude in hidden input fields
+            document.getElementById('id_latitude').value = latitude;
+            document.getElementById('id_longitude').value = longitude;
+          }, function(error) {
+            console.error("Error getting location: ", error.message);
+            // Optionally, handle errors (e.g., user denied location access)
+          });
+        } else {
+          console.log("Geolocation is not supported by this browser.");
+        }
+      });
+    </script>
+    
 </body>
 </html>

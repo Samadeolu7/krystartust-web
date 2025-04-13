@@ -14,6 +14,9 @@ import os
 from pathlib import Path
 from environ import Env
 
+from django.contrib.messages import constants as message_constants
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -204,4 +207,12 @@ CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = {
     'ssl': {
         'ssl_cert_reqs': ssl.CERT_NONE  # Change to ssl.CERT_REQUIRED or ssl.CERT_OPTIONAL if you have the required certificates
     }
+}
+
+MESSAGE_TAGS = {
+    message_constants.DEBUG: 'debug',
+    message_constants.INFO: 'info',
+    message_constants.SUCCESS: 'success',
+    message_constants.WARNING: 'warning',
+    message_constants.ERROR: 'danger',  # Maps 'error' to 'alert-danger' for Bootstrap
 }
