@@ -44,12 +44,13 @@ def check_in(request):
     try:
         latitude = float(latitude)
         longitude = float(longitude)
+        print(f"Latitude: {latitude}, Longitude: {longitude}")
     except ValueError:
         messages.error(request, "Invalid location data: Latitude and Longitude must be numeric.")
         return redirect(reverse('dashboard'))
 
     # Validate that the user is within the allowed area
-    office_location = (12.971598, 77.594566)  # Replace with your office coordinates
+    office_location = (6.784626810409781, 3.418928881000768)  # Replace with your office coordinates
     if not is_within_allowed_area(latitude, longitude, office_location):
         messages.error(request, "You are not within the allowed area for attendance.")
         return redirect(reverse('dashboard'))
