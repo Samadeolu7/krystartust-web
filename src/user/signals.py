@@ -36,7 +36,7 @@ def mark_user_attendance(sender, request, user, **kwargs):
     location = 'Default Office'
 
     try:
-        office_location = (6.7843877, 3.4193692)  # Replace with your office coordinates
+        office_location = (6.784626810409781, 3.418928881000768)  # Replace with your office coordinates
         if not is_within_allowed_area(latitude, longitude, office_location):
             # Exit early if the user is not within the allowed area
             messages.error(request, "You are not within the allowed area for attendance.")

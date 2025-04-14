@@ -106,6 +106,7 @@ def group_combined_payment(request):
                 tran.save(prefix='GCOM')
                 for client in group.client_set.all():
                     amount_paid = form.cleaned_data.get(f'client_{client.id}_amount', 0)
+                    bank_amount = amount_paid
                     if amount_paid and amount_paid > 0:
                         # Process Loan Payment
                         loan = Loan.objects.filter(client=client, loan_type = Loan.WEEKLY).first()
@@ -144,7 +145,7 @@ def group_combined_payment(request):
                         create_bank_payment(
                             bank=bank,
                             description=f"Group Combined Payment for {client.name}",
-                            amount=amount_paid,
+                            amount=bank_amount,
                             payment_date=payment_date,
                             transaction=tran,
                             created_by=request.user
