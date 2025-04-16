@@ -12,7 +12,7 @@ from django.contrib.contenttypes.models import ContentType
 from administration.models import Approval, Transaction
 from administration.utils import validate_month_status
 from loan.models import LoanPayment
-from main.models import Year
+from main.models import ClientGroup, Year
 from main.utils import verify_trial_balance
 from savings.models import SavingsPayment
 from .forms import BankForm, CashTransferForm, DateRangeForm, ReversePaymentForm
@@ -232,6 +232,53 @@ def payment_reversal(request):
                         payment_date=reversal_date,
                         transaction=tran
                     )
+                elif type == 'GCOM':
+                    # Extract the client name from the payment description
+                    if "Group Combined Payment for " in payment.description:
+                        client_name = payment.description.split("Group Combined Payment for ")[1].strip()
+                    else:
+                        client_name = None  # Handle cases where the format is unexpected
+                
+                    if client_name:
+                        # Fetch the client object using the extracted name
+                        try:
+                            savings_payment = SavingsPayment.objects.get(transaction=payment.transaction,client__name=client_name)
+                            loan_payment = LoanPayment.objects.get(transaction=payment.transaction,client__name=client_name)
+                            schedule = loan_payment.payment_schedule
+                            if schedule:
+                                schedule.is_paid = False
+                                schedule.payment_date = None
+                                loan_payment.payment_schedule = None
+                                schedule.save()
+
+                            # Create a new LoanPayment for the reversal
+                            LoanPayment.objects.create(
+                                client=loan_payment.client,
+                                loan=loan_payment.loan,
+                                amount=-loan_payment.amount,
+                                balance=loan_payment.loan.balance - loan_payment.amount,
+                                payment_date=reversal_date,
+                                transaction=tran
+                            )
+                            # Create a new SavingsPayment for the reversal
+                            SavingsPayment.objects.create(
+                                client=savings_payment.client,
+                                savings=savings_payment.savings,
+                                description=f'Payment reversal: {payment.description} - {reason}',
+                                amount=-savings_payment.amount,
+                                balance=savings_payment.savings.balance - savings_payment.amount,
+                                payment_date=reversal_date,
+                                transaction=tran
+                            )
+                            # Perform the reversal logic for the specific client
+                            # Example: Reverse loan or savings payment for the client
+                        except LoanPayment.DoesNotExist:
+                            form.add_error(None, f"Loan payment for client '{client_name}' not found.")
+                            return render(request, 'payment_reversal.html', {'form': form})
+                    else:
+                        form.add_error(None, "Unable to extract client name from the payment description.")
+                        return render(request, 'payment_reversal.html', {'form': form})
+
                 verify_trial_balance()
 
             return redirect('dashboard')
@@ -239,6 +286,25 @@ def payment_reversal(request):
         form = ReversePaymentForm()
 
     return render(request, 'payment_reversal.html', {'form': form})
+
+@login_required
+def fetch_gcom_clients(request):
+    payment_id = request.GET.get('payment_id')
+    if not payment_id:
+        return JsonResponse({'error': 'Payment ID is required.'}, status=400)
+
+    try:
+        payment = BankPayment.objects.get(id=payment_id)
+        tran = payment.transaction
+        client_data = []
+        for payment in tran.loan_payment.all():
+            if payment.loan:
+                client_data.append(payment.loan.client)
+        return JsonResponse({'clients': client_data})
+    except BankPayment.DoesNotExist:
+        return JsonResponse({'error': 'Payment not found.'}, status=404)
+    except ClientGroup.DoesNotExist:
+        return JsonResponse({'error': 'Group not found.'}, status=404)
 
 
 def update_payments(request):

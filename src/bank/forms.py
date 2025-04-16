@@ -31,7 +31,7 @@ class DateRangeForm(forms.Form):
 
 class ReversePaymentForm(forms.Form):
     year = Year.current_year()
-    type = forms.ChoiceField(choices=(('SVS','Savings'), ('LOA','Loan'), ('COM','Combined')), label='Type')
+    type = forms.ChoiceField(choices=(('SVS','Savings'), ('LOA','Loan'), ('COM','Combined'), ('GCOM','Group Combined')), label='Type')
     bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=year), label='Bank')
     payment_date = forms.DateField(widget=forms.SelectDateWidget(years=range(2000, 2030)))
     payment = forms.ModelChoiceField(queryset=BankPayment.objects.none())

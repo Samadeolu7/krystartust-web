@@ -1,4 +1,4 @@
-from .views import create_bank, bank_list, bank_detail, cash_transfer,bank_to_excel_view
+from .views import create_bank, bank_list, bank_detail, cash_transfer,bank_to_excel_view, fetch_gcom_clients
 from .views import update_payments, payment_reversal as reverse_payment, previous_years_banks
 
 from django.urls import path
@@ -13,4 +13,5 @@ urlpatterns = [
     path('update-payments/', update_payments, name='update_payments'),
     path('reverse-payment/', reverse_payment, name='reverse_payment'),
     path('previous-years/', previous_years_banks, name='previous_years_banks'),
+    path('fetch-gcom-clients/', fetch_gcom_clients, name='fetch_gcom_clients'),
 ]
