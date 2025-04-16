@@ -11,13 +11,11 @@ from user.utils import is_within_allowed_area
 
 @receiver(user_logged_in)
 def mark_user_attendance(sender, request, user, **kwargs):
-    print(f"User {user.username} logged in with IP: {request.META.get('REMOTE_ADDR')}")
     # Extract latitude and longitude from the request
     # Assuming latitude and longitude are sent in the POST request
     # For example, you can send them as part of the login form
     latitude = request.POST.get('latitude')
     longitude = request.POST.get('longitude')
-    print(f"Latitude: {latitude}, Longitude: {longitude}")
 
     # Validate that latitude and longitude are provided
     if not latitude or not longitude:

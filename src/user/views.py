@@ -25,7 +25,6 @@ class CustomLoginView(LoginView):
         #print location data from the request
         latitude = self.request.POST.get('latitude')
         longitude = self.request.POST.get('longitude')
-        print(f"Latitude: {latitude}, Longitude: {longitude}")
         # The signal will handle the location data from the POST request
         return super().form_valid(form)
 
@@ -44,7 +43,6 @@ def check_in(request):
     try:
         latitude = float(latitude)
         longitude = float(longitude)
-        print(f"Latitude: {latitude}, Longitude: {longitude}")
     except ValueError:
         messages.error(request, "Invalid location data: Latitude and Longitude must be numeric.")
         return redirect(reverse('dashboard'))
