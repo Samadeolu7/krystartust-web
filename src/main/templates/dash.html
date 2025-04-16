@@ -175,6 +175,9 @@
                         <li class="sub-item"><a href="{% url 'create_users' %}">CREATE EMPLOYEE</a></li>
                         <li class="sub-item"><a href="{% url 'user_list' %}">EMPLOYEE LIST</a></li>
                         <li class="sub-item"><a href="#">SALARY MANAGEMENT</a></li>
+                        {% if is_admin %}
+                        <li class="sub-item"><a href="{% url 'attendance_report' %}">ATTENDANCE REPORT</a></li>
+                        {% endif %}
                     </ul>
                     {% endif %}
             

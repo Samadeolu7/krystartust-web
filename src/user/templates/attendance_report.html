@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance Report{% endblock %}
+
+{% block content %}
+<h2 class="text-center">Attendance Report</h2>
+
+<!-- Filter Form -->
+<div class="container mb-4">
+    <form method="GET" action="{% url 'attendance_report' %}">
+        <div class="row">
+            <div class="col-md-3">
+                <input type="text" name="user" class="form-control" placeholder="Search by username" value="{{ user_query }}">
+            </div>
+            <div class="col-md-3">
+                <input type="date" name="start_date" class="form-control" placeholder="Start Date" value="{{ start_date }}">
+            </div>
+            <div class="col-md-3">
+                <input type="date" name="end_date" class="form-control" placeholder="End Date" value="{{ end_date }}">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Attendance Table -->
+<div class="container">
+    <table class="table-report">
+        <thead class="table-dark">
+            <tr>
+                <th colspan="6" class="text-center">Attendance Records</th>
+            </tr>
+        <thead class ="table-dark">
+            <tr>
+                <th>User</th>
+                <th>Date</th>
+                <th>Check-In</th>
+                <th>Check-Out</th>
+                <th>Duration</th>
+                <th>Location</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in attendance_records %}
+            <tr>
+                <td>{{ record.user.username }}</td>
+                <td>{{ record.date }}</td>
+                <td>{{ record.check_in|date:"Y-m-d H:i:s" }}</td>
+                <td>{{ record.check_out|date:"Y-m-d H:i:s" }}</td>
+                <td>
+                    {% if record.duration %}
+                        {{ record.duration }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>{{ record.location }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No attendance records found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+<div class="container">
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if attendance_records.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1&user={{ user_query }}&start_date={{ start_date }}&end_date={{ end_date }}" aria-label="First">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ attendance_records.previous_page_number }}&user={{ user_query }}&start_date={{ start_date }}&end_date={{ end_date }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% for num in attendance_records.paginator.page_range %}
+                {% if attendance_records.number == num %}
+                    <li class="page-item active">
+                        <a class="page-link" href="?page={{ num }}&user={{ user_query }}&start_date={{ start_date }}&end_date={{ end_date }}">{{ num }}</a>
+                    </li>
+                {% elif num > attendance_records.number|add:'-3' and num < attendance_records.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}&user={{ user_query }}&start_date={{ start_date }}&end_date={{ end_date }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if attendance_records.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ attendance_records.next_page_number }}&user={{ user_query }}&start_date={{ start_date }}&end_date={{ end_date }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ attendance_records.paginator.num_pages }}&user={{ user_query }}&start_date={{ start_date }}&end_date={{ end_date }}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endblock %}

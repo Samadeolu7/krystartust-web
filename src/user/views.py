@@ -104,7 +104,7 @@ def check_out(request):
         messages.error(request, "Invalid location data: Latitude and Longitude must be numeric.")
         return redirect(reverse('dashboard'))
 
-    office_location = (12.971598, 77.594566)  # Replace with your office coordinates
+    office_location = (6.784626810409781, 3.418928881000768)  # Replace with your office coordinates
     if not is_within_allowed_area(latitude, longitude, office_location):
         messages.error(request, "You are not within the allowed area for check-out.")
         return redirect(reverse('dashboard'))
@@ -114,6 +114,42 @@ def check_out(request):
     attendance.save()
     messages.success(request, "You have successfully checked out.")
     return redirect(reverse('dashboard'))
+
+from django.core.paginator import Paginator
+from django.db.models import Q
+
+@login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
+def attendance_report(request):
+    # Get filters from the request
+    user_query = request.GET.get('user', '')
+    start_date = request.GET.get('start_date', '')
+    end_date = request.GET.get('end_date', '')
+
+    # Filter attendance records
+    attendance_records = Attendance.objects.all()
+
+    if user_query:
+        attendance_records = attendance_records.filter(user__username__icontains=user_query)
+
+    if start_date:
+        attendance_records = attendance_records.filter(date__gte=start_date)
+
+    if end_date:
+        attendance_records = attendance_records.filter(date__lte=end_date)
+
+    # Paginate the results
+    paginator = Paginator(attendance_records, 10)  # Show 10 records per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'attendance_records': page_obj,
+        'user_query': user_query,
+        'start_date': start_date,
+        'end_date': end_date,
+    }
+    return render(request, 'attendance_report.html', context)
 
 @login_required
 @allowed_users(allowed_roles=['Admin'])
