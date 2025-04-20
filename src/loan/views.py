@@ -178,6 +178,10 @@ def guarantor_for_loan(request, loan_id):
 @login_required
 def loan_detail(request, id):
     loan = Loan.objects.filter(id=id).first()
+    previous_loans = Loan.objects.filter(client=loan.client,status='Closed', loan_type=loan.loan_type, balance__gt=0).exclude(id=loan.id)
+    if not loan:
+        messages.error(request, "Loan not found.")
+        return redirect('dashboard')
     loan_payments = LoanPayment.objects.filter(loan=loan)
     loan_repayment_schedules = LoanRepaymentSchedule.objects.filter(loan=loan)
     loan_interest_amount = Decimal(loan.interest) * Decimal(loan.amount) / Decimal(100)
@@ -186,6 +190,7 @@ def loan_detail(request, id):
         'loan_payments': loan_payments,
         'loan_schedules': loan_repayment_schedules,
         'loan_interest_amount': loan_interest_amount,
+        'previous_loans': previous_loans,
     }
     return render(request, 'loan_detail.html', context)
 

@@ -88,7 +88,7 @@ def list_clients(request):
     clients_queryset = Client.objects.none()
     if query:
         # Use select_related to fetch 'group' and prefetch_related for 'savings_set' and 'loan_set'
-        clients_queryset = Client.objects.select_related('group').prefetch_related('savings_set', 'loan_set').filter(
+        clients_queryset = Client.objects.select_related('group').prefetch_related('savings_set', 'loans').filter(
             Q(name__icontains=query) | Q(client_id__icontains=query)
         ).order_by('id')
 

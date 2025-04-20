@@ -54,7 +54,7 @@ class Client(models.Model):
 
     @cached_property
     def loan(self):
-        return self.loan_set.first()
+        return self.loans.first()
 
     def save(self, *args, **kwargs):
         if not self.client_id:
@@ -79,7 +79,7 @@ class Client(models.Model):
         - Lapse: Inactive for 30+ days with loan balance zero.
         - Dormant: Inactive for 60+ days.
         """
-        last_payment = self.loan_set.filter(payment__isnull=False).order_by('-payment__payment_date').first()
+        last_payment = self.loans.filter(payment__isnull=False).order_by('-payment__payment_date').first()
         if not last_payment:
             new_status = Client.ACTIVE
         else:

@@ -51,6 +51,7 @@
                             <tr>
                                 <th>#</th>
                                 <th>Date</th>
+                                <th>Transaction ID</th>
                                 <th>Ref No</th>
                                 <th>Description</th>
                                 <th>Amount</th>
@@ -62,6 +63,7 @@
                             <tr>
                             <td>0</td>
                             <td>{{ loan.created_at }}</td>
+                            <td>{{ loan.transaction.id }}</td>
                             <td>{{ loan.transaction.reference_number }}</td>
                             <td>Loan Disbursement</td>
                             <td>{{ loan.amount|naira }}</td>
@@ -70,6 +72,7 @@
                             <tr>
                             <td>1</td>
                             <td>{{ loan.created_at }}</td>
+                            <td>{{ loan.transaction.id }}</td>
                             <td>{{ loan.transaction.reference_number }}</td>
                             <td>Interest</td>
                             <td>{{ loan_interest_amount|naira }}</td>
@@ -79,6 +82,7 @@
                             {% for payment in loan_payments %}
                             <tr>
                                 <td>{{ forloop.counter|add:1 }}</td>
+                                <td>{{ payment.id }}</td>
                                 <td>{{ payment.payment_date }}</td>
                                 <td>{{ payment.transaction.reference_number }}</td>
                                 <td>{{ payment.description }}</td>

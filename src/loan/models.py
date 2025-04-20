@@ -29,7 +29,7 @@ class Loan(models.Model):
         (MONTHLY, 'Monthly'),
     ]
 
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, db_index=True)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, db_index=True, related_name='loans')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     interest = models.DecimalField(max_digits=10, decimal_places=2)

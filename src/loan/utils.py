@@ -130,9 +130,23 @@ def approve_loan(approval, user):
         existing_loan = Loan.objects.filter(client=client, status='Active').exclude(id=loan.id).first()
         if existing_loan and loan.loan_type == existing_loan.loan_type:
             existing_loan.status = 'Closed'
+            previous_balance = existing_loan.balance
+            loan.balance -= previous_balance
             existing_loan.balance = 0
             existing_loan.save()
             LoanRepaymentSchedule.objects.filter(loan=existing_loan).delete()
+            balance_update = LoanPayment.objects.create(
+                client=client,
+                loan=loan,
+                amount=previous_balance,
+                transaction=loan.transaction,
+                created_by=user,
+                payment_date=timezone.now(),
+                payment_schedule=None,
+            )
+
+        #make payment of existing loan
+
 
         loan_type = loan.loan_type
         duration = loan.duration
