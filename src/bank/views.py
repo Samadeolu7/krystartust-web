@@ -67,10 +67,6 @@ def bank_detail(request, pk):
             end_date = form.cleaned_data['end_date']
             
             # Ensure the date range does not exceed 2 months
-            if (end_date - start_date).days > 60:
-                form.add_error(None, 'Date range cannot exceed 2 months.')
-                end_date = today
-                start_date = today - timedelta(days=60)
         else:
             end_date = today
     else:
