@@ -38,6 +38,7 @@
                     <tr>
                         <th>#</th>
                         <th>Date</th>
+                        <th>id</th>
                         <th>Ref No</th>
                         <th>Description</th>
                         <th>Amount</th>
@@ -52,6 +53,7 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ payment.payment_date }}</td>
+                        <td>{{ payment.id }}</td>
                         <td>{{ payment.transaction.reference_number }}</td>
                         <td>{{ payment.description }}</td>
                         <td>{{ payment.amount|naira }}</td>

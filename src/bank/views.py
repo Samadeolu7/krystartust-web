@@ -31,13 +31,37 @@ def create_bank(request):
             form.save()
     return render(request, 'create_bank.html', {'form': form})
 
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+def create_bank_asset(request):
+    form = BankForm()
+    if request.method == 'POST':
+        form = BankForm(request.POST)
+        if form.is_valid():
+            form.instance.type = Bank.ASSET
+            form.save()
+    return render(request, 'create_bank.html', {'form': form})
+
 
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def bank_list(request):
     current_year = Year.current_year()
-    banks = Bank.objects.filter(year=current_year).all()
-    has_previous_years_banks = Bank.objects.filter(year__lt=current_year).exists()
+    banks = Bank.objects.filter(year=current_year, type=Bank.BANK).all()
+    has_previous_years_banks = Bank.objects.filter(year__lt=current_year, type=Bank.BANK).exists()
+    context = {
+        'banks': banks,
+        'current_year': current_year,
+        'has_previous_years_banks': has_previous_years_banks
+    }
+    return render(request, 'bank_list.html', context)
+
+@login_required
+@allowed_users(allowed_roles=['Admin', 'Manager'])
+def bank_list_asset(request):
+    current_year = Year.current_year()
+    banks = Bank.objects.filter(year=current_year, type=Bank.ASSET).all()
+    has_previous_years_banks = Bank.objects.filter(year__lt=current_year, type=Bank.ASSET).exists()
     context = {
         'banks': banks,
         'current_year': current_year,
@@ -85,7 +109,6 @@ def bank_detail(request, pk):
 # views.py
 
 @login_required
-@allowed_users(allowed_roles=['Admin', 'Manager'])
 def cash_transfer(request):
     if request.method == 'POST':
         form = CashTransferForm(request.POST)

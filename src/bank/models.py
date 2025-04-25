@@ -8,9 +8,10 @@ from main.models import Year
 
 def recalculate_balance_after_payment_date(bank_id, payment_date):
     payments = BankPayment.objects.filter(bank_id=bank_id, payment_date__gt=payment_date).order_by('payment_date', 'created_at')
+    bank = Bank.objects.get(id=bank_id)
     
     last_payment = BankPayment.objects.filter(bank_id=bank_id, payment_date__lte=payment_date).order_by('-payment_date', '-created_at').first()
-    previous_balance = last_payment.bank_balance if last_payment else Decimal('0.00')
+    previous_balance = last_payment.bank_balance if last_payment else bank.balance_bf
 
     updates = []
     for payment in payments:
@@ -21,8 +22,15 @@ def recalculate_balance_after_payment_date(bank_id, payment_date):
     BankPayment.objects.bulk_update(updates, ['bank_balance'])
         
 class Bank(models.Model):
+    BANK = 'B'
+    ASSET = 'A'
+    BANK_TYPE_CHOICES = [
+        (BANK, 'Bank'),
+        (ASSET, 'Asset'),
+    ]
     name = models.CharField(max_length=100)
     description = models.TextField()
+    type = models.CharField(max_length=50, choices=BANK_TYPE_CHOICES, default=BANK)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     balance_bf = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
