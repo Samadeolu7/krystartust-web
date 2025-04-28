@@ -213,7 +213,6 @@
                     </div>
                 </div>
                 {% endif %}
-                {% if is_admin or is_manager %}
                 <div class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Bank</a>
                     <div class="dropdown-menu">
@@ -224,7 +223,6 @@
                         <a href="{% url 'cash_transfer' %}" class="dropdown-item">Cash Transfer</a>
                     </div>
                 </div>
-                {% endif %}
                 <div class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle text-white" data-toggle="dropdown">Transactions</a>
                     <div class="dropdown-menu">

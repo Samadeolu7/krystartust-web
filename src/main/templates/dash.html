@@ -210,7 +210,6 @@
                     </ul>
                     {% endif %}
 
-                    {% if is_admin or is_manager %}
 
                     <a href="#bankSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
                         <i class="fas fa-exchange-alt"></i> BANK
@@ -222,7 +221,6 @@
                     <li class="sub-item"><a href="{% url 'bank_list' %}">Bank Report</a></li>
                     <li class="sub-item"><a href="{% url 'cash_transfer' %}">Cash Transfer</a></li>
                 </ul>
-                    {% endif %}
 
 
                     <a href="#transactionsSubmenu" class="dropdown-toggle" data-toggle="collapse" aria-expanded="false" data-parent="#sidebarAccordion">
