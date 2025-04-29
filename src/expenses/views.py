@@ -39,7 +39,7 @@ def create_expense_type(request):
 
 @login_required
 def expense_payment(request):
-    form = ExpensePaymentForm()
+    form = ExpensePaymentForm(user=request.user)
     if request.method == 'POST':
         form = ExpensePaymentForm(request.POST)
         if form.is_valid():
@@ -132,7 +132,7 @@ def create_expense_payment_batch(request):
         else:
             messages.error(request, 'Please correct the errors below')
     else:
-        batch_form = ExpensePaymentBatchForm()
+        batch_form = ExpensePaymentBatchForm(user=request.user)
         formset = ExpensePaymentBatchItemFormSet()
 
     return render(request, 'create_expense_payment_batch.html', {

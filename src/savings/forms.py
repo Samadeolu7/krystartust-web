@@ -3,6 +3,7 @@ import datetime
 from typing import Any
 from administration.models import Transaction
 from bank.models import Bank
+from bank.utils import get_user_and_office_banks
 from loan.models import Loan, LoanPayment
 from main.models import ClientGroup, Year
 from main.utils import verify_trial_balance
@@ -45,7 +46,11 @@ class WithdrawalForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
         super(WithdrawalForm, self).__init__(*args, **kwargs)
+        # Filter the bank queryset
+        if self.user:
+            self.fields['bank'].queryset = get_user_and_office_banks(self.user)
         self.fields['transaction_type'].initial = 'W'
         self.fields['transaction_type'].widget = forms.HiddenInput()
 
@@ -76,8 +81,12 @@ class SavingsForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
+        print(self.user)
 
         super(SavingsForm, self).__init__(*args, **kwargs)
+        # Filter the bank queryset
+        if self.user:
+            self.fields['bank'].queryset = get_user_and_office_banks(self.user)
 
     def save(self, commit: bool = True) -> Any:
         instance = super(SavingsForm, self).save(commit=False)
@@ -112,6 +121,9 @@ class CombinedPaymentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        # Filter the bank queryset
+        if self.user:
+            self.fields['bank'].queryset = get_user_and_office_banks(self.user)
         if 'client' in self.data:
             try:
                 client_id = int(self.data.get('client'))
@@ -173,7 +185,11 @@ class GroupCombinedPaymentForm(forms.Form):
     bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=Year.current_year()), required=False, label="Bank")
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        # Filter the bank queryset
+        if self.user:
+            self.fields['bank'].queryset = get_user_and_office_banks(self.user)
         self.clients = []
 
     def populate_clients(self, group):

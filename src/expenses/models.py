@@ -7,6 +7,8 @@ from bank.models import BankPayment
 from bank.utils import create_bank_payment
 from main.models import Year
 from user.models import User
+from administration.manager import OfficeScopedManager
+
 
 # Create your models here.
 
@@ -21,11 +23,14 @@ class Expense(models.Model):
 
     name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
+    office = models.ForeignKey('administration.Office', on_delete=models.CASCADE, null=True, blank=True, related_name='expenses')
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     balance_bf = models.DecimalField(max_digits=10, decimal_places=2)
     expense_type = models.ForeignKey(ExpenseType, on_delete=models.CASCADE, related_name='expenses')
     created_at = models.DateTimeField(auto_now_add=True)
     year = models.IntegerField()
+
+    objects = OfficeScopedManager()
 
     class Meta:
         ordering = ['created_at']

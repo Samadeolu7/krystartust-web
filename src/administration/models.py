@@ -2,13 +2,40 @@ from datetime import datetime
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from bank.models import BankPayment
+from bank.models import Bank, BankPayment
 from bank.utils import create_bank_payment, get_cash_in_hand
+from main.models import Year
 from user.models import User
 import uuid
 
 # Create your models here.
 
+
+class Office(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    location = models.CharField(max_length=100)
+    bank = models.ForeignKey('bank.Bank', on_delete=models.CASCADE, related_name='branch', null=True, blank=True)  # Allow null initially
+    head = models.ForeignKey(User, on_delete=models.CASCADE, related_name='offices', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        # Check if the office already has an associated bank
+        if not self.bank:
+            # Create a new bank with the name "[office_name] Bank"
+            bank = Bank.objects.create(
+                name=f"{self.name} Bank",
+                description=f"Bank for {self.name} office",
+                type=Bank.BANK,  # Default to 'Bank' type
+                balance=0,  # Initial balance
+                year=Year.current_year(),  # Set the current year
+            )
+            self.bank = bank  # Link the bank to the office
+
+        super().save(*args, **kwargs)  # Save the office instance
+
+    def __str__(self):
+        return self.name
 class Salary(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='salaries')
     bank_name = models.CharField(max_length=100,blank=True, null=True)

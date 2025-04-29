@@ -2,6 +2,7 @@ from decimal import Decimal
 from django.db import models
 from django.urls import reverse
 
+from administration.manager import OfficeScopedManager
 from client.models import Client
 from user.models import User
 from income.models import SingletonModel
@@ -19,9 +20,12 @@ class Savings(models.Model):
     ]
     client = models.ForeignKey(Client, on_delete=models.CASCADE, db_index=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
+    office = models.ForeignKey('administration.Office', on_delete=models.CASCADE, null=True, blank=True, related_name='savings')
     type = models.CharField(max_length=1, choices=SAVINGS_TYPE_CHOICES, default=NORMAL, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = OfficeScopedManager()
 
     def __str__(self):
         if self.type == self.NORMAL:

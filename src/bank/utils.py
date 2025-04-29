@@ -32,3 +32,18 @@ def get_union_pulse():
     return bank
 
 
+def get_user_and_office_banks(user):
+    """
+    Returns a queryset of banks that belong to the user's office or are assigned to the user.
+    """
+    if not user.is_authenticated:
+        return Bank.objects.none()
+
+    # Get banks for the user's office
+    office_banks = Bank.objects.filter(pk=user.office.bank.pk) if user.office and user.office.bank else Bank.objects.none()
+
+    # Get banks assigned to the user
+    user_banks = user.bank.all() if hasattr(user, 'bank') else Bank.objects.none()
+
+    # Combine the querysets
+    return office_banks | user_banks

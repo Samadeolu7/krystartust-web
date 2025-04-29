@@ -87,7 +87,7 @@ def register_payment(request):
             
             return redirect('dashboard')
     else:
-        form = CombinedPaymentForm()
+        form = CombinedPaymentForm(user=request.user)
     return render(request, 'combined_payment_form.html', {'form': form})
 
 
@@ -157,7 +157,7 @@ def group_combined_payment(request):
             messages.success(request, 'Group combined payment processed successfully.')
             return redirect('dashboard')
     else:
-        form = GroupCombinedPaymentForm()
+        form = GroupCombinedPaymentForm(user=request.user)
 
     return render(request, 'group_combined_payment_form.html', {'form': form})
 
@@ -222,7 +222,7 @@ def register_savings(request):
             messages.error(request, f'An error occurred while registering savings {form.errors}')
 
     else:
-        form = SavingsForm()
+        form = SavingsForm(user=request.user)
     return render(request, 'savings_form.html', {'form': form})
 
 
@@ -249,7 +249,7 @@ def record_withdrawal(request):
 
             return redirect('dashboard')
     else:
-        form = WithdrawalForm()
+        form = WithdrawalForm(user=request.user)
     return render(request, 'withdrawal_form.html', {'form': form})
 
 

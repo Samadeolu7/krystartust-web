@@ -1,6 +1,7 @@
 from django.urls import reverse
 from django.db import models
 
+from administration.manager import OfficeScopedManager
 from main.models import Year
 
 # Create your models here.
@@ -10,9 +11,13 @@ class Liability(models.Model):
     balance_bf = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     description = models.TextField()
+    office = models.ForeignKey('administration.Office', on_delete=models.CASCADE, null=True, blank=True, related_name='liabilities')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     year = models.IntegerField(default=2024)
+
+    objects = OfficeScopedManager()
+
 
     class Meta:
         ordering = ['created_at']

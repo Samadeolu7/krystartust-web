@@ -49,6 +49,7 @@ def check_in(request):
 
     # Validate that the user is within the allowed area
     office_location = (6.784626810409781, 3.418928881000768)  # Replace with your office coordinates
+    office_location = request.user.office.location if request.user.office else office_location
     if not is_within_allowed_area(latitude, longitude, office_location):
         messages.error(request, "You are not within the allowed area for attendance.")
         return redirect(reverse('dashboard'))
@@ -105,6 +106,8 @@ def check_out(request):
         return redirect(reverse('dashboard'))
 
     office_location = (6.784626810409781, 3.418928881000768)  # Replace with your office coordinates
+    office_location = request.user.office.location if request.user.office else office_location
+    
     if not is_within_allowed_area(latitude, longitude, office_location):
         messages.error(request, "You are not within the allowed area for check-out.")
         return redirect(reverse('dashboard'))

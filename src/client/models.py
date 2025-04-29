@@ -4,6 +4,7 @@ from django.db import models, IntegrityError
 from django.apps import apps
 from django.db import transaction
 from administration.models import Tickets
+from administration.manager import OfficeScopedManager
 from user.models import User
 
 class Client(models.Model):
@@ -42,6 +43,11 @@ class Client(models.Model):
     account_status = models.CharField(
         max_length=1, choices=ACCOUNT_STATUS_CHOICES, default=ACTIVE
     )
+    office = models.ForeignKey(
+        'administration.Office', on_delete=models.CASCADE, null=True, blank=True, related_name='clients'
+    )
+
+    objects = OfficeScopedManager()
 
     def __str__(self):
         return f"{self.name}-{self.client_id}"

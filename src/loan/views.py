@@ -86,7 +86,7 @@ def loan_payment(request):
         else:
             messages.error(request, "Invalid form submission. Please correct the errors below.")
     else:
-        form = LoanPaymentForm()
+        form = LoanPaymentForm(user=request.user)
     
     return render(request, 'loan_payment_form.html', {'form': form})
 
@@ -154,7 +154,7 @@ def loan_registration(request):
         else:
             messages.error(request, "There was an error with the form. Please correct it below.")
     else:
-        form = LoanRegistrationForm()
+        form = LoanRegistrationForm(user=request.user)
 
     return render(request, 'loan_register.html', {'form': form})
 

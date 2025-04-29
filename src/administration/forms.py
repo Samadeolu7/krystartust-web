@@ -3,7 +3,7 @@ from django.db import transaction
 from django_select2.forms import Select2Widget
 
 from user.models import User
-from .models import Salary, Tickets, TicketUpdates
+from .models import Salary, Tickets, TicketUpdates, Office
 from administration.utils import validate_month_status
 from main.utils import verify_trial_balance
 
@@ -63,6 +63,7 @@ class SalaryForm(forms.ModelForm):
 
 ALL_USERS_OPTION = -1
 
+
 class UserChoiceField(forms.ModelChoiceField):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -110,3 +111,8 @@ class TicketReassignForm(forms.ModelForm):
     class Meta:
         model = Tickets
         fields = ['new_user']
+
+class OfficeForm(forms.ModelForm):
+    class Meta:
+        model = Office
+        fields = '__all__'

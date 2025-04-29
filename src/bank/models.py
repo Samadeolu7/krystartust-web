@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from user.models import User
 from main.models import Year
+from administration.manager import OfficeScopedManager
 
 
 def recalculate_balance_after_payment_date(bank_id, payment_date):
@@ -35,6 +36,11 @@ class Bank(models.Model):
     balance_bf = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     year = models.IntegerField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='bank')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='banks', null=True, blank=True)
+    office = models.ForeignKey('administration.Office', on_delete=models.CASCADE, null=True, blank=True, related_name='banks')
+
+    objects = OfficeScopedManager()
 
     def save(self, *args, **kwargs):
         if not self.year:
@@ -118,4 +124,3 @@ class PendingCashTransfer(models.Model):
 
     def __str__(self):
         return f"Transfer from {self.source_bank} to {self.destination_bank} - {self.amount}"
-

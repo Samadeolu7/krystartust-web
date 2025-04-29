@@ -1,4 +1,5 @@
 from bank.models import Bank
+from bank.utils import get_user_and_office_banks
 from client.models import Client
 from main.models import Year
 from savings.models import Savings
@@ -28,6 +29,12 @@ class LoanPaymentForm(forms.ModelForm):
         widgets = { 'loan': Select2Widget}
 
     def __init__(self, *args, **kwargs):
+        # Get the user from kwargs
+        self.user = kwargs.pop('user', None)  # Get the user from kwargs
+        super(LoanPaymentForm, self).__init__(*args, **kwargs)
+        # Filter the bank queryset
+        if self.user:
+            self.fields['bank'].queryset = get_user_and_office_banks(self.user)
         super().__init__(*args, **kwargs)
         if 'loan' in self.data:
             try:
@@ -76,7 +83,13 @@ class LoanRegistrationForm(forms.ModelForm):
         widgets = { 'client': Select2Widget, }
 
     def __init__(self, *args, **kwargs):
+        # Get the user from kwargs
+        self.user = kwargs.pop('user', None)  # Get the user from kwargs
+
         super(LoanRegistrationForm, self).__init__(*args, **kwargs)
+        # Filter the bank queryset
+        if self.user:
+            self.fields['bank'].queryset = get_user_and_office_banks(self.user)
         self.fields['registration_fee'].initial = LoanRegistrationFee.objects.all().first().amount
         self.fields['risk_premium'].initial = RiskPremium.objects.all().first().amount
         self.fields['union_contribution'].initial = UnionContribution.objects.all().first().amount

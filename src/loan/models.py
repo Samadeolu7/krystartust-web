@@ -5,7 +5,8 @@ from django.db import models
 from django.db.models import Case, When, BooleanField
 from django.urls import reverse
 
-from administration.models import TicketUpdates, Tickets
+from administration.manager import OfficeScopedManager
+from administration.models import Tickets, TicketUpdates
 from client.models import Client
 from user.models import User
 
@@ -18,6 +19,9 @@ class LoanManager(models.Manager):
                 output_field=BooleanField()
             )
         )
+    
+class LoanScopedManager(LoanManager, OfficeScopedManager):
+    pass
 
 class Loan(models.Model):
     DAILY = 'Daily'
@@ -44,9 +48,11 @@ class Loan(models.Model):
     created_by = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='loans', db_index=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
-    objects = LoanManager()
     transaction = models.OneToOneField('administration.Transaction', on_delete=models.CASCADE, null=True, blank=True, related_name='loans')
     approved = models.BooleanField(default=False)
+    office = models.ForeignKey('administration.Office', on_delete=models.CASCADE, null=True, blank=True, related_name='loans')
+
+    objects = LoanScopedManager()
 
     def is_approved(self):
         return self.approved
