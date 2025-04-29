@@ -293,10 +293,8 @@ def payment_reversal(request):
                             # Example: Reverse loan or savings payment for the client
                         except LoanPayment.DoesNotExist:
                             form.add_error(None, f"Loan payment for client '{client_name}' not found.")
-                            return render(request, 'payment_reversal.html', {'form': form})
                     else:
                         form.add_error(None, "Unable to extract client name from the payment description.")
-                        return render(request, 'payment_reversal.html', {'form': form})
 
                 verify_trial_balance()
 
