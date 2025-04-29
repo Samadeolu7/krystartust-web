@@ -1,5 +1,6 @@
 from django import forms
 from django.db import transaction
+from django_select2.forms import Select2Widget
 
 from user.models import User
 from .models import Salary, Tickets, TicketUpdates
@@ -76,6 +77,7 @@ class TicketForm(forms.ModelForm):
     class Meta:
         model = Tickets
         fields = ['users', 'client', 'title', 'description', 'priority']
+        widgets = { 'client': Select2Widget, }
 
     users = UserChoiceField(
         queryset=User.objects.all(),

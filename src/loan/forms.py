@@ -25,6 +25,7 @@ class LoanPaymentForm(forms.ModelForm):
     class Meta:
         model = LoanPayment
         fields = ['loan', 'amount', 'payment_schedule', 'payment_date']
+        widgets = { 'loan': Select2Widget}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -93,7 +94,7 @@ class LoanUploadForm(forms.Form):
 class LoanPaymentFromSavingsForm(forms.Form):
     client = forms.ModelChoiceField(queryset=Client.objects.all(), widget=Select2Widget)
     loan = forms.ModelChoiceField(queryset=Loan.objects.none(), widget=Select2Widget)
-    payment_schedule = forms.ModelChoiceField(queryset=PaymentSchedule.objects.none(), widget=Select2Widget)
+    payment_schedule = forms.ModelChoiceField(queryset=PaymentSchedule.objects.none())
     amount = forms.DecimalField(max_digits=10, decimal_places=2, required=False, disabled=True)
     savings_balance = forms.DecimalField(max_digits=10, decimal_places=2, required=False, disabled=True)
 

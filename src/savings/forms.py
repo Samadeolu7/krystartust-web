@@ -68,7 +68,7 @@ class SavingsForm(forms.ModelForm):
     
     class Meta:
         model = SavingsPayment
-        fields = ['savings', 'amount', 'payment_date', 'bank']
+        fields = [ 'amount', 'payment_date', 'bank']
         widgets = {
             'payment_date': forms.DateInput(attrs={'type': 'date'}),
             'savings': Select2Widget,

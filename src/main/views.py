@@ -178,6 +178,9 @@ def dashboard(request):
     close_year = False
     if date_year > system_year:
         close_year = True
+
+    cash_in_hand = Bank.objects.filter(name='Cash in Hand', year=system_year).first().balance
+    moniepoint = Bank.objects.filter(name='MoniePoint', year=system_year).first().balance
     
     context = {
         'user': user,
@@ -206,6 +209,8 @@ def dashboard(request):
         'staff_labels': staff_labels,
         'prospect_counts': prospect_counts,
         'system_year': system_year,
+        'cash_in_hand': cash_in_hand,
+        'moniepoint': moniepoint,
     }
 
     return render(request, 'dash.html', context)

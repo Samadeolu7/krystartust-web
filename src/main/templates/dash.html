@@ -395,7 +395,9 @@
                 {% endif %}
 
                 <!-- Status Boxes -->
+                 
                 <div class="row mb-4">
+                    {% if is_admin %}
                     <div class="col-md-3">
                         <a href="{% url 'daily_transactions_report' %}">
                         <div class="status-box status-yellow" id="expected-cash-inflow">Expected Cash Inflow -{{expected_cash_in|naira}}</div>
@@ -416,6 +418,45 @@
                             margin-top: 5px;
                         }
                     </style>
+                    <script>
+                        const expectedCashInflow = document.getElementById('expected-cash-inflow');
+                        const actualCashInflow = document.getElementById('actual-cash-inflow');
+                    
+                        const expectedCashValues = [
+                            'Expected Cash Inflow - {{expected_cash_in_daily|naira}}',
+                            'Expected Cash Inflow - {{expected_cash_in_weekly|naira}}',
+                            'Expected Cash Inflow - {{expected_cash_in_monthly|naira}}'
+                        ];
+                    
+                        const actualCashValues = [
+                            'Current Cash Inflow - {{actual_cash_in_daily|naira}}',
+                            'Current Cash Inflow - {{actual_cash_in_weekly|naira}}',
+                            'Current Cash Inflow - {{actual_cash_in_monthly|naira}}'
+                        ];
+                    
+                        let index = 0;
+                    
+                        function changeContent() {
+                            index = (index + 1) % expectedCashValues.length;
+                            expectedCashInflow.innerHTML = expectedCashValues[index];
+                            actualCashInflow.innerHTML = actualCashValues[index];
+                        }
+                    
+                        setInterval(changeContent, 5000);
+                    </script>
+                    {% else %}
+
+                    <div class="col-md-3">
+                        <a href="{% url 'bank_list' %}">
+                        <div class="status-box status-yellow" id="expected-cash-inflow">Cash In Hand -{{cash_in_hand|naira}}</div>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'bank_list' %}">
+                        <div class="status-box status-green" id="actual-cash-inflow">Bank -  {{moniepoint|naira}} </div>
+                        </a>
+                    </div>
+                    {% endif %}
 
                     <div class="col-md-3">
                         <a href="{% url 'loan_defaulters_report' %}">
@@ -658,31 +699,6 @@
             });
         });
     </script>
-    <script>
-        const expectedCashInflow = document.getElementById('expected-cash-inflow');
-        const actualCashInflow = document.getElementById('actual-cash-inflow');
     
-        const expectedCashValues = [
-            'Expected Cash Inflow - {{expected_cash_in_daily|naira}}',
-            'Expected Cash Inflow - {{expected_cash_in_weekly|naira}}',
-            'Expected Cash Inflow - {{expected_cash_in_monthly|naira}}'
-        ];
-    
-        const actualCashValues = [
-            'Current Cash Inflow - {{actual_cash_in_daily|naira}}',
-            'Current Cash Inflow - {{actual_cash_in_weekly|naira}}',
-            'Current Cash Inflow - {{actual_cash_in_monthly|naira}}'
-        ];
-    
-        let index = 0;
-    
-        function changeContent() {
-            index = (index + 1) % expectedCashValues.length;
-            expectedCashInflow.innerHTML = expectedCashValues[index];
-            actualCashInflow.innerHTML = actualCashValues[index];
-        }
-    
-        setInterval(changeContent, 5000);
-    </script>
 </body>
 </html>
