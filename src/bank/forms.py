@@ -10,7 +10,7 @@ from .models import Bank, BankPayment
 class BankForm(ModelForm):
     class Meta:
         model = Bank
-        fields = ['name','description','balance_bf']
+        fields = ['name','description','balance_bf', 'user', 'type', 'office']
 
 
 class CashTransferForm(forms.Form):
