@@ -179,8 +179,16 @@ def dashboard(request):
     if date_year > system_year:
         close_year = True
 
-    cash_in_hand = Bank.objects.filter(name='Cash in Hand', year=system_year).first().balance
-    moniepoint = Bank.objects.filter(name='MoniePoint', year=system_year).first().balance
+    cash_in_hand = Bank.objects.filter(user=user, year=system_year).first()
+    moniepoint = Bank.objects.filter(office=user.office, name='MoniePoint', year=system_year).first()
+    if not cash_in_hand:
+        cash_in_hand = 0
+    else:
+        cash_in_hand = cash_in_hand.balance
+    if not moniepoint:
+        moniepoint = 0
+    else:
+        moniepoint = moniepoint.balance
     
     context = {
         'user': user,
