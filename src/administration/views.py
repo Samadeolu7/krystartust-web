@@ -80,7 +80,7 @@ def disapprove(request, pk):
     return redirect('approvals')
 
 @login_required
-@allowed_users(allowed_roles=['Admin'])
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def approval_detail(request, pk):
     approval = Approval.objects.get(pk=pk)
     context = {
@@ -104,7 +104,7 @@ def approval_detail(request, pk):
 
 
 @login_required
-@allowed_users(allowed_roles=['Admin'])
+@allowed_users(allowed_roles=['Admin', 'Manager'])
 def approval_history(request):
     approvals = Approval.objects.filter(approved=True, rejected=True)
     return render(request, 'approval_history.html', {'approvals': approvals})
