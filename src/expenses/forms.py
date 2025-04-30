@@ -31,7 +31,9 @@ class ExpensePaymentForm(ModelForm):
 
         # Filter the bank queryset
         if self.user:
-            self.fields['bank'].queryset = get_user_and_office_banks(self.user)
+            is_admin = self.user.groups.filter(name='Admin').exists()
+            if not is_admin:
+                self.fields['bank'].queryset = get_user_and_office_banks(self.user)
                   
 class ExpenseTypeForm(ModelForm):
     class Meta:
@@ -55,7 +57,10 @@ class ExpensePaymentBatchForm(forms.ModelForm):
         super(ExpensePaymentBatchForm, self).__init__(*args, **kwargs)
         # Filter the bank queryset
         if self.user:
-            self.fields['bank'].queryset = get_user_and_office_banks(self.user)
+            is_admin = self.user.groups.filter(name='Admin').exists()
+            if not is_admin:
+                # Get the banks associated with the user and office
+                self.fields['bank'].queryset = get_user_and_office_banks(self.user)
 
 class ExpensePaymentBatchItemForm(forms.ModelForm):
     year = Year.current_year()

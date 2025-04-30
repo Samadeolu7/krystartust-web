@@ -34,7 +34,9 @@ class LoanPaymentForm(forms.ModelForm):
         super(LoanPaymentForm, self).__init__(*args, **kwargs)
         # Filter the bank queryset
         if self.user:
-            self.fields['bank'].queryset = get_user_and_office_banks(self.user)
+            is_admin = self.user.groups.filter(name='Admin').exists()
+            if not is_admin:
+                self.fields['bank'].queryset = get_user_and_office_banks(self.user)
         super().__init__(*args, **kwargs)
         if 'loan' in self.data:
             try:
@@ -89,7 +91,9 @@ class LoanRegistrationForm(forms.ModelForm):
         super(LoanRegistrationForm, self).__init__(*args, **kwargs)
         # Filter the bank queryset
         if self.user:
-            self.fields['bank'].queryset = get_user_and_office_banks(self.user)
+            is_admin = self.user.groups.filter(name='Admin').exists()
+            if not is_admin:
+                self.fields['bank'].queryset = get_user_and_office_banks(self.user)
         self.fields['registration_fee'].initial = LoanRegistrationFee.objects.all().first().amount
         self.fields['risk_premium'].initial = RiskPremium.objects.all().first().amount
         self.fields['union_contribution'].initial = UnionContribution.objects.all().first().amount
