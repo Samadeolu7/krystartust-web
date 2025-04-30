@@ -33,11 +33,7 @@ def salary(request):
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Manager'])
 def approvals(request):
-    if 'Admin' not in request.user.groups.values_list('name', flat=True):
-        loan = Approval.Loan
-        cash_transfer = Approval.Cash_Transfer
-        approvals = Approval.objects.filter(approved=False,type=loan) | Approval.objects.filter(approved=False,type=cash_transfer)
-        return render(request, 'approvals.html', {'approvals': approvals})
+
     approvals = Approval.objects.filter(approved=False, rejected=False)
     journals = JournalEntry.objects.filter(approved=False, rejected=False)
     return render(request, 'approvals.html', {'approvals': approvals, 'journals': journals})
