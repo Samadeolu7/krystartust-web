@@ -20,7 +20,7 @@ class CashTransferForm(forms.Form):
     destination_bank = forms.ModelChoiceField(queryset=Bank.objects.filter(year=year), label="Destination Bank")
     amount = forms.DecimalField(max_digits=10, decimal_places=2)
     description = forms.CharField(widget=forms.Textarea, required=False)
-    payment_date = forms.DateField(widget=forms.SelectDateWidget(years=range(2000, 2030)))
+    payment_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
 
 
 class DateRangeForm(forms.Form):
