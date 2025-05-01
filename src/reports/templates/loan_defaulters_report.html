@@ -18,6 +18,7 @@
         <thead class="table-dark">
             <tr>
                 <th>#</th>
+                <th>ID<th>
                 <th>Name</th>
                 <th>Phone</th>
                 <th>Group</th>
@@ -33,6 +34,7 @@
             {% for item in schedule %}
             <tr>
                 <td>{{ forloop.counter }}</td>
+                <td>{{ item.loan.client.id }}</td>
                 <td>{{ item.loan.client.name }}</td>
                 <td>{{ item.loan.client.phone }}</td>
                 <td>{{ item.loan.client.group.name }}</td>
