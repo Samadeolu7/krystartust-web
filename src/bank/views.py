@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from multiprocessing.connection import Client
 
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
@@ -261,8 +262,12 @@ def payment_reversal(request):
                     if client_name:
                         # Fetch the client object using the extracted name
                         try:
-                            savings_payment = SavingsPayment.objects.get(transaction=payment.transaction,client__name=client_name)
-                            loan_payment = LoanPayment.objects.get(transaction=payment.transaction,client__name=client_name)
+                            client = Client.objects.get(name=client_name)
+                            if not client:
+                                form.add_error(None, f"Client '{client_name}' not found.")
+                                raise ValueError(f"Client '{client_name}' not found.")
+                            savings_payment = SavingsPayment.objects.get(transaction=payment.transaction,client=client)
+                            loan_payment = LoanPayment.objects.get(transaction=payment.transaction,client=client)
                             schedule = loan_payment.payment_schedule
                             if schedule:
                                 schedule.is_paid = False
@@ -293,6 +298,10 @@ def payment_reversal(request):
                             # Example: Reverse loan or savings payment for the client
                         except LoanPayment.DoesNotExist:
                             form.add_error(None, f"Loan payment for client '{client_name}' not found.")
+                            raise ValueError(f"Loan payment for client '{client_name}' not found.")
+                        except :
+                            form.add_error(None, f"Savings payment for client '{client_name}' not found.")
+                            raise ValueError(f"Savings payment for client '{client_name}' not found.")
                     else:
                         form.add_error(None, "Unable to extract client name from the payment description.")
 
