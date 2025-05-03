@@ -266,9 +266,12 @@ def payment_reversal(request):
                             if not client:
                                 form.add_error(None, f"Client '{client_name}' not found.")
                                 raise ValueError(f"Client '{client_name}' not found.")
-                            loan_payment = LoanPayment.objects.get(transaction=payment.transaction,client=client)
+                            try:
+                                loan_payment = LoanPayment.objects.get(transaction=payment.transaction,client=client)
+                            except LoanPayment.DoesNotExist:
+                                loan_payment = None
                             savings_payment = None
-                            if loan_payment.amount != payment.amount:
+                            if loan_payment == None or loan_payment.amount != payment.amount:
                                 savings_payment = SavingsPayment.objects.get(transaction=payment.transaction,client=client)
                             
                             schedule = loan_payment.payment_schedule
