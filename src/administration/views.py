@@ -38,7 +38,7 @@ def approvals(request):
     if not is_admin:
         loan = Approval.Loan
         cash_transfer = Approval.Cash_Transfer
-        approvals = Approval.objects.filter(approved=False,type=loan,rejected=False) | Approval.objects.filter(approved=False,type=cash_transfer,rejected=False)
+        approvals = Approval.objects.filter(approved=False,type=cash_transfer,rejected=False)
         return render(request, 'approvals.html', {'approvals': approvals})
     approvals = Approval.objects.filter(approved=False, rejected=False)
     journals = JournalEntry.objects.filter(approved=False, rejected=False)
