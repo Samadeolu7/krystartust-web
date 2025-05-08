@@ -67,6 +67,9 @@ class Client(models.Model):
             self.client_id = generate_client_id(self.client_type)
         elif self.client_id.startswith('PR') and self.client_type != 'PR':
             self.client_id = generate_client_id(self.client_type)
+            self.account_status = Client.ACTIVE  # Set status to "Active" when client is activated
+            self.client_type = self.client_type
+            
             self.prospect.is_activated = True
             self.prospect.save()
         

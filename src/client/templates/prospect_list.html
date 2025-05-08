@@ -29,7 +29,7 @@
             <td>
                 {{ prospect.created_by }}
             <td>
-                <a href="{% url 'edit_client' prospect.client.id %}">Process</a>
+                <a href="{% url 'edit_prospect' prospect.client.id %}">Process</a>
         </tr>
         {% empty %}
         <tr>

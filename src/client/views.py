@@ -55,6 +55,36 @@ def create_client(request):
     return render(request, 'client_form.html', {'form': form})
 
 @login_required
+def edit_prospect(request, client_id):
+    """View to handle editing an existing client."""
+    client = get_object_or_404(Client, id=client_id)
+    if request.method == 'POST':
+        form = ClientForm(request.POST, instance=client)
+        with transaction.atomic():
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Client created successfully.')
+                bank = form.cleaned_data['bank']
+                date = form.cleaned_data['date']
+                tran = Transaction(description=f'Client Registration for {client.name}')
+                tran.save(prefix='REG')
+                register_savings(bank,client=form.instance, amount=form.cleaned_data["compulsory_savings"],date=date,transaction=tran,user=request.user)
+                income = get_registration_fee_income()
+                id_fee = get_id_fee_income()
+                bank = form.cleaned_data['bank']
+                create_income_payment(bank, income=income, description='Registration Fee', amount=form.cleaned_data['registration_fee'], payment_date=date, transaction=tran, user=request.user)
+                create_income_payment(bank, income=id_fee, description='ID Fee', amount=form.cleaned_data['id_fee'], payment_date=date, transaction=tran, user=request.user)
+
+                verify_trial_balance()
+                return redirect('individual_report', pk=client.id)
+            else:
+                messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ClientForm(instance=client)
+    
+    return render(request, 'client_form.html', {'form': form})
+
+@login_required
 def edit_client(request, client_id):
     """View to handle editing an existing client."""
     client = get_object_or_404(Client, id=client_id)
