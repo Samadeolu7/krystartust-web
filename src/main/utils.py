@@ -5,7 +5,9 @@ from liability.models import Liability, LiabilityPayment
 from loan.models import Loan, LoanPayment
 from main.models import Year, YearEndEntry
 from savings.models import Savings, SavingsPayment
+
 from django.db import transaction
+from django.utils import timezone
 
 from django.db.models import Sum
 
@@ -24,7 +26,20 @@ def verify_trial_balance():
     total_debit = total_expenses + total_loans + total_banks 
 
     if abs(total_credit - total_debit) <= 1:
-        return True
+        if total_credit == total_debit:
+            return True
+        else:
+            control_difference = abs(total_credit - total_debit)
+            control_account = Bank.objects.filter(name='Control Account').first()
+            if control_account:
+                bank_payment = BankPayment(
+                    bank=control_account,
+                    amount=control_difference,
+                    payment_date=timezone.now(),
+                    description='Control Account Adjustment for Trial Balance',
+                )
+                bank_payment.save()
+                return True
     else:
         raise ValueError(
             f'Trial balance does not match. Credit: {total_credit}, '
