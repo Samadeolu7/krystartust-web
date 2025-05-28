@@ -15,7 +15,7 @@ class Liability(models.Model):
     seller = models.BooleanField(default=False, help_text="Indicates if the liability is a seller")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    year = models.IntegerField(default=2024)
+    year = models.IntegerField(default=2025)
 
     objects = OfficeScopedManager()
 
@@ -31,8 +31,8 @@ class Liability(models.Model):
         return reverse('liability_detail', kwargs={'pk': self.pk})
     
     def save(self, *args, **kwargs):
-        if not self.year:
-            self.year = Year.current_year() or 0
+        if not self.pk:
+            self.year = Year.current_year()
         super().save(*args, **kwargs)
 
     def record_payment(self, amount,description, payment_date,transaction):
