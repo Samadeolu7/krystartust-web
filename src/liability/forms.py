@@ -8,7 +8,7 @@ from .models import Liability, LiabilityPayment
 class LiabilityForm(ModelForm):
     class Meta:
         model = Liability
-        fields = ['name','description','balance_bf']
+        fields = ['name','description','balance_bf','seller']
 
 class LiabilityPaymentForm(ModelForm):
     year = Year.current_year()

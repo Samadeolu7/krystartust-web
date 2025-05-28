@@ -26,7 +26,11 @@ def create_liability(request):
     if request.method == 'POST':
         form = LiabilityForm(request.POST)
         if form.is_valid():
-            form.save()
+            with transaction.atomic():
+                form.save()
+                verify_trial_balance()
+                return redirect('liability_list')
+
     return render(request, 'create_liability.html', {'form': form})
 
 

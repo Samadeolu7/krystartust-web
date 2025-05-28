@@ -1,0 +1,71 @@
+name: Django CI/CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run linters
+        run: flake8 .
+      - name: Run tests
+        run: pytest --maxfail=1 --disable-warnings -q
+
+  build-image:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Docker image
+        run: docker build -t myorg/myapp:${{ github.sha }} .
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Push Docker image to registry
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          tags: myorg/myapp:${{ github.sha }}
+
+  deploy:
+    needs: build-image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@v0.7.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/myapp
+            echo "Tagging current image as 'previous' for rollback..."
+            docker tag myapp:current myapp:previous || echo "No previous image to tag."
+            
+            echo "Pulling new image..."
+            docker pull myorg/myapp:${{ github.sha }}
+            docker tag myorg/myapp:${{ github.sha }} myapp:current
+            
+            echo "Updating the web service..."
+            docker-compose pull web
+            docker-compose up -d --no-deps web
+            
+            echo "Running health checks..."
+            if ! curl --fail http://localhost/health; then
+              echo "Health check failed! Rolling back..."
+              docker tag myapp:previous myapp:current
+              docker-compose up -d --no-deps web
+              exit 1
+            fi
+            
+            echo "Deployment successful!"

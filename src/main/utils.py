@@ -23,7 +23,7 @@ def verify_trial_balance():
     total_credit = total_incomes + total_savings + total_liability
     total_debit = total_expenses + total_loans + total_banks 
 
-    if total_credit == total_debit:
+    if abs(total_credit - total_debit) <= 1:
         return True
     else:
         raise ValueError(

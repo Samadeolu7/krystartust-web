@@ -12,6 +12,7 @@ class Liability(models.Model):
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     description = models.TextField()
     office = models.ForeignKey('administration.Office', on_delete=models.CASCADE, null=True, blank=True, related_name='liabilities')
+    seller = models.BooleanField(default=False, help_text="Indicates if the liability is a seller")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     year = models.IntegerField(default=2024)
